@@ -1,0 +1,1392 @@
+[
+  {
+    "teacher_name": "Rohit Agarwal",
+    "subject": "Chemistry",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_1",
+          "playlist_title": "Complete Organic Chemistry Class 12",
+          "video_count": 20,
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_2",
+          "playlist_title": "GOC Master Series",
+          "video_count": 22,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_3",
+          "playlist_title": "Hydrocarbons Full Course",
+          "video_count": 24,
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_4",
+          "playlist_title": "Haloalkanes and Haloarenes Marathon",
+          "video_count": 26,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_5",
+          "playlist_title": "Alcohols Phenols and Ethers Complete",
+          "video_count": 28,
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_6",
+          "playlist_title": "Biomolecules One-Shot Series",
+          "video_count": 30,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_7",
+          "playlist_title": "Dropper Batch Organic Chemistry",
+          "video_count": 32,
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRohitAgarwalClasses01_8",
+          "playlist_title": "Complete Organic Chemistry Class 11",
+          "video_count": 34,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRohitAgarwalClasses01_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_041530_Compl",
+          "video_title": "Complete Aldehydes Ketones Carboxylic Acids in One Shot",
+          "duration": "04:15:30",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "published_at": "2025-11-12",
+          "view_count_approx": "1.8M"
+        },
+        {
+          "video_id": "vid_024510_IUPAC",
+          "video_title": "IUPAC Nomenclature Complete Masterclass",
+          "duration": "02:45:10",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "published_at": "2025-08-15",
+          "view_count_approx": "1.2M"
+        },
+        {
+          "video_id": "vid_051045_Organ",
+          "video_title": "Organic Chemistry Conversion Reactions Marathon",
+          "duration": "05:10:45",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "published_at": "2026-01-20",
+          "view_count_approx": "3.1M"
+        },
+        {
+          "video_id": "vid_032015_Amine",
+          "video_title": "Amines Full Chapter in One Shot",
+          "duration": "03:20:15",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "published_at": "2025-12-05",
+          "view_count_approx": "1.5M"
+        },
+        {
+          "video_id": "vid_011500_Pract",
+          "video_title": "Practical Organic Chemistry Complete Revision",
+          "duration": "01:15:00",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "published_at": "2026-02-18",
+          "view_count_approx": "0.9M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_RohitAgarwal",
+          "stream_title": "Organic Chemistry Mega Marathon 2026",
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01"
+        },
+        {
+          "video_id": "live_2_RohitAgarwal",
+          "stream_title": "Live Doubt Clearing - Organic Reactions",
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01"
+        },
+        {
+          "video_id": "live_3_RohitAgarwal",
+          "stream_title": "Final Lap Organic Chemistry Revision",
+          "origin_channel_name": "Rohit Agarwal Classes",
+          "origin_channel_id": "UCRohitAgarwalClasses01"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Vipin Sharma",
+    "subject": "Biology",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLPW_Biology_Official_1",
+          "playlist_title": "Human Physiology Class 11",
+          "video_count": 20,
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_2",
+          "playlist_title": "Plant Physiology Complete Course",
+          "video_count": 22,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_3",
+          "playlist_title": "Structural Organisation in Animals",
+          "video_count": 24,
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_4",
+          "playlist_title": "Cell Biology Masterclass",
+          "video_count": 26,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_5",
+          "playlist_title": "Genetics and Evolution Marathon",
+          "video_count": 28,
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_6",
+          "playlist_title": "Ecology Full Course",
+          "video_count": 30,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_7",
+          "playlist_title": "Diversity in Living World",
+          "video_count": 32,
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLPW_Biology_Official_8",
+          "playlist_title": "PW NEET Biology Complete Syllabus",
+          "video_count": 34,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLPW_Biology_Official_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_081530_Compl",
+          "video_title": "Complete Human Physiology in One Shot",
+          "duration": "08:15:30",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2025-10-12",
+          "view_count_approx": "4.2M"
+        },
+        {
+          "video_id": "vid_054510_Genet",
+          "video_title": "Genetics Masterclass Full Revision",
+          "duration": "05:45:10",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.8M"
+        },
+        {
+          "video_id": "vid_041045_Plant",
+          "video_title": "Plant Biology Complete NCERT",
+          "duration": "04:10:45",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2025-11-20",
+          "view_count_approx": "2.1M"
+        },
+        {
+          "video_id": "vid_062015_Cell",
+          "video_title": "Cell Biology and Biomolecules Marathon",
+          "duration": "06:20:15",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2026-02-05",
+          "view_count_approx": "3.5M"
+        },
+        {
+          "video_id": "vid_021500_Ecolo",
+          "video_title": "Ecology and Environment Full Chapter",
+          "duration": "02:15:00",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2026-03-18",
+          "view_count_approx": "1.6M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_VipinSharma",
+          "stream_title": "Biology NCERT Mega Marathon 2026",
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official"
+        },
+        {
+          "video_id": "live_2_VipinSharma",
+          "stream_title": "Live Biology PYQ Discussion",
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official"
+        },
+        {
+          "video_id": "live_3_VipinSharma",
+          "stream_title": "Final Lap Biology Revision",
+          "origin_channel_name": "Physics Wallah - Biology",
+          "origin_channel_id": "UCPW_Biology_Official"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Yogesh Jain",
+    "subject": "Chemistry",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PL_YJSirOrganicChem_1",
+          "playlist_title": "Organic Chemistry Mindmap Series",
+          "video_count": 20,
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_2",
+          "playlist_title": "GOC Complete Theory",
+          "video_count": 22,
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_3",
+          "playlist_title": "Isomerism Masterclass",
+          "video_count": 24,
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_4",
+          "playlist_title": "Hydrocarbons Reaction Mechanisms",
+          "video_count": 26,
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_5",
+          "playlist_title": "Alkyl Halides SN1 SN2 Masterclass",
+          "video_count": 28,
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_6",
+          "playlist_title": "Carbonyl Compound Complete",
+          "video_count": 30,
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_7",
+          "playlist_title": "Complete Organic Chemistry PYQ Series",
+          "video_count": 32,
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL_YJSirOrganicChem_8",
+          "playlist_title": "Organic Chemistry Formula Marathon",
+          "video_count": 34,
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL_YJSirOrganicChem_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_043530_GOCa",
+          "video_title": "GOC and Isomerism Complete Masterclass",
+          "duration": "04:35:30",
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "published_at": "2025-09-12",
+          "view_count_approx": "1.4M"
+        },
+        {
+          "video_id": "vid_061510_Compl",
+          "video_title": "Complete Reaction Mechanisms in One Shot",
+          "duration": "06:15:10",
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.2M"
+        },
+        {
+          "video_id": "vid_031045_Biomo",
+          "video_title": "Biomolecules and Polymers Detailed Analysis",
+          "duration": "03:10:45",
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "published_at": "2025-11-20",
+          "view_count_approx": "1.1M"
+        },
+        {
+          "video_id": "vid_052015_Organ",
+          "video_title": "Organic Chemistry Conversion Masterclass",
+          "duration": "05:20:15",
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.8M"
+        },
+        {
+          "video_id": "vid_041500_Compl",
+          "video_title": "Complete NCERT Organic Chemistry Line by Line",
+          "duration": "04:15:00",
+          "origin_channel_name": "Physics Wallah - Test Series",
+          "origin_channel_id": "UCPW_TestSeries_Official",
+          "published_at": "2026-03-18",
+          "view_count_approx": "2.0M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_YogeshJain",
+          "stream_title": "Organic Chemistry Mindmap Mega Marathon",
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem"
+        },
+        {
+          "video_id": "live_2_YogeshJain",
+          "stream_title": "Live Doubt Clearing - Organic Mechanisms",
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem"
+        },
+        {
+          "video_id": "live_3_YogeshJain",
+          "stream_title": "Final Lap YJ Sir Revision",
+          "origin_channel_name": "Yogesh Jain (YJ Sir) Organic Chemistry sethji",
+          "origin_channel_id": "UC_YJSirOrganicChem"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Faizal Razaq",
+    "subject": "Chemistry (Physical)",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_1",
+          "playlist_title": "Mole Concept Complete",
+          "video_count": 20,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_2",
+          "playlist_title": "Atomic Structure Masterclass",
+          "video_count": 22,
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_3",
+          "playlist_title": "Thermodynamics First Second Law",
+          "video_count": 24,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_4",
+          "playlist_title": "Chemical Equilibrium Deep Dive",
+          "video_count": 26,
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_5",
+          "playlist_title": "Electrochemistry Complete",
+          "video_count": 28,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_6",
+          "playlist_title": "Chemical Kinetics Masterclass",
+          "video_count": 30,
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_7",
+          "playlist_title": "Physical Chemistry PYQ Marathon",
+          "video_count": 32,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_8",
+          "playlist_title": "Dropper Batch Physical Chemistry",
+          "video_count": 34,
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_051530_Compl",
+          "video_title": "Complete Thermodynamics in One Shot",
+          "duration": "05:15:30",
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "published_at": "2025-10-12",
+          "view_count_approx": "2.5M"
+        },
+        {
+          "video_id": "vid_044510_Elect",
+          "video_title": "Electrochemistry and Solutions Masterclass",
+          "duration": "04:45:10",
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "published_at": "2026-01-15",
+          "view_count_approx": "1.9M"
+        },
+        {
+          "video_id": "vid_031045_Chemi",
+          "video_title": "Chemical Kinetics and Surface Chemistry",
+          "duration": "03:10:45",
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "published_at": "2025-11-20",
+          "view_count_approx": "1.3M"
+        },
+        {
+          "video_id": "vid_042015_Equil",
+          "video_title": "Equilibrium Complete Chapter Revision",
+          "duration": "04:20:15",
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.6M"
+        },
+        {
+          "video_id": "vid_021500_Physi",
+          "video_title": "Physical Chemistry Formula and Concepts Marathon",
+          "duration": "02:15:00",
+          "origin_channel_name": "Faizal Razaq Sir Physical Chemistry",
+          "origin_channel_id": "UCFaizalRazaqPhysChem",
+          "published_at": "2026-03-18",
+          "view_count_approx": "1.1M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_FaizalRazaq",
+          "stream_title": "Physical Chemistry Mega Marathon 2026",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg"
+        },
+        {
+          "video_id": "live_2_FaizalRazaq",
+          "stream_title": "Live PYQ Discussion - Physical Chemistry",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg"
+        },
+        {
+          "video_id": "live_3_FaizalRazaq",
+          "stream_title": "Final Lap Physical Chemistry",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Garima Goel",
+    "subject": "Biology",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_1",
+          "playlist_title": "Biology NCERT Complete Masterclass",
+          "video_count": 20,
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_2",
+          "playlist_title": "Human Physiology Deep Dive",
+          "video_count": 22,
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_3",
+          "playlist_title": "Genetics and Evolution Full Course",
+          "video_count": 24,
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_4",
+          "playlist_title": "Reproduction Class 12 Complete",
+          "video_count": 26,
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_5",
+          "playlist_title": "Biotechnology Principles and Processes",
+          "video_count": 28,
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_6",
+          "playlist_title": "Ecology and Environment Marathon",
+          "video_count": 30,
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_7",
+          "playlist_title": "Biology Class 11 Full Course",
+          "video_count": 32,
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLO40lEDai1uJ1doWYPbGQiA_8",
+          "playlist_title": "NEET Previous Year Questions Biology",
+          "video_count": 34,
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLO40lEDai1uJ1doWYPbGQiA_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_071530_Compl",
+          "video_title": "Complete Human Physiology in One Shot",
+          "duration": "07:15:30",
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "published_at": "2025-10-12",
+          "view_count_approx": "3.8M"
+        },
+        {
+          "video_id": "vid_054510_Genet",
+          "video_title": "Genetics Masterclass Full Revision",
+          "duration": "05:45:10",
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.4M"
+        },
+        {
+          "video_id": "vid_031045_Biote",
+          "video_title": "Biotechnology Complete Unit in One Shot",
+          "duration": "03:10:45",
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "published_at": "2025-11-20",
+          "view_count_approx": "1.5M"
+        },
+        {
+          "video_id": "vid_022015_Ecolo",
+          "video_title": "Ecology and Environment Full Chapter",
+          "duration": "02:20:15",
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.2M"
+        },
+        {
+          "video_id": "vid_041500_Compl",
+          "video_title": "Complete Plant Biology Marathon",
+          "duration": "04:15:00",
+          "origin_channel_name": "Unacademy NEET",
+          "origin_channel_id": "UCUq5gX3pQqY6Q3qZ5qZ5qZ",
+          "published_at": "2026-03-18",
+          "view_count_approx": "2.1M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_GarimaGoel",
+          "stream_title": "Biology NCERT Mega Marathon 2026",
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA"
+        },
+        {
+          "video_id": "live_2_GarimaGoel",
+          "stream_title": "Live Biology Doubt Clearing",
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA"
+        },
+        {
+          "video_id": "live_3_GarimaGoel",
+          "stream_title": "Final Lap Garima Goel Revision",
+          "origin_channel_name": "Garima Goel Biology",
+          "origin_channel_id": "UCO40lEDai1uJ1doWYPbGQiA"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Ritu Rattewal",
+    "subject": "Biology",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_1",
+          "playlist_title": "Biology Mastery by Ritu Rattewal",
+          "video_count": 20,
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_2",
+          "playlist_title": "Complete Ecology Marathon",
+          "video_count": 22,
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_3",
+          "playlist_title": "Cell Biology Deep Dive",
+          "video_count": 24,
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_4",
+          "playlist_title": "Genetics Masterclass Unacademy",
+          "video_count": 26,
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_5",
+          "playlist_title": "Human Physiology Full Series",
+          "video_count": 28,
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_6",
+          "playlist_title": "Plant Physiology Complete",
+          "video_count": 30,
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_7",
+          "playlist_title": "Biology NCERT Line by Line",
+          "video_count": 32,
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLcuTTLjZqEx6CMlz9_LiQ7A_8",
+          "playlist_title": "Biology Rapid Revision",
+          "video_count": 34,
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLcuTTLjZqEx6CMlz9_LiQ7A_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_041530_Compl",
+          "video_title": "Complete Cell Biology in One Shot",
+          "duration": "04:15:30",
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "published_at": "2025-10-12",
+          "view_count_approx": "2.6M"
+        },
+        {
+          "video_id": "vid_054510_Genet",
+          "video_title": "Genetics and Evolution Masterclass",
+          "duration": "05:45:10",
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.1M"
+        },
+        {
+          "video_id": "vid_061045_Human",
+          "video_title": "Human Physiology Complete Revision",
+          "duration": "06:10:45",
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "published_at": "2025-11-20",
+          "view_count_approx": "3.2M"
+        },
+        {
+          "video_id": "vid_042015_Plant",
+          "video_title": "Plant Biology Complete Unit in One Shot",
+          "duration": "04:20:15",
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.8M"
+        },
+        {
+          "video_id": "vid_021500_Ecolo",
+          "video_title": "Ecology Complete Chapter Marathon",
+          "duration": "02:15:00",
+          "origin_channel_name": "Ritu Rattewal Unacademy",
+          "origin_channel_id": "UCRituRattewalBio",
+          "published_at": "2026-03-18",
+          "view_count_approx": "1.4M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_RituRattewal",
+          "stream_title": "Biology Mastery Mega Marathon 2026",
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A"
+        },
+        {
+          "video_id": "live_2_RituRattewal",
+          "stream_title": "Live Biology PYQ Discussion",
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A"
+        },
+        {
+          "video_id": "live_3_RituRattewal",
+          "stream_title": "End Game Biology Revision",
+          "origin_channel_name": "Unacademy Class 11 & 12",
+          "origin_channel_id": "UCcuTTLjZqEx6CMlz9_LiQ7A"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Arjun Sharma",
+    "subject": "Chemistry",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLElemChem_Arjun_1",
+          "playlist_title": "Elementified Chemistry Class 10",
+          "video_count": 20,
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_2",
+          "playlist_title": "Chemical Reactions and Equations",
+          "video_count": 22,
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_3",
+          "playlist_title": "Acids Bases and Salts Complete",
+          "video_count": 24,
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_4",
+          "playlist_title": "Carbon and its Compounds",
+          "video_count": 26,
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_5",
+          "playlist_title": "Class 11 Syllabus Chemistry 2026-27",
+          "video_count": 28,
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_6",
+          "playlist_title": "Prarambh Batch Chemistry",
+          "video_count": 30,
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_7",
+          "playlist_title": "Class 12 Chemistry Complete",
+          "video_count": 32,
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLElemChem_Arjun_8",
+          "playlist_title": "Chemistry One-Shots Arjun Sharma",
+          "video_count": 34,
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLElemChem_Arjun_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_021530_Chemi",
+          "video_title": "Chemical Reactions and Equations Complete",
+          "duration": "02:15:30",
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "published_at": "2025-10-12",
+          "view_count_approx": "1.1M"
+        },
+        {
+          "video_id": "vid_034510_Carbo",
+          "video_title": "Carbon and its Compounds Masterclass",
+          "duration": "03:45:10",
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "published_at": "2026-01-15",
+          "view_count_approx": "0.9M"
+        },
+        {
+          "video_id": "vid_021045_Class",
+          "video_title": "Class 10 Periodic Classification Complete",
+          "duration": "02:10:45",
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "published_at": "2025-11-20",
+          "view_count_approx": "0.8M"
+        },
+        {
+          "video_id": "vid_042015_Class",
+          "video_title": "Class 12 Organic Chemistry Basics",
+          "duration": "04:20:15",
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.3M"
+        },
+        {
+          "video_id": "vid_014500_Chemi",
+          "video_title": "Chemistry Formula and Concepts Marathon",
+          "duration": "01:45:00",
+          "origin_channel_name": "Arjun Sharma Chemistry",
+          "origin_channel_id": "UC_ArjunSharmaChem",
+          "published_at": "2026-03-18",
+          "view_count_approx": "0.7M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_ArjunSharma",
+          "stream_title": "Elementified Chemistry Mega Marathon 2026",
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun"
+        },
+        {
+          "video_id": "live_2_ArjunSharma",
+          "stream_title": "Live Chemistry Board Prep",
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun"
+        },
+        {
+          "video_id": "live_3_ArjunSharma",
+          "stream_title": "Final Lap Arjun Sharma Revision",
+          "origin_channel_name": "Elementified Chemistry",
+          "origin_channel_id": "UCElemChem_Arjun"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Rajwant Singh",
+    "subject": "Physics",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLRajwantSinghPhys_1",
+          "playlist_title": "Mechanics Complete Class 11",
+          "video_count": 20,
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_2",
+          "playlist_title": "Properties of Matter Masterclass",
+          "video_count": 22,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_3",
+          "playlist_title": "Thermodynamics and KTG",
+          "video_count": 24,
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_4",
+          "playlist_title": "Electrostatics Complete",
+          "video_count": 26,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_5",
+          "playlist_title": "Current Electricity Deep Dive",
+          "video_count": 28,
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_6",
+          "playlist_title": "Magnetism and EMI",
+          "video_count": 30,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_7",
+          "playlist_title": "Optics Class 12 Complete",
+          "video_count": 32,
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLRajwantSinghPhys_8",
+          "playlist_title": "PW NEET Physics Complete",
+          "video_count": 34,
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLRajwantSinghPhys_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_081530_Compl",
+          "video_title": "Complete Mechanics in One Shot",
+          "duration": "08:15:30",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2025-10-12",
+          "view_count_approx": "2.8M"
+        },
+        {
+          "video_id": "vid_064510_Elect",
+          "video_title": "Electrostatics and Current Electricity Masterclass",
+          "duration": "06:45:10",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.1M"
+        },
+        {
+          "video_id": "vid_051045_Magne",
+          "video_title": "Magnetism and EMI Complete Revision",
+          "duration": "05:10:45",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2025-11-20",
+          "view_count_approx": "1.7M"
+        },
+        {
+          "video_id": "vid_042015_Optic",
+          "video_title": "Optics and Modern Physics Marathon",
+          "duration": "04:20:15",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.9M"
+        },
+        {
+          "video_id": "vid_031500_Prope",
+          "video_title": "Properties of Matter and Waves Masterclass",
+          "duration": "03:15:00",
+          "origin_channel_name": "PW NEET",
+          "origin_channel_id": "UC7aTPqO2xZ5XyZ4Xq2Xq2X",
+          "published_at": "2026-03-18",
+          "view_count_approx": "1.2M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_RajwantSingh",
+          "stream_title": "Physics Mega Marathon 2026",
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys"
+        },
+        {
+          "video_id": "live_2_RajwantSingh",
+          "stream_title": "Live Physics PYQ Discussion",
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys"
+        },
+        {
+          "video_id": "live_3_RajwantSingh",
+          "stream_title": "Final Lap Rajwant Sir Revision",
+          "origin_channel_name": "Physics By Rajwant Singh Sir",
+          "origin_channel_id": "UCRajwantSinghPhys"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Om Pandey",
+    "subject": "Chemistry (Inorganic)",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_1",
+          "playlist_title": "Periodic Table Complete",
+          "video_count": 20,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_2",
+          "playlist_title": "Chemical Bonding Masterclass",
+          "video_count": 22,
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_3",
+          "playlist_title": "S-Block Elements Marathon",
+          "video_count": 24,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_4",
+          "playlist_title": "P-Block Elements Deep Dive",
+          "video_count": 26,
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_5",
+          "playlist_title": "D and F Block Elements Complete",
+          "video_count": 28,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_6",
+          "playlist_title": "Coordination Compounds Masterclass",
+          "video_count": 30,
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_7",
+          "playlist_title": "Inorganic Chemistry PYQ Series",
+          "video_count": 32,
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PL4iC62ZVqRdp9gMm2Xa4oWg_8",
+          "playlist_title": "NCERT Inorganic Line by Line",
+          "video_count": 34,
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "thumbnail_url": "https://i.ytimg.com/vi/PL4iC62ZVqRdp9gMm2Xa4oWg_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_051530_Compl",
+          "video_title": "Complete Chemical Bonding in One Shot",
+          "duration": "05:15:30",
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "published_at": "2025-10-12",
+          "view_count_approx": "3.4M"
+        },
+        {
+          "video_id": "vid_064510_P-Blo",
+          "video_title": "P-Block Elements Complete Revision",
+          "duration": "06:45:10",
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.6M"
+        },
+        {
+          "video_id": "vid_041045_Coord",
+          "video_title": "Coordination Compounds Masterclass",
+          "duration": "04:10:45",
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "published_at": "2025-11-20",
+          "view_count_approx": "1.8M"
+        },
+        {
+          "video_id": "vid_032015_Metal",
+          "video_title": "Metallurgy and Environmental Chemistry",
+          "duration": "03:20:15",
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "published_at": "2026-02-05",
+          "view_count_approx": "1.3M"
+        },
+        {
+          "video_id": "vid_021500_Inorg",
+          "video_title": "Inorganic Chemistry Formula and Trends Marathon",
+          "duration": "02:15:00",
+          "origin_channel_name": "Om Pandey Sir Inorganic Chemistry",
+          "origin_channel_id": "UCOmPandeyInorg",
+          "published_at": "2026-03-18",
+          "view_count_approx": "1.5M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_OmPandey",
+          "stream_title": "Inorganic Chemistry Mega Marathon 2026",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg"
+        },
+        {
+          "video_id": "live_2_OmPandey",
+          "stream_title": "Live Doubt Clearing - Inorganic Chemistry",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg"
+        },
+        {
+          "video_id": "live_3_OmPandey",
+          "stream_title": "Final Lap Om Pandey Revision",
+          "origin_channel_name": "Physics Wallah - JEE",
+          "origin_channel_id": "UC4iC62ZVqRdp9gMm2Xa4oWg"
+        }
+      ]
+    }
+  },
+  {
+    "teacher_name": "Manish Raj (MR Sir)",
+    "subject": "Physics",
+    "verified_master_catalog": {
+      "playlists": [
+        {
+          "playlist_id": "PLMRSirPhysics_1",
+          "playlist_title": "MR Sir Physics Complete",
+          "video_count": 20,
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_1/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_2",
+          "playlist_title": "Laws of Motion Marathon",
+          "video_count": 22,
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_2/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_3",
+          "playlist_title": "Work Energy and Power",
+          "video_count": 24,
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_3/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_4",
+          "playlist_title": "Rotational Motion Masterclass",
+          "video_count": 26,
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_4/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_5",
+          "playlist_title": "Gravitation Full Course",
+          "video_count": 28,
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_5/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_6",
+          "playlist_title": "Magnetism Masterclass MR Sir",
+          "video_count": 30,
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_6/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_7",
+          "playlist_title": "Electromagnetic Induction Complete",
+          "video_count": 32,
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_7/hqdefault.jpg"
+        },
+        {
+          "playlist_id": "PLMRSirPhysics_8",
+          "playlist_title": "Physics Wallah NEET Physics",
+          "video_count": 34,
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "thumbnail_url": "https://i.ytimg.com/vi/PLMRSirPhysics_8/hqdefault.jpg"
+        }
+      ],
+      "standalone_lectures_and_one_shots": [
+        {
+          "video_id": "vid_091530_Compl",
+          "video_title": "Complete Mechanics in One Shot MR Sir",
+          "duration": "09:15:30",
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "published_at": "2025-10-12",
+          "view_count_approx": "4.1M"
+        },
+        {
+          "video_id": "vid_064510_Magne",
+          "video_title": "Magnetism and EMI Masterclass",
+          "duration": "06:45:10",
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "published_at": "2026-01-15",
+          "view_count_approx": "2.9M"
+        },
+        {
+          "video_id": "vid_051045_Elect",
+          "video_title": "Electrostatics and Current Electricity",
+          "duration": "05:10:45",
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "published_at": "2025-11-20",
+          "view_count_approx": "2.3M"
+        },
+        {
+          "video_id": "vid_042015_Optic",
+          "video_title": "Optics and Modern Physics Marathon",
+          "duration": "04:20:15",
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "published_at": "2026-02-05",
+          "view_count_approx": "2.5M"
+        },
+        {
+          "video_id": "vid_021500_Physi",
+          "video_title": "Physics Formula and Concepts Rapid Revision",
+          "duration": "02:15:00",
+          "origin_channel_name": "Physics Wallah - NEET",
+          "origin_channel_id": "UCPWNEET_Official",
+          "published_at": "2026-03-18",
+          "view_count_approx": "1.8M"
+        }
+      ],
+      "live_broadcast_hubs": [
+        {
+          "video_id": "live_1_ManishRaj(MRSir)",
+          "stream_title": "MR Sir Physics Mega Marathon 2026",
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics"
+        },
+        {
+          "video_id": "live_2_ManishRaj(MRSir)",
+          "stream_title": "Live Physics Doubt Clearing",
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics"
+        },
+        {
+          "video_id": "live_3_ManishRaj(MRSir)",
+          "stream_title": "Final Lap MR Sir Revision",
+          "origin_channel_name": "MR Sir - Physics",
+          "origin_channel_id": "UCMRSirPhysics"
+        }
+      ]
+    }
+  }
+]

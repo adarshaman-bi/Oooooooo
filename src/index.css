@@ -1,0 +1,352 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Inter", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-main-bg: #000000;
+  --color-surface-card: #0D0D0C;
+  --color-nav-footer: #0F0F0F;
+  --color-border-web: #1A1A1A;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A0A0A0;
+  --color-highlight-element: #FFFFFF;
+  --color-muted-accent: #FFFFFF;
+  --color-neutral-structure: #1A1A1A;
+  --color-secondary-accent: #FFFFFF;
+  --color-ratings: #FFEFD5;
+
+  --color-brand-dark: #000000;
+  --color-brand-black: #000000;
+  --color-brand-border: #1A1A1A;
+  --color-brand-accent: #FFFFFF;
+  --color-brand-gray: #A0A0A0;
+
+  /* PURGE STANDARD PALETTES: Override Tailwind color families to Black, White, Grey, Ice White, Powder Blue, Charcoal Navy, Platinum, or Papaya Whip strictly */
+  --color-indigo-50: #F4FEFF;
+  --color-indigo-100: #F4FEFF;
+  --color-indigo-200: #A9C0E0;
+  --color-indigo-300: #A9C0E0;
+  --color-indigo-400: #A9C0E0;
+  --color-indigo-500: #F4FEFF;
+  --color-indigo-600: #FFFFFF;
+  --color-indigo-700: #EEEEEE;
+  --color-indigo-800: #1A1A1A;
+  --color-indigo-900: #101010;
+  --color-indigo-950: #0F0F0F;
+
+  --color-blue-50: #F4FEFF;
+  --color-blue-100: #F4FEFF;
+  --color-blue-200: #A9C0E0;
+  --color-blue-300: #A9C0E0;
+  --color-blue-400: #A9C0E0;
+  --color-blue-500: #F4FEFF;
+  --color-blue-600: #FFFFFF;
+  --color-blue-700: #EEEEEE;
+  --color-blue-800: #1A1A1A;
+  --color-blue-900: #101010;
+  --color-blue-950: #0F0F0F;
+
+  --color-sky-50: #F4FEFF;
+  --color-sky-100: #F4FEFF;
+  --color-sky-200: #A9C0E0;
+  --color-sky-300: #A9C0E0;
+  --color-sky-400: #A9C0E0;
+  --color-sky-500: #F4FEFF;
+  --color-sky-600: #FFFFFF;
+  --color-sky-700: #EEEEEE;
+  --color-sky-800: #1A1A1A;
+  --color-sky-900: #101010;
+  --color-sky-950: #0F0F0F;
+
+  --color-cyan-50: #F4FEFF;
+  --color-cyan-100: #F4FEFF;
+  --color-cyan-200: #A9C0E0;
+  --color-cyan-300: #A9C0E0;
+  --color-cyan-400: #A9C0E0;
+  --color-cyan-500: #F4FEFF;
+  --color-cyan-600: #FFFFFF;
+  --color-cyan-700: #EEEEEE;
+  --color-cyan-800: #1A1A1A;
+  --color-cyan-900: #101010;
+  --color-cyan-950: #0F0F0F;
+
+  --color-teal-50: #F4FEFF;
+  --color-teal-100: #F4FEFF;
+  --color-teal-200: #A9C0E0;
+  --color-teal-300: #A9C0E0;
+  --color-teal-400: #A9C0E0;
+  --color-teal-500: #F4FEFF;
+  --color-teal-600: #FFFFFF;
+  --color-teal-700: #EEEEEE;
+  --color-teal-800: #1A1A1A;
+  --color-teal-900: #101010;
+  --color-teal-950: #0F0F0F;
+
+  --color-emerald-50: #F4FEFF;
+  --color-emerald-100: #F4FEFF;
+  --color-emerald-200: #A9C0E0;
+  --color-emerald-300: #A9C0E0;
+  --color-emerald-400: #A9C0E0;
+  --color-emerald-500: #F4FEFF;
+  --color-emerald-600: #FFFFFF;
+  --color-emerald-700: #EEEEEE;
+  --color-emerald-800: #1A1A1A;
+  --color-emerald-900: #101010;
+  --color-emerald-950: #0F0F0F;
+
+  --color-green-50: #F4FEFF;
+  --color-green-100: #F4FEFF;
+  --color-green-200: #A9C0E0;
+  --color-green-300: #A9C0E0;
+  --color-green-400: #A9C0E0;
+  --color-green-500: #F4FEFF;
+  --color-green-600: #FFFFFF;
+  --color-green-700: #EEEEEE;
+  --color-green-800: #1A1A1A;
+  --color-green-900: #101010;
+  --color-green-950: #0F0F0F;
+
+  --color-rose-50: #F4FEFF;
+  --color-rose-100: #F4FEFF;
+  --color-rose-200: #A9C0E0;
+  --color-rose-300: #A9C0E0;
+  --color-rose-400: #A9C0E0;
+  --color-rose-500: #F4FEFF;
+  --color-rose-600: #FFFFFF;
+  --color-rose-700: #EEEEEE;
+  --color-rose-800: #1A1A1A;
+  --color-rose-900: #101010;
+  --color-rose-950: #0F0F0F;
+
+  --color-red-50: #FFFFFF;
+  --color-red-100: #FFFFFF;
+  --color-red-200: #EEEEEE;
+  --color-red-300: #A9C0E0;
+  --color-red-400: #A9C0E0;
+  --color-red-500: #F4FEFF;
+  --color-red-600: #FFFFFF;
+  --color-red-700: #EEEEEE;
+  --color-red-800: #1A1A1A;
+  --color-red-900: #101010;
+  --color-red-950: #0F0F0F;
+
+  --color-pink-50: #F4FEFF;
+  --color-pink-100: #F4FEFF;
+  --color-pink-200: #A9C0E0;
+  --color-pink-300: #A9C0E0;
+  --color-pink-400: #A9C0E0;
+  --color-pink-500: #F4FEFF;
+  --color-pink-600: #FFFFFF;
+  --color-pink-700: #EEEEEE;
+  --color-pink-800: #1A1A1A;
+  --color-pink-900: #101010;
+  --color-pink-950: #0F0F0F;
+
+  --color-fuchsia-50: #F4FEFF;
+  --color-fuchsia-100: #F4FEFF;
+  --color-fuchsia-200: #A9C0E0;
+  --color-fuchsia-300: #A9C0E0;
+  --color-fuchsia-400: #A9C0E0;
+  --color-fuchsia-500: #F4FEFF;
+  --color-fuchsia-600: #FFFFFF;
+  --color-fuchsia-700: #EEEEEE;
+  --color-fuchsia-800: #1A1A1A;
+  --color-fuchsia-900: #101010;
+  --color-fuchsia-950: #0F0F0F;
+
+  --color-purple-50: #F4FEFF;
+  --color-purple-100: #F4FEFF;
+  --color-purple-200: #A9C0E0;
+  --color-purple-300: #A9C0E0;
+  --color-purple-400: #A9C0E0;
+  --color-purple-500: #F4FEFF;
+  --color-purple-600: #FFFFFF;
+  --color-purple-700: #EEEEEE;
+  --color-purple-800: #1A1A1A;
+  --color-purple-900: #101010;
+  --color-purple-950: #0F0F0F;
+
+  --color-violet-50: #F4FEFF;
+  --color-violet-100: #F4FEFF;
+  --color-violet-200: #A9C0E0;
+  --color-violet-300: #A9C0E0;
+  --color-violet-400: #A9C0E0;
+  --color-violet-500: #F4FEFF;
+  --color-violet-600: #FFFFFF;
+  --color-violet-700: #EEEEEE;
+  --color-violet-800: #1A1A1A;
+  --color-violet-900: #101010;
+  --color-violet-950: #0F0F0F;
+
+  --color-orange-50: #F4FEFF;
+  --color-orange-100: #F4FEFF;
+  --color-orange-200: #A9C0E0;
+  --color-orange-300: #A9C0E0;
+  --color-orange-400: #A9C0E0;
+  --color-orange-500: #F4FEFF;
+  --color-orange-600: #FFFFFF;
+  --color-orange-700: #EEEEEE;
+  --color-orange-800: #1A1A1A;
+  --color-orange-900: #101010;
+  --color-orange-950: #0F0F0F;
+
+  --color-amber-50: #101010;
+  --color-amber-100: #101010;
+  --color-amber-200: #1A1A1A;
+  --color-amber-300: #A0A0A0;
+  --color-amber-400: #EEEEEE;
+  --color-amber-500: #FFEFD5; /* ratings papaya whip! */
+  --color-amber-600: #FFEFD5;
+  --color-amber-700: #FFEFD5;
+  --color-amber-800: #1A1A1A;
+  --color-amber-900: #101010;
+  --color-amber-950: #0F0F0F;
+
+  --color-yellow-50: #101010;
+  --color-yellow-100: #101010;
+  --color-yellow-200: #1A1A1A;
+  --color-yellow-300: #A0A0A0;
+  --color-yellow-400: #EEEEEE;
+  --color-yellow-500: #FFEFD5; /* ratings papaya whip! */
+  --color-yellow-600: #FFEFD5;
+  --color-yellow-700: #FFEFD5;
+  --color-yellow-800: #1A1A1A;
+  --color-yellow-900: #101010;
+  --color-yellow-950: #0F0F0F;
+}
+
+/* Base custom styles supporting permanent dark theme */
+body, html {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-sans);
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-progress-slide {
+  animation: progressSlide 1.5s infinite ease-in-out;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #71717A;
+}
+
+/* YouTube Immersive Layering */
+.player-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 16/9 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+#yt-iframe-player {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+.click-interceptor {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+}
+
+.custom-hud {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 3 !important;
+}
+
+/* ── Premium Card Animations & Effects ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card-enter {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in {
+  animation: slideIn 0.35s ease-out forwards;
+}
+
+@keyframes ringPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(89,199,73,0.4)); }
+  50% { filter: drop-shadow(0 0 18px rgba(89,199,73,0.7)); }
+}
+.ring-pulse {
+  animation: ringPulse 2.5s ease-in-out infinite;
+}
+
+.follow-btn {
+  transition: all 0.3s ease;
+}
+.follow-btn:hover {
+  transform: scale(1.02);
+}
+.follow-btn.following {
+  background: #FFFDF1;
+  color: #0d1117;
+  border-color: #FFFDF1;
+}
+.follow-btn.following:hover {
+  box-shadow: 0 0 24px 6px rgba(255,253,241,0.3);
+}
+.follow-btn:not(.following):hover {
+  box-shadow: 0 0 28px 8px rgba(147,197,253,0.4);
+  filter: brightness(1.1);
+}
+
+.outline-btn {
+  transition: all 0.25s ease;
+}
+.outline-btn:hover {
+  background-color: rgba(255,253,241,0.08);
+  border-color: rgba(255,253,241,0.25);
+  color: #FFFDF1;
+  transform: scale(1.02);
+}
+
+
