@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SearchProvider, useSearch } from './context/SearchContext';
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
-import { useTheme } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchView from './components/SearchView';
