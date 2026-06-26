@@ -935,8 +935,8 @@ function AppContent() {
       subject: p.subject,
       examType: p.examType,
       contentType: 'playlist',
-      teacherId: p.teacherId,
-      teacherName: p.teacherName,
+      teacherId: p.teacherId ?? '',
+      teacherName: p.teacherName ?? '',
       instituteId: p.instituteId,
       instituteName: p.instituteName,
       duration: `${p.lecturesCount || 0} Lectures`,
@@ -1485,7 +1485,7 @@ function AppContent() {
     subjectFilter
   ).sort((a, b) => {
     if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'trustScore') return b.trustScore - a.trustScore;
+    if (sortBy === 'trustScore') return (b.trustScore ?? 0) - (a.trustScore ?? 0);
     return b.followersCount - a.followersCount;
   }).filter(t => !verifiedOnly || (t.isVerified !== false && t.verified !== false && t.verificationStatus !== 'pending'));
 
@@ -1650,7 +1650,7 @@ function AppContent() {
   const filteredTestSeries = (TEST_SERIES_CATALOG || []).filter(ts => {
     const matchesSearch = ts.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           ts.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          ts.description.toLowerCase().includes(searchQuery.toLowerCase());
+                          (ts.description ?? '').toLowerCase().includes(searchQuery.toLowerCase());
     const currentExam = examFilter !== 'All' ? examFilter : (user?.examType || 'Both');
     if (currentExam !== 'Both' && currentExam !== 'All' && ts.examType && ts.examType !== 'Both' && ts.examType !== 'All' && ts.examType !== currentExam) {
       return false;

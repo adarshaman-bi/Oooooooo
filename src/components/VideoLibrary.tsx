@@ -1466,7 +1466,7 @@ export default function VideoLibrary({ onBackToHome }: VideoLibraryProps) {
               <div className="lg:col-span-4 space-y-3.5">
                 <div className="p-4 rounded-xl bg-[#09090A] border border-neutral-910 text-left space-y-2">
                   <span className="text-[9px] font-mono text-zinc-500 uppercase block font-bold leading-none">PLAYING CONTEXT</span>
-                  <h4 className="text-xs font-mono font-bold text-white uppercase line-clamp-1 truncate w-full">{selectedPlaylist.title}</h4>
+                  <h4 className="text-xs font-mono font-bold text-white uppercase line-clamp-1 truncate w-full">{selectedPlaylist?.title ?? ''}</h4>
                   <div className="w-full bg-zinc-805 h-1.5 rounded overflow-hidden">
                     <div 
                       className="bg-white h-full transition-all duration-300" 
