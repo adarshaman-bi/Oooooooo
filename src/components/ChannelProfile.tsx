@@ -115,7 +115,6 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
       if (!activeChannelId) return;
       setIsLoading(true);
       setErrorMsg(null);
-      console.log(`[Frontend data fetch] Loading channel profile for: ${activeChannelId}`);
 
       try {
         const baseApiUrl = window.location.hostname === 'localhost'
@@ -124,15 +123,12 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
 
         const profileRes = await axios.get(`${baseApiUrl}/channel/${activeChannelId}`);
         if (profileRes.data && profileRes.data.status === 'ok') {
-          console.log('[Frontend data fetch] Channel details successfully loaded:', profileRes.data.data.title);
           setChannel(profileRes.data.data);
         } else {
           setErrorMsg(profileRes.data.error || 'Failed to retrieve channel profile.');
-          console.error('[Frontend data fetch] Channel response status not ok:', profileRes.data);
         }
       } catch (err: any) {
         const msg = err.response?.data?.error || err.message || 'Failed connecting to proxy server.';
-        console.error('[Frontend data fetch] Error loading YouTube channel details:', err);
         setErrorMsg(msg);
       } finally {
         setIsLoading(false);
@@ -148,7 +144,6 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
       if (!activeChannelId) return;
       setIsLoadingLectures(true);
       setLectures([]);
-      console.log(`[Frontend data fetch] Loading video lectures for: ${activeChannelId}`);
 
       try {
         const baseApiUrl = window.location.hostname === 'localhost'
@@ -158,13 +153,10 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
         const lecturesRes = await axios.get(`${baseApiUrl}/lectures/${activeChannelId}`);
         if (lecturesRes.data && lecturesRes.data.status === 'ok') {
           const fetchedLectures = lecturesRes.data.data || [];
-          console.log(`[Frontend data fetch] Loaded ${fetchedLectures.length} video lectures.`);
           setLectures(fetchedLectures);
         } else {
-          console.error('[Frontend data fetch] Lectures response status not ok:', lecturesRes.data);
         }
       } catch (err: any) {
-        console.error('[Frontend data fetch] Error loading lectures:', err);
       } finally {
         setIsLoadingLectures(false);
       }
@@ -193,7 +185,6 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
           setItemRatings(prev => ({ ...prev, [id]: data.averageRating }));
         }
       } catch (e) {
-        console.warn(`Failed to fetch ratings for ${id}:`, e);
       }
     });
   }, [channel, lectures]);
@@ -202,17 +193,14 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
   const loadItemReviews = async (itemId: string) => {
     setIsLoadingReviews(true);
     setReviewSubmitError(null);
-    console.log(`[Reviews fetch] Fetching reviews for item ${itemId}`);
     try {
       const res = await fetch(`/api/youtube/reviews/${itemId}`);
       const data = await res.json();
       if (data.status === 'ok') {
         setSelectedItemReviews(data.reviews || []);
         setSelectedItemAvgRating(data.averageRating || 0);
-        console.log(`[Reviews fetch] Successfully loaded ${data.reviews?.length} reviews.`);
       }
     } catch (e) {
-      console.error(`[Reviews fetch] Failed to load reviews for ${itemId}:`, e);
     } finally {
       setIsLoadingReviews(false);
     }
@@ -231,7 +219,6 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
 
     setIsSubmittingReview(true);
     setReviewSubmitError(null);
-    console.log(`[Reviews submit] Posting review for ${selectedItem.id}`);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -251,16 +238,13 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
 
       const resData = await res.json();
       if (resData.status === 'ok') {
-        console.log('[Reviews submit] Review successfully registered.');
         setReviewTextInput('');
         await loadItemReviews(selectedItem.id);
         setItemRatings(prev => ({ ...prev, [selectedItem.id]: ratingInput }));
       } else {
         setReviewSubmitError(resData.error || 'Failed to submit review.');
-        console.error('[Reviews submit] Error response:', resData);
       }
     } catch (err: any) {
-      console.error('[Reviews submit] Error occurred:', err);
       setReviewSubmitError('Failed to post review. Please check connection.');
     } finally {
       setIsSubmittingReview(false);

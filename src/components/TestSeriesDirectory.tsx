@@ -91,11 +91,21 @@ export default function TestSeriesDirectory({
         return ratingB - ratingA;
       }
       if (sortBy === 'priceAsc') {
-        const getPrice = (p: any) => p && typeof p === 'object' && 'amount' in p ? p.amount : (typeof p === 'number' ? p : Infinity);
+        const getPrice = (p: { amount: number; currency: string; unit?: string } | "free" | "bundled" | null | undefined): number => {
+          if (!p || p === "free" || p === "bundled") return 0;
+          if (typeof p === 'object' && 'amount' in p) return p.amount;
+          if (typeof p === 'number') return p;
+          return Infinity;
+        };
         return getPrice(a.price) - getPrice(b.price);
       }
       if (sortBy === 'priceDesc') {
-        const getPrice = (p: any) => p && typeof p === 'object' && 'amount' in p ? p.amount : (typeof p === 'number' ? p : -1);
+        const getPrice = (p: { amount: number; currency: string; unit?: string } | "free" | "bundled" | null | undefined): number => {
+          if (!p || p === "free" || p === "bundled") return 0;
+          if (typeof p === 'object' && 'amount' in p) return p.amount;
+          if (typeof p === 'number') return p;
+          return -1;
+        };
         return getPrice(b.price) - getPrice(a.price);
       }
       return 0;

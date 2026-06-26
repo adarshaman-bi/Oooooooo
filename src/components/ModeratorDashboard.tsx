@@ -144,7 +144,7 @@ export default function ModeratorDashboard() {
   // YouTube tab states
   const [channels, setChannels] = useState<any[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState('');
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<{ id: string; name: string; description?: string; }[]>([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState<string | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);

@@ -42,7 +42,7 @@ export default function DetailsModal({
   onSelectLecture
 }: DetailsModalProps) {
   const { user, isGuest } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<TeacherProfile | InstituteProfile | { id: string; name: string; description?: string; isVerified: boolean; officialLinks: string[]; rating: number; reviewCount: number } | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [trustBreakdown, setTrustBreakdown] = useState<TrustScoreBreakdown | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -94,7 +94,7 @@ export default function DetailsModal({
             setIsLoading(false);
             return;
           }
-          setProfile(prof as any);
+          setProfile(prof);
 
           const revs = await dbService.fetchReviews(targetId);
           setReviews(revs);
@@ -114,7 +114,7 @@ export default function DetailsModal({
             setIsLoading(false);
             return;
           }
-          setProfile(prof as any);
+          setProfile(prof);
 
           const revs = await dbService.fetchReviews(targetId);
           setReviews(revs);
@@ -142,7 +142,7 @@ export default function DetailsModal({
             officialLinks: [],
             rating: 4.5,
             reviewCount: 0
-          } as any);
+          });
 
           const allLecs = await dbService.fetchLectures();
           const plLecs = allLecs.filter(l => l.playlistId === targetId);
@@ -162,14 +162,15 @@ export default function DetailsModal({
             officialLinks: [],
             rating: 4.8,
             reviewCount: 0
-          } as any);
+          });
 
           setBatches([b]);
         }
         setIsLoading(false);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed loading targeted resource details.';
         console.error(err);
-        setErrorMsg(err?.message || 'Failed loading targeted resource details.');
+        setErrorMsg(message);
         setIsLoading(false);
       }
     });
@@ -220,8 +221,9 @@ export default function DetailsModal({
       setReviews(revs);
       const tb = await dbService.fetchTrustScore(targetId);
       setTrustBreakdown(tb);
-    } catch (err: any) {
-      setReviewError(err?.message || 'Database permissions aborted.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Database permissions aborted.';
+      setReviewError(message);
     }
   };
 
