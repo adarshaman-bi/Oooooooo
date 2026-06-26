@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SearchProvider, useSearch } from './context/SearchContext';
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
+import { useTheme } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchView from './components/SearchView';
@@ -554,6 +555,7 @@ const CustomCheckIcon = ({ size = 18, className = "" }) => (
 );
 
 function AppContent() {
+  const { themeMode, toggleTheme } = useTheme();
   const { user, firebaseUser, isGuest, enableGuestMode, loading, setExamPreference, updatePreferences } = useAuth();
   const { activeLecture, setActiveLecture } = usePlayer();
 
@@ -1801,6 +1803,8 @@ function AppContent() {
         searchSuggestions={searchSuggestions}
         currentExamType={examFilter}
         onVoiceSearchClick={startSpeechRecognition}
+        themeMode={themeMode}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Modern Slide-Down Unified Multi-Filter Panel like YouTube but tailored to tabs */}

@@ -1,4 +1,4 @@
-import { Bell, User as UserIcon, ShieldAlert, Search, Mic } from 'lucide-react';
+import { Bell, User as UserIcon, ShieldAlert, Search, Mic, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AppNotification } from '../types';
 import { useState } from 'react';
@@ -23,6 +23,10 @@ interface HeaderProps {
   currentExamType?: string;
   onVoiceSearchClick?: () => void;
   onLogoClick?: () => void;
+  
+  // Theme toggle
+  themeMode: 'light' | 'dark';
+  onToggleTheme: () => void;
 }
 
 export default function Header({
@@ -41,7 +45,9 @@ export default function Header({
   searchSuggestions = [],
   currentExamType = 'NEET',
   onVoiceSearchClick,
-  onLogoClick
+  onLogoClick,
+  themeMode,
+  onToggleTheme
 }: HeaderProps) {
   const { user, isGuest } = useAuth();
   const [isFocused, setIsFocused] = useState(false);
@@ -205,6 +211,19 @@ export default function Header({
                 <UserIcon className="w-5 h-5" />
               )}
             </button>
+            
+            {/* Theme Toggle Button */}
+            <button
+              onClick={onToggleTheme}
+              className="w-10 h-10 flex items-center justify-center rounded-full border-none bg-[#0D0D0C] text-zinc-400 hover:text-[#FFFFFF] transition-all cursor-pointer"
+              title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {themeMode === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+            </button>
           </>
         ) : (
           <>
@@ -233,6 +252,19 @@ export default function Header({
               title="Sign in to your space"
             >
               <UserIcon className="w-5 h-5" />
+            </button>
+            
+            {/* Theme Toggle Button (Guest) */}
+            <button
+              onClick={onToggleTheme}
+              className="w-10 h-10 flex items-center justify-center rounded-full border-none bg-[#0D0D0C] text-zinc-400 hover:text-[#FFFFFF] transition-all cursor-pointer"
+              title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {themeMode === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </button>
 
             {/* Sign in extra CTA button */}
