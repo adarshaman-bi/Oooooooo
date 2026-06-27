@@ -23,6 +23,7 @@ import AuthModal from './components/AuthModal';
 import OnboardingWizard from './components/OnboardingWizard';
 import NotificationsDashboard from './components/NotificationsDashboard';
 import SearchSpecsModal from './components/SearchSpecsModal';
+import AuthCallback from './pages/AuthCallback';
 import {
   personalizeLectures,
   personalizePlaylists,
@@ -747,9 +748,17 @@ function AppContent() {
     };
   }, []);
 
-  // Synchronize URL path route for '/admin/educators' and '/teachers/:id'
+  // Synchronize URL path route for '/admin/educators', '/teachers/:id', and '/auth/callback'
   useEffect(() => {
     const path = window.location.pathname;
+    
+    // Handle OAuth callback route
+    if (path === '/auth/callback') {
+      // Supabase will handle the session automatically via AuthContext
+      // The AuthCallback component will render and redirect after success
+      return;
+    }
+    
     if (path === '/admin/educators') {
       if (user) {
         if (user.email === 'adarshaman898@gmail.com' || user.role === 'admin' || user.role === 'moderator') {

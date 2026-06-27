@@ -44,7 +44,7 @@ export default function TestSeriesDirectory({
         (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.shortDescription && item.shortDescription.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.longDescription && item.longDescription.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        item.subjects.some(sub => sub.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.subjects ?? []).some(sub => sub.toLowerCase().includes(searchQuery.toLowerCase())) ||
         item.features.some(feat => feat.toLowerCase().includes(searchQuery.toLowerCase()));
 
       // 2. Exam Tag Filter (NEET / JEE Main / JEE Advanced / CUET)

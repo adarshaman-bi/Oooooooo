@@ -24,6 +24,21 @@
   --color-brand-accent: #FFFFFF;
   --color-brand-gray: #A0A0A0;
 
+  /* Light Theme (Biovised Premium) */
+  --color-light-bg: #FDF0D2;
+  --color-light-paper: #FDFDFC;
+  --color-light-text-primary: #2F2327;
+  --color-light-text-secondary: #60574D;
+  --color-light-divider: #B49F8D;
+  --color-light-cta: #FBB093;
+  --color-light-hover: #E1D4BF;
+  --color-light-overlay: #0C0F13;
+  --color-light-verified: #1D9BF0;
+  --color-light-ratings: #E6A500;
+  --color-light-progress-completed: #8EDB9F;
+  --color-light-progress-remaining: #FFFFFF;
+  --color-light-progress-track: #EAEAEA;
+
   /* PURGE STANDARD PALETTES: Override Tailwind color families to Black, White, Grey, Ice White, Powder Blue, Charcoal Navy, Platinum, or Papaya Whip strictly */
   --color-indigo-50: #F4FEFF;
   --color-indigo-100: #F4FEFF;
@@ -218,11 +233,24 @@
   --color-yellow-950: #0F0F0F;
 }
 
-/* Base custom styles supporting permanent dark theme */
+/* Base custom styles with theme support */
 body, html {
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Theme (Default) */
+.dark-theme body,
+.dark-theme html {
   background-color: #000000 !important;
   color: #FFFFFF !important;
-  font-family: var(--font-sans);
+}
+
+/* Light Theme (Biovised Premium) */
+.light-theme body,
+.light-theme html {
+  background-color: #FDF0D2 !important;
+  color: #2F2327 !important;
 }
 
 @keyframes progressSlide {

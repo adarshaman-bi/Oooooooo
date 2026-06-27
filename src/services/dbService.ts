@@ -179,7 +179,7 @@ export async function fetchTeachers(filters?: {
     
     if (filters) {
       if (filters.subject && filters.subject !== 'All') {
-        teachers = teachers.filter(t => t.subject === filters.subject || t.subjects?.includes(filters.subject));
+        teachers = teachers.filter(t => t.subject === filters.subject || t.subjects?.includes(filters.subject!));
       }
       if (filters.examType && filters.examType !== 'All') {
         teachers = teachers.filter(t => t.exams?.includes(filters.examType as any));

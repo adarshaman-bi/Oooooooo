@@ -227,7 +227,7 @@ export function personalizePlaylists(
       if (sQuery) {
         const matchesQuery = 
           p.title.toLowerCase().includes(sQuery) || 
-          p.teacherName.toLowerCase().includes(sQuery) ||
+          (p.teacherName ?? '').toLowerCase().includes(sQuery) ||
           p.subject.toLowerCase().includes(sQuery);
         if (!matchesQuery) return false;
       }

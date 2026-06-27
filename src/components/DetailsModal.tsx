@@ -428,7 +428,7 @@ export default function DetailsModal({
                           </p>
 
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
-                            {profile.officialLinks?.map((url, i) => (
+                            {profile.officialLinks?.map((url: string, i: number) => (
                               <a
                                 key={i}
                                 href={url}

@@ -903,7 +903,7 @@ export default function ModeratorDashboard() {
       for (const tId of distinctTeacherIds) {
         const teacherProfile = dbTeachers.find(t => t.id === tId) || {
           id: tId,
-          name: tId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          name: tId.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
           avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
           subject: 'Physics',
           bio: 'Indexed Verified Educator.',
