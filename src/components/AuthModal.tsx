@@ -429,6 +429,19 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
               </svg>
               Google Account Secure Sign-In
             </button>
+
+            <button
+              onClick={() => {
+                enableGuestMode();
+                if (onGuestBypass) onGuestBypass();
+                onClose();
+              }}
+              type="button"
+              className="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-medium py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            >
+              <LogIn className="w-4 h-4" />
+              Continue as Guest
+            </button>
           </>
         )}
 
