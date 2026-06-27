@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SearchProvider, useSearch } from './context/SearchContext';
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
@@ -8,6 +9,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchView from './components/SearchView';
 import LectureCard from './components/LectureCard';
+import AuthCallback from './components/AuthCallback';
 import TestSeriesDirectory from './components/TestSeriesDirectory';
 import { TEST_SERIES_CATALOG } from './data/testSeriesData';
 import HomeDashboard from './components/HomeDashboard';
@@ -2371,12 +2373,19 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SearchProvider>
-        <PlayerProvider>
-          <AppContent />
-        </PlayerProvider>
-      </SearchProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <SearchProvider>
+          <PlayerProvider>
+            <Routes>
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="*" element={
+                <AppContent />
+              } />
+            </Routes>
+          </PlayerProvider>
+        </SearchProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
