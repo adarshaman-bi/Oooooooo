@@ -258,14 +258,67 @@ body, html {
   border-color: rgba(24, 24, 27, 0.9) !important;
 }
 
-/* Light Theme (Biovised Premium - Apple/Linear Aesthetic) */
-.light-theme body,
-.light-theme html {
-  background-color: #FDF0D2 !important;
-  color: #2F2327 !important;
+/* ============================================
+   LIGHT THEME: \"APPLE EDITORIAL WHITE\" V2
+   Philosophy: 90% White, 8% Cream (BG only), 2% Accent
+   ============================================ */
+
+.light-theme {
+  /* 1. CORE PALETTE - STRICT DISTRIBUTION */
+  --bg-default: #FDF0D2;       /* Cream: Only page background */
+  --bg-paper: #FDFDFC;         /* Soft White: Cards, Inputs, Nav (90% of UI) */
+  --bg-hover: #F5F5F4;         /* Neutral Gray: Subtle hover states */
+  
+  --text-primary: #2F2327;     /* Deep Plum: Headlines */
+  --text-secondary: #60574D;   /* Medium Brown: Body text */
+  --text-tertiary: #9C9288;    /* Light Taupe: Placeholders */
+  
+  --border-subtle: #EAE8E6;    /* Very light border for definition */
+  --divider: #B49F8D;          /* Stronger divider for sections */
+  
+  --primary-accent: #FBB093;   /* Soft Peach: CTAs, Active States */
+  --primary-hover: #E69A7F;    /* Darker Peach: Button Hover */
+  
+  --verified-blue: #1D9BF0;    /* Twitter Blue: Verified Badges */
+  --rating-gold: #E6A500;      /* Turmeric Gold: Stars ONLY */
+  
+  --success-green: #8EDB9F;    /* Progress Complete */
+  --track-gray: #EAEAEA;       /* Progress Track */
+  
+  --overlay-dark: rgba(12, 15, 19, 0.6); /* Modal Backdrop */
+
+  /* 2. TYPOGRAPHY & SPACING */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-card: 24px;         /* Large, premium radius */
+  --radius-input: 16px;        /* Soft inputs */
+  --radius-btn: 12px;          /* Friendly buttons */
+  
+  /* 3. APPLE-STYLE SHADOWS (Soft, Diffused, No Hard Edges) */
+  --shadow-xs: 0 1px 2px rgba(47, 35, 39, 0.04);
+  --shadow-sm: 0 2px 8px rgba(47, 35, 39, 0.06);
+  --shadow-md: 0 4px 16px rgba(47, 35, 39, 0.08); /* Standard Card */
+  --shadow-lg: 0 12px 32px rgba(47, 35, 39, 0.12); /* Floating Modal */
+  --shadow-float: 0 8px 24px rgba(47, 35, 39, 0.1); /* Hover Lift */
+  
+  /* 4. APPLY TO ROOT */
+  background-color: var(--bg-default);
+  color: var(--text-primary);
 }
 
-/* Light Theme Card Styling - Soft White Floating Cards */
+/* Page Background */
+.light-theme body,
+.light-theme html {
+  background-color: var(--bg-default) !important;
+  color: var(--text-primary) !important;
+}
+
+/* A. CARDS: The Hero Element - Pure White Floating */
+.light-theme .card,
+.light-theme .teacher-card,
+.light-theme .course-card,
+.light-theme .video-card,
+.light-theme .post-card,
+.light-theme .playcard,
 .light-theme .bg-\[\.1\],
 .light-theme .bg-\[\#0E0E10\],
 .light-theme .bg-\[\#0D0D0C\],
@@ -274,110 +327,155 @@ body, html {
 .light-theme .bg-\[\#1A1A1A\],
 .light-theme .bg-neutral-900,
 .light-theme .bg-black {
-  background-color: #FDFDFC !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-radius: var(--radius-card) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Light Theme Text Colors */
+.light-theme .card:hover,
+.light-theme .teacher-card:hover,
+.light-theme .course-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-float) !important;
+}
+
+/* B. TEXT COLORS */
 .light-theme .text-white,
 .light-theme .text-\#FFFFFF,
 .light-theme .text-\#FFFDF1 {
-  color: #2F2327 !important;
+  color: var(--text-primary) !important;
 }
 
 .light-theme .text-zinc-400,
 .light-theme .text-gray-400,
-.light-theme .text-muted {
-  color: #60574D !important;
+.light-theme .text-muted,
+.light-theme .text-secondary {
+  color: var(--text-secondary) !important;
 }
 
-/* Light Theme Borders */
+.light-theme .text-zinc-500,
+.light-theme .text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+/* C. BORDERS */
 .light-theme .border-zinc-900\/90,
 .light-theme .border-\[\#1A1A1A\],
 .light-theme .border-neutral-800,
 .light-theme .border-white\/10,
 .light-theme .border-white\/20 {
-  border-color: #B49F8D !important;
+  border-color: var(--border-subtle) !important;
 }
 
-/* Light Theme Shadows - Apple-style soft depth */
-.light-theme .shadow-xl,
-.light-theme .shadow-2xl {
-  box-shadow: 0 4px 24px rgba(47, 35, 39, 0.08) !important;
+/* D. NAVIGATION */
+.light-theme .footer-nav,
+.light-theme .header,
+.light-theme nav,
+.light-theme .bg-\[\#0F0F0F\],
+.light-theme .bg-nav-footer {
+  background-color: var(--bg-paper) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  box-shadow: none !important;
 }
 
-.light-theme .card-enter,
-.light-theme .slide-in {
-  box-shadow: 0 2px 12px rgba(47, 35, 39, 0.06) !important;
+.light-theme .nav-item {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
-/* Light Theme Hover States */
-.light-theme .hover\:bg-zinc-900:hover,
-.light-theme .hover\:bg-white\/10:hover {
-  background-color: #E1D4BF !important;
+.light-theme .nav-item.active,
+.light-theme .nav-item-active {
+  color: var(--text-primary) !important;
+  font-weight: 600;
 }
 
-/* Light Theme CTA Buttons */
+/* E. BUTTONS */
+.light-theme button,
+.light-theme .btn {
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
 .light-theme .bg-indigo-600,
 .light-theme .bg-blue-600,
-.light-theme .bg-emerald-600 {
-  background-color: #FBB093 !important;
-  color: #2F2327 !important;
+.light-theme .bg-emerald-600,
+.light-theme .cta-button {
+  background-color: var(--primary-accent) !important;
+  color: var(--text-primary) !important;
 }
 
 .light-theme .bg-indigo-600:hover,
 .light-theme .bg-blue-600:hover,
 .light-theme .bg-emerald-600:hover {
-  background-color: #FBB093 !important;
+  background-color: var(--primary-hover) !important;
   opacity: 0.9;
 }
 
-/* Light Theme Navigation */
-.light-theme .bg-\[\#0F0F0F\],
-.light-theme .bg-nav-footer {
-  background-color: #FDFDFC !important;
-  border-top: 1px solid #B49F8D !important;
-}
-
-/* Light Theme Input Fields */
+/* F. INPUTS */
 .light-theme input,
 .light-theme textarea,
-.light-theme select {
-  background-color: #FDFDFC !important;
-  color: #2F2327 !important;
-  border-color: #B49F8D !important;
+.light-theme select,
+.light-theme .search-bar {
+  background-color: var(--bg-paper) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+  border-radius: var(--radius-input) !important;
 }
 
 .light-theme input::placeholder,
 .light-theme textarea::placeholder {
-  color: #60574D !important;
+  color: var(--text-tertiary) !important;
 }
 
-/* Light Theme Progress Bars */
-.light-theme .bg-emerald-500 {
-  background-color: #8EDB9F !important;
+/* G. PROGRESS BARS */
+.light-theme .bg-emerald-500,
+.light-theme .progress-completed {
+  background-color: var(--success-green) !important;
 }
 
 .light-theme .bg-zinc-800,
-.light-theme .bg-white\/10 {
-  background-color: #EAEAEA !important;
+.light-theme .bg-white\/10,
+.light-theme .progress-track {
+  background-color: var(--track-gray) !important;
 }
 
-/* Light Theme Verified Badge */
+/* H. SEMANTIC COLORS */
 .light-theme .text-blue-500,
-.light-theme .text-\[\#1D9BF0\] {
-  color: #1D9BF0 !important;
+.light-theme .text-\[\#1D9BF0\],
+.light-theme .verified-badge {
+  color: var(--verified-blue) !important;
 }
 
-/* Light Theme Ratings */
 .light-theme .text-yellow-500,
 .light-theme .text-\[\#FFEFD5\],
-.light-theme .text-amber-500 {
-  color: #E6A500 !important;
+.light-theme .text-amber-500,
+.light-theme .rating-stars {
+  color: var(--rating-gold) !important;
 }
 
-/* Light Theme Skeleton Loading */
-.light-theme .animate-pulse > div {
-  background-color: #E1D4BF !important;
+/* I. SKELETON LOADING */
+.light-theme .animate-pulse,
+.light-theme .skeleton {
+  background-color: var(--bg-hover) !important;
+}
+
+/* J. HOVER STATES */
+.light-theme .hover\:bg-zinc-900:hover,
+.light-theme .hover\:bg-white\/10:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* K. MODALS / OVERLAYS */
+.light-theme .modal,
+.light-theme .dialog,
+.light-theme .sheet {
+  background-color: var(--bg-paper) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-radius: var(--radius-card) !important;
 }
 
 @keyframes progressSlide {
