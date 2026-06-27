@@ -6,6 +6,7 @@ interface ThemeContextType {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
+  showThemeToast: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -24,6 +25,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
+  const [showThemeToast, setShowThemeToast] = useState(false);
 
   useEffect(() => {
     // Apply theme class to document root
@@ -38,11 +40,17 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, [themeMode]);
 
   const toggleTheme = () => {
-    setThemeMode(prev => prev === 'dark' ? 'light' : 'dark');
+    setThemeMode(prev => {
+      const newMode = prev === 'dark' ? 'light' : 'dark';
+      // Trigger toast animation
+      setShowThemeToast(true);
+      setTimeout(() => setShowThemeToast(false), 2000);
+      return newMode;
+    });
   };
 
   return (
-    <ThemeContext.Provider value={{ themeMode, setThemeMode, toggleTheme }}>
+    <ThemeContext.Provider value={{ themeMode, setThemeMode, toggleTheme, showThemeToast }}>
       {children}
     </ThemeContext.Provider>
   );

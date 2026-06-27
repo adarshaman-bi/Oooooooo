@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SearchProvider, useSearch } from './context/SearchContext';
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SearchView from './components/SearchView';
@@ -557,6 +558,7 @@ const CustomCheckIcon = ({ size = 18, className = "" }) => (
 function AppContent() {
   const { user, firebaseUser, isGuest, enableGuestMode, loading, setExamPreference, updatePreferences } = useAuth();
   const { activeLecture, setActiveLecture } = usePlayer();
+  const { themeMode, toggleTheme, showThemeToast } = useTheme();
 
   // Strip OAuth error parameters from the address bar immediately upon successful initialization
   useEffect(() => {
@@ -1810,7 +1812,25 @@ function AppContent() {
         searchSuggestions={searchSuggestions}
         currentExamType={examFilter}
         onVoiceSearchClick={startSpeechRecognition}
+        themeMode={themeMode}
+        onToggleTheme={toggleTheme}
       />
+
+      {/* Theme Toast Notification */}
+      <AnimatePresence>
+        {showThemeToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[9999] pointer-events-none"
+          >
+            <div className="bg-[#1A1A1A] text-white px-6 py-3 rounded-full shadow-2xl border border-[#2A2A2A] flex items-center gap-2">
+              <span className="text-sm font-medium">Theme Updated</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modern Slide-Down Unified Multi-Filter Panel like YouTube but tailored to tabs */}
       <AnimatePresence>
@@ -2376,12 +2396,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SearchProvider>
-        <PlayerProvider>
-          <AppContent />
-        </PlayerProvider>
-      </SearchProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <SearchProvider>
+          <PlayerProvider>
+            <AppContent />
+          </PlayerProvider>
+        </SearchProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
