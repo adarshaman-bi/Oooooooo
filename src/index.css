@@ -504,4 +504,243 @@ body, html {
   transform: scale(1.02);
 }
 
+/* ============================================
+   LIGHT THEME: "APPLE EDITORIAL WHITE" V2
+   Philosophy: 90% White, 8% Cream (BG only), 2% Accent
+   ============================================ */
+
+.light-theme {
+  /* 1. CORE PALETTE - STRICT DISTRIBUTION */
+  --bg-default: #FDF0D2;       /* Cream: Only page background, barely visible */
+  --bg-paper: #FDFDFC;         /* Soft White: Cards, Inputs, Nav (90% of UI) */
+  --bg-hover: #F5F5F4;         /* Neutral Gray: Subtle hover states */
+  
+  --text-primary: #2F2327;     /* Deep Plum: Headlines */
+  --text-secondary: #60574D;   /* Medium Brown: Body text */
+  --text-tertiary: #9C9288;    /* Light Taupe: Placeholders */
+  
+  --border-subtle: #EAE8E6;    /* Very light border for definition */
+  --divider: #B49F8D;          /* Stronger divider for sections */
+  
+  --primary-accent: #FBB093;   /* Soft Peach: CTAs, Active States */
+  --primary-hover: #E69A7F;    /* Darker Peach: Button Hover */
+  
+  --verified-blue: #1D9BF0;    /* Twitter Blue: Verified Badges */
+  --rating-gold: #E6A500;      /* Turmeric Gold: Stars ONLY */
+  
+  --success-green: #8EDB9F;    /* Progress Complete */
+  --track-gray: #EAEAEA;       /* Progress Track */
+  
+  --overlay-dark: rgba(12, 15, 19, 0.6); /* Modal Backdrop */
+
+  /* 2. TYPOGRAPHY & SPACING */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-card: 24px;         /* Large, premium radius */
+  --radius-input: 16px;        /* Soft inputs */
+  --radius-btn: 12px;          /* Friendly buttons */
+  
+  /* 3. APPLE-STYLE SHADOWS (Soft, Diffused, No Hard Edges) */
+  --shadow-xs: 0 1px 2px rgba(47, 35, 39, 0.04);
+  --shadow-sm: 0 2px 8px rgba(47, 35, 39, 0.06);
+  --shadow-md: 0 4px 16px rgba(47, 35, 39, 0.08); /* Standard Card */
+  --shadow-lg: 0 12px 32px rgba(47, 35, 39, 0.12); /* Floating Modal */
+  --shadow-float: 0 8px 24px rgba(47, 35, 39, 0.1); /* Hover Lift */
+  
+  /* 4. COMPONENT OVERRIDES (Global) */
+  background-color: var(--bg-default);
+  color: var(--text-primary);
+  
+  /* Force all major containers to be WHITE, not Cream */
+  --card-bg: var(--bg-paper);
+  --input-bg: var(--bg-paper);
+  --nav-bg: var(--bg-paper);
+  --modal-bg: var(--bg-paper);
+}
+
+/* A. CARDS: The Hero Element - Pure White Floating */
+.light-theme .card,
+.light-theme .teacher-card,
+.light-theme .course-card,
+.light-theme .video-card,
+.light-theme .post-card,
+.light-theme .playcard {
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-radius: var(--radius-card) !important;
+  padding: 24px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.light-theme .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-float) !important;
+}
+
+/* B. NAVIGATION: Clean, White, Minimal */
+.light-theme .footer-nav,
+.light-theme .header,
+.light-theme nav {
+  background-color: var(--bg-paper) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px);
+}
+
+.light-theme .nav-item {
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.light-theme .nav-item.active {
+  color: var(--text-primary);
+}
+
+.light-theme .nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: var(--primary-accent);
+  border-radius: 50%;
+}
+
+/* C. INPUTS & SEARCH: Pill Shape, White */
+.light-theme input,
+.light-theme textarea,
+.light-theme .search-bar {
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+  border-radius: 999px;
+  padding: 12px 20px;
+  box-shadow: var(--shadow-xs) !important;
+}
+
+.light-theme input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.light-theme input:focus,
+.light-theme textarea:focus {
+  border-color: var(--primary-accent) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(251, 176, 147, 0.2) !important;
+}
+
+/* D. BUTTONS: Soft Peach Primary, Ghost Secondary */
+.light-theme .btn-primary,
+.light-theme button[type="submit"] {
+  background-color: var(--primary-accent) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-btn);
+  box-shadow: 0 2px 8px rgba(251, 176, 147, 0.4) !important;
+}
+
+.light-theme .btn-primary:hover {
+  background-color: var(--primary-hover) !important;
+  transform: translateY(-1px);
+}
+
+.light-theme .btn-secondary,
+.light-theme .btn-ghost {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+.light-theme .btn-ghost:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* E. BADGES & CHIPS: White Background */
+.light-theme .badge,
+.light-theme .chip {
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 99px;
+}
+
+.light-theme .chip.selected {
+  background-color: var(--primary-accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary-accent) !important;
+}
+
+/* F. VERIFIED BADGE: Instagram Blue */
+.light-theme .verified-badge {
+  color: var(--verified-blue);
+  background: none;
+}
+.light-theme .verified-badge svg {
+  fill: var(--verified-blue);
+}
+
+/* G. RATINGS: Turmeric Gold ONLY */
+.light-theme .rating-star,
+.light-theme .rating-stars {
+  color: var(--rating-gold);
+  fill: var(--rating-gold);
+}
+
+/* H. PROGRESS BARS */
+.light-theme .progress-track {
+  background-color: var(--track-gray);
+}
+.light-theme .progress-fill {
+  background-color: var(--success-green);
+}
+
+/* I. SKELETON LOADING: Warm Beige Shimmer */
+.light-theme .skeleton {
+  background: linear-gradient(90deg, #F5F0EB 0%, #FAF5F0 50%, #F5F0EB 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* J. MODALS & OVERLAYS */
+.light-theme .modal-content,
+.light-theme .dialog,
+.light-theme .auth-modal {
+  background-color: var(--bg-paper) !important;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg) !important;
+  border: none;
+}
+
+/* K. DIVIDERS */
+.light-theme hr,
+.light-theme .divider {
+  border-color: var(--border-subtle) !important;
+  opacity: 0.6;
+}
+
+/* L. SCROLLBAR (Subtle) */
+.light-theme ::-webkit-scrollbar {
+  width: 8px;
+}
+.light-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.light-theme ::-webkit-scrollbar-thumb {
+  background-color: #D1C7BE;
+  border-radius: 99px;
+  border: 2px solid var(--bg-paper);
+}
+
 
