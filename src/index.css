@@ -246,11 +246,138 @@ body, html {
   color: #FFFFFF !important;
 }
 
-/* Light Theme (Biovised Premium) */
+.dark-theme .bg-\[\.1\] {
+  background-color: #0E0E10 !important;
+}
+
+.dark-theme .bg-\[\.2\] {
+  background-color: #0D0D0C !important;
+}
+
+.dark-theme .border-zinc-900\/90 {
+  border-color: rgba(24, 24, 27, 0.9) !important;
+}
+
+/* Light Theme (Biovised Premium - Apple/Linear Aesthetic) */
 .light-theme body,
 .light-theme html {
   background-color: #FDF0D2 !important;
   color: #2F2327 !important;
+}
+
+/* Light Theme Card Styling - Soft White Floating Cards */
+.light-theme .bg-\[\.1\],
+.light-theme .bg-\[\#0E0E10\],
+.light-theme .bg-\[\#0D0D0C\],
+.light-theme .bg-zinc-900\/40,
+.light-theme .bg-zinc-900\/70,
+.light-theme .bg-\[\#1A1A1A\],
+.light-theme .bg-neutral-900,
+.light-theme .bg-black {
+  background-color: #FDFDFC !important;
+}
+
+/* Light Theme Text Colors */
+.light-theme .text-white,
+.light-theme .text-\#FFFFFF,
+.light-theme .text-\#FFFDF1 {
+  color: #2F2327 !important;
+}
+
+.light-theme .text-zinc-400,
+.light-theme .text-gray-400,
+.light-theme .text-muted {
+  color: #60574D !important;
+}
+
+/* Light Theme Borders */
+.light-theme .border-zinc-900\/90,
+.light-theme .border-\[\#1A1A1A\],
+.light-theme .border-neutral-800,
+.light-theme .border-white\/10,
+.light-theme .border-white\/20 {
+  border-color: #B49F8D !important;
+}
+
+/* Light Theme Shadows - Apple-style soft depth */
+.light-theme .shadow-xl,
+.light-theme .shadow-2xl {
+  box-shadow: 0 4px 24px rgba(47, 35, 39, 0.08) !important;
+}
+
+.light-theme .card-enter,
+.light-theme .slide-in {
+  box-shadow: 0 2px 12px rgba(47, 35, 39, 0.06) !important;
+}
+
+/* Light Theme Hover States */
+.light-theme .hover\:bg-zinc-900:hover,
+.light-theme .hover\:bg-white\/10:hover {
+  background-color: #E1D4BF !important;
+}
+
+/* Light Theme CTA Buttons */
+.light-theme .bg-indigo-600,
+.light-theme .bg-blue-600,
+.light-theme .bg-emerald-600 {
+  background-color: #FBB093 !important;
+  color: #2F2327 !important;
+}
+
+.light-theme .bg-indigo-600:hover,
+.light-theme .bg-blue-600:hover,
+.light-theme .bg-emerald-600:hover {
+  background-color: #FBB093 !important;
+  opacity: 0.9;
+}
+
+/* Light Theme Navigation */
+.light-theme .bg-\[\#0F0F0F\],
+.light-theme .bg-nav-footer {
+  background-color: #FDFDFC !important;
+  border-top: 1px solid #B49F8D !important;
+}
+
+/* Light Theme Input Fields */
+.light-theme input,
+.light-theme textarea,
+.light-theme select {
+  background-color: #FDFDFC !important;
+  color: #2F2327 !important;
+  border-color: #B49F8D !important;
+}
+
+.light-theme input::placeholder,
+.light-theme textarea::placeholder {
+  color: #60574D !important;
+}
+
+/* Light Theme Progress Bars */
+.light-theme .bg-emerald-500 {
+  background-color: #8EDB9F !important;
+}
+
+.light-theme .bg-zinc-800,
+.light-theme .bg-white\/10 {
+  background-color: #EAEAEA !important;
+}
+
+/* Light Theme Verified Badge */
+.light-theme .text-blue-500,
+.light-theme .text-\[\#1D9BF0\] {
+  color: #1D9BF0 !important;
+}
+
+/* Light Theme Ratings */
+.light-theme .text-yellow-500,
+.light-theme .text-\[\#FFEFD5\],
+.light-theme .text-amber-500 {
+  color: #E6A500 !important;
+}
+
+/* Light Theme Skeleton Loading */
+.light-theme .animate-pulse > div {
+  background-color: #E1D4BF !important;
 }
 
 @keyframes progressSlide {
