@@ -28,15 +28,30 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [showThemeToast, setShowThemeToast] = useState(false);
 
   useEffect(() => {
-    // Apply theme class to document root
-    const root = document.documentElement;
-    if (themeMode === 'light') {
-      root.classList.add('light-theme');
-      root.classList.remove('dark-theme');
-    } else {
-      root.classList.add('dark-theme');
-      root.classList.remove('light-theme');
+    // Initialize from localStorage on mount
+    const saved = localStorage.getItem('biovised-theme') as ThemeMode | null;
+    if (saved) {
+      setThemeMode(saved);
     }
+  }, []);
+
+  useEffect(() => {
+    // Apply theme class AND data attribute to document root for maximum compatibility
+    const root = document.documentElement;
+    
+    // Clear both classes first
+    root.classList.remove('light-theme', 'dark-theme', 'light', 'dark');
+    
+    if (themeMode === 'light') {
+      root.classList.add('light-theme', 'light');
+      root.setAttribute('data-theme', 'light');
+    } else {
+      root.classList.add('dark-theme', 'dark');
+      root.setAttribute('data-theme', 'dark');
+    }
+    
+    // Persist to localStorage
+    localStorage.setItem('biovised-theme', themeMode);
   }, [themeMode]);
 
   const toggleTheme = () => {
