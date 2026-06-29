@@ -592,6 +592,22 @@ body, html {
   filter: brightness(1.1);
 }
 
+/* Light theme Follow Button styling overrides (Peach instead of blue) */
+.light-theme .follow-btn:not(.following) {
+  background-color: var(--primary-accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary-accent) !important;
+}
+.light-theme .follow-btn:not(.following):hover {
+  background-color: var(--primary-hover) !important;
+  box-shadow: 0 0 28px 8px rgba(251, 176, 147, 0.4) !important;
+}
+.light-theme .follow-btn.following {
+  background-color: var(--bg-paper) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
 .outline-btn {
   transition: all 0.25s ease;
 }

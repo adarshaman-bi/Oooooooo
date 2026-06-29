@@ -24,16 +24,15 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
-  const [showThemeToast, setShowThemeToast] = useState(false);
-
-  useEffect(() => {
-    // Initialize from localStorage on mount
-    const saved = localStorage.getItem('biovised-theme') as ThemeMode | null;
-    if (saved) {
-      setThemeMode(saved);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    try {
+      const saved = localStorage.getItem('biovised-theme') as ThemeMode | null;
+      return saved || 'dark';
+    } catch (e) {
+      return 'dark';
     }
-  }, []);
+  });
+  const [showThemeToast, setShowThemeToast] = useState(false);
 
   useEffect(() => {
     // Apply theme class AND data attribute to document root for maximum compatibility
