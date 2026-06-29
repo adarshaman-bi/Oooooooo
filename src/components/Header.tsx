@@ -215,7 +215,7 @@ export default function Header({
             {/* Theme Toggle Button */}
             <button
               onClick={onToggleTheme}
-              className="w-10 h-10 flex items-center justify-center rounded-full border-none bg-[#0D0D0C] text-zinc-400 hover:text-[#FFFFFF] transition-all cursor-pointer"
+              className="theme-icon-btn w-10 h-10 flex items-center justify-center rounded-full border-none bg-[#0D0D0C] text-zinc-400 hover:text-[#FFFFFF] transition-all cursor-pointer"
               title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`}
             >
               {themeMode === 'dark' ? (
@@ -257,7 +257,7 @@ export default function Header({
             {/* Theme Toggle Button (Guest) */}
             <button
               onClick={onToggleTheme}
-              className="w-10 h-10 flex items-center justify-center rounded-full border-none bg-[#0D0D0C] text-zinc-400 hover:text-[#FFFFFF] transition-all cursor-pointer"
+              className="theme-icon-btn w-10 h-10 flex items-center justify-center rounded-full border-none bg-[#0D0D0C] text-zinc-400 hover:text-[#FFFFFF] transition-all cursor-pointer"
               title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`}
             >
               {themeMode === 'dark' ? (

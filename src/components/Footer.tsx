@@ -1,5 +1,4 @@
 import { Home, Users, PlaySquare, ClipboardCheck, Layers, Video, Building2 } from 'lucide-react';
-import { motion } from 'motion/react';
 
 interface FooterProps {
   currentView: string;
@@ -38,26 +37,18 @@ export default function Footer({
               <div 
                 className={`flex flex-col items-center justify-center transition-all duration-300 w-full max-w-[50px] xs:max-w-[76px] sm:max-w-[96px] min-w-0 ${
                   isActive 
-                    ? 'bg-zinc-800/50 rounded-xl px-3 py-2 text-white font-bold' 
-                    : 'text-zinc-400 hover:text-white opacity-65 hover:opacity-100'
+                    ? 'text-white' 
+                    : 'text-zinc-500 hover:text-white opacity-65 hover:opacity-100'
                 }`}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <Icon className="w-[18px] h-[18px] xs:w-[21px] xs:h-[21px] sm:w-[24px] sm:h-[24px] mb-0.5 transition-colors" strokeWidth={1.8} />
-                <span className="text-[8px] xs:text-[10px] sm:text-[11px] tracking-tight text-center leading-normal truncate w-full px-0.5">
+                <span className={`text-[8px] xs:text-[10px] sm:text-[11px] tracking-tight text-center leading-normal truncate w-full px-0.5 ${
+                  isActive ? 'font-semibold' : 'font-normal'
+                }`}>
                   {t.label}
                 </span>
               </div>
-              
-              {isActive ? (
-                <motion.div 
-                  layoutId="navMinimalistWhiteDot"
-                  className="w-1.5 h-1.5 bg-white rounded-full mt-1 mx-auto shadow-[0_0_8px_rgba(255,255,255,0.8)]" 
-                  transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                />
-              ) : (
-                <div className="w-1.5 h-1.5 bg-transparent mt-1" />
-              )}
             </button>
           );
         })}
@@ -65,3 +56,4 @@ export default function Footer({
     </nav>
   );
 }
+

@@ -25,6 +25,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 import NotificationsDashboard from './components/NotificationsDashboard';
 import SearchSpecsModal from './components/SearchSpecsModal';
 import AuthCallback from './pages/AuthCallback';
+import MicModal from './components/MicModal';
 import {
   personalizeLectures,
   personalizePlaylists,
@@ -981,47 +982,10 @@ function AppContent() {
   const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [micModalOpen, setMicModalOpen] = useState<boolean>(false);
 
   const startSpeechRecognition = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser. Please try Chrome or Safari.");
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-        setSpeechError(null);
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          setSearchQuery(transcript);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
-        setSpeechError(event.error);
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
-    } catch (e) {
-      console.error(e);
-      setIsListening(false);
-    }
+    setMicModalOpen(true);
   };
 
   // Esc keyboard key listener
@@ -1831,6 +1795,19 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Voice Search Bottom Sheet */}
+      <MicModal
+        isOpen={micModalOpen}
+        onClose={() => setMicModalOpen(false)}
+        onTranscript={(text) => {
+          setSearchQuery(text);
+          setMicModalOpen(false);
+          if (currentView !== 'search') {
+            setCurrentView('explore');
+          }
+        }}
+      />
 
       {/* Modern Slide-Down Unified Multi-Filter Panel like YouTube but tailored to tabs */}
       <AnimatePresence>
