@@ -475,8 +475,9 @@ const TeacherCard = ({ t, dbTeacher, videos, followedIds, handleFollowToggle, se
                 <p className="text-[8px] text-[#A1A1AA]">({reviewStats.count} review{reviewStats.count === 1 ? '' : 's'})</p>
               </>
             ) : loadingReviews ? (
-              <div className="flex flex-col items-center justify-center h-24 font-mono text-[8px] text-[#A1A1AA]">
-                Analyzing...
+              <div className="flex flex-col items-center justify-center gap-2 h-24 w-full">
+                <div className="w-12 h-12 rounded-full bg-zinc-800 animate-pulse skeleton" />
+                <div className="w-16 h-2 rounded bg-zinc-800 animate-pulse skeleton" />
               </div>
             ) : (
               <>
@@ -555,6 +556,17 @@ const CustomCheckIcon = ({ size = 18, className = "" }) => (
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 function AppContent() {
   const { user, firebaseUser, isGuest, enableGuestMode, loading, setExamPreference, updatePreferences } = useAuth();
@@ -963,6 +975,8 @@ function AppContent() {
 
   // Dynamic search / filters state from Global Context-Aware Search Architecture
   const { searchQuery, setSearchQuery, activeCategory, setActiveCategory } = useSearch();
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const searchCache = useRef<Map<string, any>>(new Map());
 
   // Sync active category inside the context whenever page view or class category tab changes
   useEffect(() => {
@@ -1035,6 +1049,19 @@ function AppContent() {
     
     setSearchQuery(trimmed);
     setHasExecutedSearch(true);
+    
+    const cacheKey = `${trimmed}_${examFilter}_${subjectFilter}_${contentTypeFilter}_${activeExploreTab || 'home'}`;
+    if (searchCache.current.has(cacheKey)) {
+      console.log(`[Cache Hit] Serving search results from client cache for: ${trimmed}`);
+      const cachedData = searchCache.current.get(cacheKey);
+      setServerSearchResults(cachedData.results);
+      setSearchedExternal(cachedData.searchedExternal);
+      setExternalCount(cachedData.externalCount);
+      setIsSearchingServer(false);
+      setIsLabourIllusionActive(false);
+      return;
+    }
+
     setIsSearchingServer(true);
     setIsLabourIllusionActive(true);
     setLabourProgress(10);
@@ -1076,6 +1103,12 @@ function AppContent() {
           finalResults = data.results || [];
           extSearched = data.searchedExternal || false;
           extCount = data.externalCount || 0;
+          
+          searchCache.current.set(cacheKey, {
+            results: finalResults,
+            searchedExternal: extSearched,
+            externalCount: extCount
+          });
         }
       })
       .catch(err => console.error('[Global Search Sync Failed]:', err))
@@ -1086,7 +1119,7 @@ function AppContent() {
 
   // PHASE 5: Server-side search API integration - suggestions only
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    if (debouncedSearchQuery.trim() === '') {
       setServerSearchResults([]);
       setSearchSuggestions([]);
       setSearchedExternal(false);
@@ -1099,20 +1132,15 @@ function AppContent() {
     // Reset results flag if user edits/continues typing
     setHasExecutedSearch(false);
 
-    // Fetch Prefix-Trie / Autocomplete suggestions from Live Real indexed titles (debounced by 300ms)
-    const delayDebounce = setTimeout(() => {
-      fetch(`/api/search/suggestions?q=${encodeURIComponent(searchQuery)}&examType=${examFilter}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.suggestions) {
-            setSearchSuggestions(data.suggestions);
-          }
-        })
-        .catch(err => console.warn('Suggestions fetch failed:', err));
-    }, 300);
-
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery, examFilter]);
+    fetch(`/api/search/suggestions?q=${encodeURIComponent(debouncedSearchQuery)}&examType=${examFilter}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.suggestions) {
+          setSearchSuggestions(data.suggestions);
+        }
+      })
+      .catch(err => console.warn('Suggestions fetch failed:', err));
+  }, [debouncedSearchQuery, examFilter]);
 
   // Trigger splash screen timer & force redirect on finish when auth loading is resolved
   useEffect(() => {

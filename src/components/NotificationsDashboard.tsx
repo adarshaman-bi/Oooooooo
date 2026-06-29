@@ -57,7 +57,11 @@ export default function NotificationsDashboard({
   }
 
   if (notifications.length === 0) {
-    return null;
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 w-full select-none">
+        <p className="text-sm font-sans text-zinc-550 dark:text-zinc-400 font-medium">Nothing new here..</p>
+      </div>
+    );
   }
 
   const unreadCount = notifications.filter(n => !n.read).length;

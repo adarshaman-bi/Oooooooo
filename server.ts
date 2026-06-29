@@ -2377,6 +2377,92 @@ const searchIndexer = new InMemorySearchIndex();
 let lastYTSearchTime = 0;
 const YT_SEARCH_COOLDOWN_MS = 2000;
 
+const youtubeSearchCache = new Map<string, any[]>();
+
+function enforceEducationalGuardrail(query: string): { allowed: boolean; query: string } {
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    return { allowed: false, query };
+  }
+
+  // Explicitly blocked non-educational keywords
+  const blockedKeywords = [
+    'movie', 'song', 'music', 'gossip', 'comedy', 'vlog', 'entertainment',
+    'politics', 'sports', 'game', 'gaming', 'funny', 'drama', 'prank',
+    'dance', 'news', 'trailer', 'teaser', 'cartoon', 'anime', 'rap',
+    'singer', 'movie review', 'reaction video', 'tv show', 'wwe'
+  ];
+
+  const hasBlocked = blockedKeywords.some(kw => q.includes(kw));
+  if (hasBlocked) {
+    return { allowed: false, query };
+  }
+
+  // Educational keywords
+  const eduKeywords = [
+    'physics', 'chemistry', 'biology', 'math', 'maths', 'mathematics',
+    'neet', 'jee', 'iit', 'ncert', 'organic', 'inorganic', 'calculus',
+    'mechanics', 'class 11', 'class 12', 'lecture', 'revision',
+    'crash course', 'pyq', 'hc verma', 'solution', 'allen', 'aakash',
+    'study', 'education', 'exam', 'lectures', 'coaching', 'preparation'
+  ];
+
+  const hasEdu = eduKeywords.some(kw => q.includes(kw));
+  if (!hasEdu) {
+    // Append constraints to keep it educational
+    return { allowed: true, query: `${query} JEE NEET study preparation lecture` };
+  }
+
+  return { allowed: true, query };
+}
+
+async function searchYouTubeVideos(query: string): Promise<any[]> {
+  if (youtubeSearchCache.has(query)) {
+    console.log(`[YouTube Search Cache Hit] Serving from memory cache for: ${query}`);
+    return youtubeSearchCache.get(query) || [];
+  }
+
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey || apiKey === 'YOUR_YOUTUBE_DATA_API_V3_KEY' || apiKey.startsWith('MY_')) {
+    console.warn('[YouTube Search] API key missing or placeholder. Skipping external API call.');
+    return [];
+  }
+
+  try {
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&key=${apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.warn(`[YouTube Search] API responded with status ${res.status}`);
+      return [];
+    }
+    const data = await res.json();
+    const items = data.items || [];
+    const results = items.map((item: any) => ({
+      id: item.id.videoId,
+      type: 'lecture',
+      title: item.snippet.title,
+      description: item.snippet.description || '',
+      videoUrl: `https://www.youtube.com/embed/${item.id.videoId}`,
+      thumbnailUrl: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url || '',
+      publishDate: item.snippet.publishedAt,
+      subject: 'Education',
+      examType: 'NEET/JEE',
+      contentType: 'lecture',
+      teacherName: item.snippet.channelTitle || 'External Educator',
+      instituteName: 'YouTube Mapped Node',
+      source: 'youtube',
+      verified: false,
+      verificationStatus: 'pending'
+    }));
+
+    youtubeSearchCache.set(query, results);
+    return results;
+  } catch (err: any) {
+    console.error('[YouTube Search] Failed to query API:', err.message);
+    return [];
+  }
+}
+
 // Auto-suggest Endpoint
 app.get('/api/search/suggestions', (req, res) => {
   const { q, examType } = req.query;
@@ -2416,18 +2502,20 @@ app.get('/api/search/global', async (req, res) => {
 
     // Check if verified results are insufficient (e.g. less than 3 lectures/matching values)
     const lectureHits = finalResults.filter(h => h.type === 'lecture');
-    if (lectureHits.length < 3) {
-      console.log(`[Search Sequence] Verified lecture hits (${lectureHits.length}) are insufficient. Advancing to Step 2.`);
+    if (lectureHits.length < 3 && queryStr) {
+      console.log(`[Search Sequence] Verified lecture hits (${lectureHits.length}) are insufficient. Querying YouTube API with guardrails.`);
       
-      // Step 2: Append cached unverified external records
-      const cachedPendingLectures = cachedPendingMatches.filter(h => h.type === 'lecture');
-      finalResults = [...finalResults, ...cachedPendingLectures];
-
-      const currentLectureHits = finalResults.filter(h => h.type === 'lecture');
-      
-      // Section 2 constraints: NO user-facing YouTube API search. Zero.
-      // All 10,000+ users search YOUR Firestore database — not YouTube API.
-      console.log(`[Search Sequence] Done. Abiding by strict quota design. Direct user-facing YouTube queries are disabled.`);
+      const guardrail = enforceEducationalGuardrail(queryStr);
+      if (!guardrail.allowed) {
+        console.log(`[Search Guardrail] Intercepted non-educational search: "${queryStr}"`);
+      } else {
+        const externalVideos = await searchYouTubeVideos(guardrail.query);
+        if (externalVideos.length > 0) {
+          searchedExternal = true;
+          externalCount = externalVideos.length;
+          finalResults = [...finalResults, ...externalVideos];
+        }
+      }
     }
 
     // Step 5: Sort final results. If finalResults is empty, it returns empty array representing valid "no results" state.

@@ -51,7 +51,7 @@ export default function Header({
 }: HeaderProps) {
   const { user, isGuest } = useAuth();
   const [isFocused, setIsFocused] = useState(false);
-  const hasUnread = notifications.some(n => !n.read);
+  const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
 
   const shouldRedirectToSearch = currentView !== 'explore' || !activeExploreTab || activeExploreTab === 'home';
 
@@ -190,8 +190,10 @@ export default function Header({
             >
               <div className="relative">
                 <Bell className="w-5 h-5" strokeWidth={1.8} />
-                {hasUnread && (
-                  <span className="bg-red-500 absolute w-2.5 h-2.5 rounded-full -top-0.5 -right-0.5" />
+                {unreadCount > 0 && (
+                  <span className="bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 absolute -top-1.5 -right-1.5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
                 )}
               </div>
             </button>
@@ -241,7 +243,11 @@ export default function Header({
             >
               <div className="relative">
                 <Bell className="w-5 h-5" strokeWidth={1.8} />
-                <span className="bg-red-500 absolute w-2.5 h-2.5 rounded-full -top-0.5 -right-0.5" />
+                {unreadCount > 0 && (
+                  <span className="bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 absolute -top-1.5 -right-1.5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </div>
             </button>
 
