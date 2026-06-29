@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { TeacherProfile } from '../types';
+import TeacherProfileSkeleton from './skeletons/TeacherProfileSkeleton';
 import teachersDiscography from '../config/teachersDiscography.json';
 import { 
   MapPin, 
@@ -550,11 +551,7 @@ export default function TeacherProfileDetail({
   };
 
   if (loadingTeacher) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center font-mono text-xs text-zinc-500">
-        Loading educator workspace profile...
-      </div>
-    );
+    return <TeacherProfileSkeleton />;
   }
 
   if (!dbTeacher) {
