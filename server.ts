@@ -5,8 +5,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { createClient } from '@supabase/supabase-js';
-import youtubeRouter from './src/routes/youtube.ts';
-import lectureRouter from './src/routes/lectureRoutes.ts';
+import youtubeRouter from './src/routes/youtube.js';
+import lectureRouter from './src/routes/lectureRoutes.js';
 
 dotenv.config();
 
