@@ -1,5 +1,5 @@
 import express from 'express';
-import { getLiveTeacherLectures } from '../services/youtubeService';
+import { getLiveTeacherLectures } from '../services/youtubeService.ts';
 
 const router = express.Router();
 

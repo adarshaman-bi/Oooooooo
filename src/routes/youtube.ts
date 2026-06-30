@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
-import { getLiveTeacherLectures } from '../services/youtubeService';
+import { getLiveTeacherLectures } from '../services/youtubeService.ts';
 
 dotenv.config();
 
