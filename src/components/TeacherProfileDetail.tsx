@@ -348,7 +348,7 @@ export default function TeacherProfileDetail({
         setLoadingYtChannel(true);
       }
       try {
-        const res = await fetch(`http://localhost:3001/api/youtube/channel/${ytChannelId}`);
+        const res = await fetch(`/api/youtube/channel/${ytChannelId}`);
         if (!res.ok) throw new Error('Failed to fetch channel from proxy');
         const payload = await res.json();
         if (active && payload.status === 'ok') {
@@ -395,7 +395,7 @@ export default function TeacherProfileDetail({
         setLoadingYtLectures(true);
       }
       try {
-        const res = await fetch(`http://localhost:3001/api/youtube/lectures/${ytChannelId}`);
+        const res = await fetch(`/api/youtube/lectures/${ytChannelId}`);
         if (!res.ok) throw new Error('Failed to fetch uploaded videos from proxy');
         const payload = await res.json();
         if (active && payload.status === 'ok') {

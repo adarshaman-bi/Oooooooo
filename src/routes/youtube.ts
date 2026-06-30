@@ -413,6 +413,20 @@ router.get('/channel/:channelId', async (req, res) => {
       liveStream
     };
 
+    // Sync channel metadata to public.channels table
+    try {
+      await supabaseAdmin.from('channels').upsert({
+        id: channelId,
+        name: title,
+        avatar: logo,
+        subscribers: String(subscriberCount),
+        playlists_count: playlists.length,
+        is_active: true,
+      } as any, { onConflict: 'id' });
+    } catch (syncErr: any) {
+      console.warn(`[SYNC] Failed to sync channel ${channelId} to DB:`, syncErr.message);
+    }
+
     // Cache for 5 minutes
     channelProfileCache[channelId] = {
       data: channelData,
@@ -437,14 +451,16 @@ router.get('/lectures/:playlistId', async (req, res) => {
 
   try {
     const lectures = await getLiveTeacherLectures(playlistId);
-    // Format to match old schema expectations
+    // Format to match old schema expectations + deep stats
     const formattedLectures = lectures.map(v => ({
       id: v.id,
       title: v.title,
       description: v.description,
       thumbnail: v.thumbnail,
       publishedAt: v.publishedAt,
-      videoUrl: `https://www.youtube.com/embed/${v.id}`
+      videoUrl: `https://www.youtube.com/embed/${v.id}`,
+      viewCount: v.viewCount || 0,
+      duration: v.duration || '',
     }));
     return res.json({ status: 'ok', data: formattedLectures });
   } catch (err: any) {

@@ -117,9 +117,7 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
       setErrorMsg(null);
 
       try {
-        const baseApiUrl = window.location.hostname === 'localhost'
-          ? 'http://localhost:3001/api/youtube'
-          : '/api/youtube';
+        const baseApiUrl = '/api/youtube';
 
         const profileRes = await axios.get(`${baseApiUrl}/channel/${activeChannelId}`);
         if (profileRes.data && profileRes.data.status === 'ok') {
@@ -146,9 +144,7 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
       setLectures([]);
 
       try {
-        const baseApiUrl = window.location.hostname === 'localhost'
-          ? 'http://localhost:3001/api/youtube'
-          : '/api/youtube';
+        const baseApiUrl = '/api/youtube';
 
         const lecturesRes = await axios.get(`${baseApiUrl}/lectures/${activeChannelId}`);
         if (lecturesRes.data && lecturesRes.data.status === 'ok') {
