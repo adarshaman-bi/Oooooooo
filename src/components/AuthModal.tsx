@@ -136,10 +136,18 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
     }
   };
 
+  const getURL = () => {
+    let url = typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : (import.meta as any).env?.VITE_REDIRECT_URL || 'https://ooooooooooo-pi.vercel.app';
+    url = url.endsWith('/') ? url : `${url}/`;
+    return `${url}auth/callback`;
+  };
+
   const handleGoogleSignIn = async () => {
     setError('');
     try {
-      const redirectUrl = (import.meta as any).env?.VITE_REDIRECT_URL || (import.meta as any).env?.VITE_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`;
+      const redirectUrl = getURL();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
