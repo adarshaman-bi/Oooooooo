@@ -101,7 +101,7 @@ export const LecturesGrid: React.FC<LecturesGridProps> = ({ playlistId }) => {
         Latest Live Video Lectures
       </h3>
       <div className="grid grid-cols-3 gap-0.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-5 p-0.5 sm:p-0">
-        {lectures.map((video) => (
+        {lectures.map((video, index) => (
           <div 
             key={video.id} 
             onClick={() => {
@@ -122,6 +122,10 @@ export const LecturesGrid: React.FC<LecturesGridProps> = ({ playlistId }) => {
                   <Play className="w-3 h-3 sm:w-4 sm:h-4 text-zinc-950 fill-current ml-0.5" />
                 </div>
               </div>
+              {/* Lecture Index Badge */}
+              <span className="absolute top-2 left-2 bg-emerald-600 text-[10px] text-white font-mono font-bold px-2 py-0.5 rounded shadow-lg uppercase tracking-wider">
+                Lecture #{index + 1}
+              </span>
               {/* Duration badge */}
               {video.duration && (
                 <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-[10px] text-white font-mono px-1.5 py-0.5 rounded flex items-center gap-1">
