@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, X, Search, Mic } from 'lucide-react';
+import { ArrowLeft, X, Search, Mic, Clock } from 'lucide-react';
 import { Lecture, Playlist, Batch } from '../types';
 import LectureCard from './LectureCard';
 import { BatchCard } from './BatchCard';
@@ -109,8 +109,8 @@ export default function SearchView({
         </button>
 
         {/* Pill Search Container with strict borderless properties */}
-        <div className="flex-grow relative flex items-center bg-[#0D0D0C] border border-[#1A1A1A] rounded-full px-4 border-none outline-none ring-0 focus-within:ring-0 shadow-none">
-          <Search className="w-4 h-4 text-zinc-500 mr-2 shrink-0" />
+        <div className="flex-grow relative flex items-center rounded-full bg-[#0D0D0C] border border-zinc-800 text-white px-5 py-2.5 focus-within:border-zinc-700 w-full">
+          <Search className="w-4 h-4 text-zinc-550 mr-3 shrink-0" />
           <input
             type="text"
             value={searchQuery}
@@ -121,13 +121,13 @@ export default function SearchView({
               }
             }}
             placeholder="Search playlists, lessons, tests, or teachers..."
-            className="w-full h-10 bg-transparent text-sm text-[#FFFFFF] placeholder-zinc-500 border-none outline-none ring-0 focus:ring-0 focus:border-none focus:outline-none focus-within:ring-0 pr-8"
+            className="w-full bg-transparent text-sm text-white placeholder-zinc-650 border-none outline-none ring-0 focus:ring-0 pr-8"
             autoFocus
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 text-zinc-500 hover:text-[#FFFFFF] transition-colors bg-transparent border-none cursor-pointer"
+              className="absolute right-5 text-zinc-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center"
             >
               <X className="w-4 h-4" />
             </button>
@@ -136,24 +136,25 @@ export default function SearchView({
 
         <button
           onClick={startSpeechRecognition}
-          className="w-10 h-10 rounded-full bg-[#0D0D0C] hover:bg-zinc-900 border border-[#1A1A1A] text-zinc-400 hover:text-[#FFFFFF] transition-all flex items-center justify-center cursor-pointer shrink-0"
+          className="w-10 h-10 rounded-full bg-[#0D0D0C] hover:bg-zinc-900 border border-zinc-800 text-zinc-450 hover:text-white transition-all flex items-center justify-center cursor-pointer shrink-0"
           title="Search with voice"
         >
           <Mic className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="w-full max-w-2xl mx-auto flex flex-col items-center px-4">
+      <div className="w-full max-w-2xl mx-auto flex flex-col items-center px-4 relative">
         {/* Autocomplete Suggestions Under Input Box (only when search has not been executed yet) */}
         {!hasExecutedSearch && searchQuery.trim() !== '' && searchSuggestions.length > 0 && (
-          <div className="w-full bg-[#0D0D0C] border border-[#1A1A1A] rounded-2xl p-2 mt-4 flex flex-col divide-y divide-[#1A1A1A] shadow-2xl z-20">
+          <div className="w-full bg-[#0D0D0C] border border-zinc-800 rounded-2xl shadow-2xl mt-2 overflow-hidden z-50 flex flex-col divide-y divide-zinc-900">
             {searchSuggestions.map((suggestion, idx) => (
               <button
                 key={idx}
                 onClick={() => executeSearch(suggestion)}
-                className="w-full text-left py-3.5 px-4 text-sm text-zinc-400 hover:text-[#FFFFFF] hover:bg-white/[0.03] transition-colors rounded-xl font-sans cursor-pointer outline-none border-0 bg-transparent"
+                className="w-full text-left py-3.5 px-5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-900/60 cursor-pointer transition-all flex items-center gap-3 border-none bg-transparent outline-none"
               >
-                {suggestion}
+                <Clock className="w-4 h-4 text-zinc-550 shrink-0" />
+                <span>{suggestion}</span>
               </button>
             ))}
           </div>

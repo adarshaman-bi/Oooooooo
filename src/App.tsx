@@ -1685,6 +1685,11 @@ function AppContent() {
     );
   }
 
+  // Handle OAuth callback rendering route
+  if (window.location.pathname === '/auth/callback') {
+    return <AuthCallback />;
+  }
+
   // Gate check: If user is not authenticated and has not chosen guest mode yet, force them to land on the login page
   if (!loading && !firebaseUser && !guestBypassed) {
     return (

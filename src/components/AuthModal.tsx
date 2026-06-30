@@ -139,10 +139,11 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
   const handleGoogleSignIn = async () => {
     setError('');
     try {
+      const redirectUrl = (import.meta as any).env?.VITE_REDIRECT_URL || (import.meta as any).env?.VITE_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: redirectUrl
         }
       });
       if (error) throw error;
@@ -164,16 +165,16 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
       onClick={handleBackdropClick}
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 text-left overflow-y-auto ${
         isLandingPage 
-          ? 'bg-gradient-to-tr from-sky-100 via-sky-50 to-white' 
-          : 'bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200'
+          ? 'bg-[#000000]' 
+          : 'bg-black/80 backdrop-blur-sm animate-in fade-in duration-200'
       }`}
     >
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-10 relative overflow-hidden text-slate-800 font-sans">
+      <div className="w-full max-w-md bg-[#000000] rounded-2xl border border-zinc-850 shadow-2xl p-8 md:p-10 relative overflow-hidden text-white font-sans">
         
         {!isLandingPage && (
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors"
+            className="absolute top-5 right-5 text-zinc-500 hover:text-white transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -181,30 +182,30 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
         )}
 
         {/* Small Gray Square Badge */}
-        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 mb-6 border border-slate-200/50">
+        <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center text-white mb-6 border border-zinc-800">
           <LogIn className="w-5 h-5" />
         </div>
 
-        <h2 className="text-xl font-sans font-semibold text-slate-900 tracking-tight mb-1.5">
+        <h2 className="text-xl font-sans font-semibold text-white tracking-tight mb-1.5 uppercase">
           {mode === 'signin' && 'Sign in to Biovised'}
           {mode === 'signup' && 'Create your account'}
           {mode === 'forgot' && 'Reset your password'}
         </h2>
-        <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+        <p className="text-xs text-zinc-400 mb-6 leading-relaxed font-mono">
           {mode === 'signin' && 'Unlock structured JEE & NEET educational channels.'}
           {mode === 'signup' && 'Join the premium platform for medical and engineering prep.'}
           {mode === 'forgot' && 'Provide your registered email address to secure your link.'}
         </p>
 
         {error && (
-          <div className="p-3.5 mb-5 bg-rose-50 border border-rose-100 text-rose-700 text-xs rounded-lg flex items-start gap-2 animate-in fade-in duration-200">
+          <div className="p-3.5 mb-5 bg-rose-950/20 border border-rose-900/40 text-rose-400 text-xs rounded-lg flex items-start gap-2 animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-3.5 mb-5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs rounded-lg flex items-start gap-2">
+          <div className="p-3.5 mb-5 bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 text-xs rounded-lg flex items-start gap-2">
             <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
             <span>{success}</span>
           </div>
@@ -215,13 +216,13 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
             <>
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider">Candidate Name</label>
-                  <span className={`text-[10px] font-mono ${displayName.length > 50 ? 'text-red-500 font-bold' : 'text-slate-400'}`}>
+                  <label className="block text-[10px] font-bold text-zinc-300 uppercase tracking-wider">Candidate Name</label>
+                  <span className={`text-[9px] font-mono ${displayName.length > 50 ? 'text-red-500 font-bold' : 'text-zinc-500'}`}>
                     {displayName.length}/50 chars
                   </span>
                 </div>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                  <User className="absolute left-3.5 top-3 w-4 h-4 text-zinc-500" />
                   <input
                     type="text"
                     required
@@ -229,13 +230,13 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
                     onBlur={() => setNameTouched(true)}
                     onChange={(e) => setDisplayName(e.target.value.slice(0, 50))}
                     placeholder="Enter Candidate Full Name"
-                    className={`w-full bg-slate-50 border ${
+                    className={`w-full bg-zinc-950 border ${
                       nameTouched && !isNameValid 
-                        ? 'border-red-400 focus:border-red-400 focus:ring-red-400/25' 
+                        ? 'border-red-500 focus:border-red-500' 
                         : nameTouched && isNameValid
-                        ? 'border-emerald-300 focus:border-emerald-300 focus:ring-emerald-300/25'
-                        : 'border-slate-200 focus:border-slate-400 focus:ring-slate-400/25'
-                    } rounded-lg py-2 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all`}
+                        ? 'border-emerald-500 focus:border-emerald-500'
+                        : 'border-zinc-800 focus:border-white'
+                    } rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-zinc-600 outline-none transition-all`}
                   />
                 </div>
                 {nameTouched && !isNameValid && (
@@ -247,27 +248,27 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
 
               <div className="grid grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5 uppercase tracking-wider">Join As</label>
+                  <label className="block text-[10px] font-bold text-zinc-300 mb-1.5 uppercase tracking-wider">Join As</label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-slate-400 rounded-lg py-2 px-3 text-sm text-slate-800 outline-none transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-white rounded-lg py-2 px-3 text-sm text-white outline-none transition-all"
                   >
-                    <option value="user">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="institute">Institute Portal</option>
+                    <option className="bg-zinc-950 text-white" value="user">Student</option>
+                    <option className="bg-zinc-950 text-white" value="teacher">Teacher</option>
+                    <option className="bg-zinc-950 text-white" value="institute">Institute Portal</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5 uppercase tracking-wider">Exam Goal</label>
+                  <label className="block text-[10px] font-bold text-zinc-300 mb-1.5 uppercase tracking-wider">Exam Goal</label>
                   <select
                     value={examType}
                     onChange={(e) => setExamType(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-slate-400 rounded-lg py-2 px-3 text-sm text-slate-800 outline-none transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-white rounded-lg py-2 px-3 text-sm text-white outline-none transition-all"
                   >
-                    <option value="JEE">JEE</option>
-                    <option value="NEET">NEET</option>
-                    <option value="Both">Both / All Goals</option>
+                    <option className="bg-zinc-950 text-white" value="JEE">JEE</option>
+                    <option className="bg-zinc-950 text-white" value="NEET">NEET</option>
+                    <option className="bg-zinc-950 text-white" value="Both">Both / All Goals</option>
                   </select>
                 </div>
               </div>
@@ -276,15 +277,15 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
 
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider">Email Address</label>
+              <label className="block text-[10px] font-bold text-zinc-300 uppercase tracking-wider">Email Address</label>
               {emailTouched && (
-                <span className={`text-[10px] font-mono ${isEmailValid ? 'text-emerald-500' : 'text-rose-500'}`}>
+                <span className={`text-[9px] font-mono ${isEmailValid ? 'text-emerald-500' : 'text-rose-500'}`}>
                   {isEmailValid ? 'Email Formatted' : 'Input Valid Email'}
                 </span>
               )}
             </div>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+              <Mail className="absolute left-3.5 top-3 w-4 h-4 text-zinc-500" />
               <input
                 type="email"
                 required
@@ -292,13 +293,13 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
                 onBlur={() => setEmailTouched(true)}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="candidate@domain.org"
-                className={`w-full bg-slate-50 border ${
+                className={`w-full bg-zinc-950 border ${
                   emailTouched && !isEmailValid 
-                    ? 'border-red-400 focus:border-red-400 focus:ring-red-400/25' 
+                    ? 'border-red-500 focus:border-red-500' 
                     : emailTouched && isEmailValid
-                    ? 'border-emerald-300 focus:border-emerald-300 focus:ring-emerald-300/25'
-                    : 'border-slate-200 focus:border-slate-400 focus:ring-slate-400/25'
-                } rounded-lg py-2 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all`}
+                    ? 'border-emerald-500 focus:border-emerald-500'
+                    : 'border-zinc-800 focus:border-white'
+                } rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-zinc-600 outline-none transition-all`}
               />
             </div>
           </div>
@@ -306,9 +307,9 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
           {mode !== 'forgot' && (
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-xs font-medium text-slate-700 uppercase tracking-wider">Password</label>
+                <label className="block text-[10px] font-bold text-zinc-300 uppercase tracking-wider">Password</label>
                 {password.length > 0 && (
-                  <span className={`text-[10px] font-mono font-medium ${
+                  <span className={`text-[9px] font-mono font-medium ${
                     requirementsMetCount <= 2 ? 'text-red-500' : requirementsMetCount <= 4 ? 'text-amber-500' : 'text-emerald-500'
                   }`}>
                     {passwordStrengthLabel()}
@@ -316,7 +317,7 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-zinc-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -324,18 +325,18 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
                   onBlur={() => setPasswordTouched(true)}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
-                  className={`w-full bg-slate-50 border ${
+                  className={`w-full bg-zinc-950 border ${
                     passwordTouched && mode === 'signup' && !isPasswordValid
-                      ? 'border-red-400 focus:border-red-400 focus:ring-red-400/25'
+                      ? 'border-red-500 focus:border-red-500'
                       : passwordTouched && mode === 'signup' && isPasswordValid
-                      ? 'border-emerald-300 focus:border-emerald-300 focus:ring-emerald-300/25'
-                      : 'border-slate-200 focus:border-slate-400 focus:ring-slate-400/25'
-                  } rounded-lg py-2 pl-10 pr-10 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all`}
+                      ? 'border-emerald-500 focus:border-emerald-500'
+                      : 'border-zinc-800 focus:border-white'
+                  } rounded-lg py-2 pl-10 pr-10 text-sm text-white placeholder-zinc-600 outline-none transition-all`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                  className="absolute right-3 top-3 text-zinc-500 hover:text-white focus:outline-none transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -343,33 +344,33 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
 
               {/* Password strength checklist */}
               {mode === 'signup' && (password.length > 0 || passwordTouched) && (
-                <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg space-y-2">
-                  <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden transition-all duration-300">
+                <div className="mt-3 p-3 bg-zinc-950 border border-zinc-900 rounded-lg space-y-2">
+                  <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden transition-all duration-300">
                     <div 
                       className={`h-full transition-all duration-500 ${passwordStrengthColor()}`}
                       style={{ width: `${(requirementsMetCount / 5) * 100}%` }}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-slate-400">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-zinc-500 font-mono">
                     <div className="flex items-center gap-1">
-                      <Check className={`w-3 h-3 ${hasEightChars ? 'text-emerald-500 font-bold' : 'text-slate-300'}`} />
-                      <span className={hasEightChars ? 'text-slate-700 font-medium' : ''}>8+ Characters</span>
+                      <Check className={`w-3 h-3 ${hasEightChars ? 'text-emerald-500 font-bold' : 'text-zinc-850'}`} />
+                      <span className={hasEightChars ? 'text-zinc-355 font-medium' : ''}>8+ Chars</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Check className={`w-3 h-3 ${hasUpperCase ? 'text-emerald-500 font-bold' : 'text-slate-300'}`} />
-                      <span className={hasUpperCase ? 'text-slate-700 font-medium' : ''}>Uppercase (A-Z)</span>
+                      <Check className={`w-3 h-3 ${hasUpperCase ? 'text-emerald-500 font-bold' : 'text-zinc-850'}`} />
+                      <span className={hasUpperCase ? 'text-zinc-355 font-medium' : ''}>Uppercase</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Check className={`w-3 h-3 ${hasLowerCase ? 'text-emerald-500 font-bold' : 'text-slate-300'}`} />
-                      <span className={hasLowerCase ? 'text-slate-700 font-medium' : ''}>Lowercase (a-z)</span>
+                      <Check className={`w-3 h-3 ${hasLowerCase ? 'text-emerald-500 font-bold' : 'text-zinc-850'}`} />
+                      <span className={hasLowerCase ? 'text-zinc-355 font-medium' : ''}>Lowercase</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Check className={`w-3 h-3 ${hasNumber ? 'text-emerald-500 font-bold' : 'text-slate-300'}`} />
-                      <span className={hasNumber ? 'text-slate-700 font-medium' : ''}>Number (0-9)</span>
+                      <Check className={`w-3 h-3 ${hasNumber ? 'text-emerald-500 font-bold' : 'text-zinc-850'}`} />
+                      <span className={hasNumber ? 'text-zinc-355 font-medium' : ''}>Number</span>
                     </div>
                     <div className="flex items-center gap-1 col-span-2">
-                      <Check className={`w-3 h-3 ${hasSpecial ? 'text-emerald-500 font-bold' : 'text-slate-300'}`} />
-                      <span className={hasSpecial ? 'text-slate-700 font-medium' : ''}>Special Symbol (!@#$)</span>
+                      <Check className={`w-3 h-3 ${hasSpecial ? 'text-emerald-500 font-bold' : 'text-zinc-850'}`} />
+                      <span className={hasSpecial ? 'text-zinc-355 font-medium' : ''}>Special Symbol</span>
                     </div>
                   </div>
                 </div>
@@ -380,30 +381,30 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
           <button
             type="submit"
             disabled={submitting || (password.length > 0 && !canSubmit)}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full bg-white hover:bg-zinc-200 text-black font-semibold py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {submitting && (
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
             )}
-            {submitting ? 'Get Started...' : mode === 'signin' ? 'Get Started' : mode === 'signup' ? 'Create Account' : 'Send Instructions'}
+            {submitting ? 'Authenticating...' : mode === 'signin' ? 'Get Started' : mode === 'signup' ? 'Create Account' : 'Send Instructions'}
           </button>
         </form>
 
         {mode === 'signin' && (
           <>
             <div className="relative flex py-4 items-center">
-              <div className="flex-grow border-t border-slate-100"></div>
-              <span className="flex-shrink mx-4 text-slate-400 font-mono text-[9px] uppercase tracking-wider">Or Authenticate With</span>
-              <div className="flex-grow border-t border-slate-100"></div>
+              <div className="flex-grow border-t border-zinc-900"></div>
+              <span className="flex-shrink mx-4 text-zinc-500 font-mono text-[9px] uppercase tracking-wider">Or Authenticate With</span>
+              <div className="flex-grow border-t border-zinc-900"></div>
             </div>
 
             <button
               onClick={handleGoogleSignIn}
               type="button"
-              className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-medium py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              className="w-full bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-white font-medium py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -437,30 +438,30 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
                 onClose();
               }}
               type="button"
-              className="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-medium py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              className="w-full bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 text-zinc-300 font-medium py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
-              <LogIn className="w-4 h-4" />
+              <LogIn className="w-4 h-4 text-zinc-400" />
               Continue as Guest
             </button>
           </>
         )}
 
-        <div className="mt-6 flex flex-col gap-2 items-center text-xs text-slate-500">
+        <div className="mt-6 flex flex-col gap-2 items-center text-xs text-zinc-500 font-mono uppercase">
           {mode === 'signin' ? (
             <>
-              <button onClick={() => setMode('signup')} className="hover:text-slate-900 transition-colors underline cursor-pointer">
+              <button onClick={() => setMode('signup')} className="hover:text-white transition-colors underline cursor-pointer">
                 Need an account? Sign Up instead
               </button>
-              <button onClick={() => setMode('forgot')} className="hover:text-slate-900 transition-colors cursor-pointer">
+              <button onClick={() => setMode('forgot')} className="hover:text-white transition-colors cursor-pointer">
                 Forgot password? Recover account
               </button>
             </>
           ) : mode === 'signup' ? (
-            <button onClick={() => setMode('signin')} className="hover:text-slate-900 transition-colors underline cursor-pointer">
+            <button onClick={() => setMode('signin')} className="hover:text-white transition-colors underline cursor-pointer">
               Already have an account? Sign In
             </button>
           ) : (
-            <button onClick={() => setMode('signin')} className="hover:text-slate-900 transition-colors flex items-center gap-1 cursor-pointer">
+            <button onClick={() => setMode('signin')} className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
               <RotateCcw className="w-3.5 h-3.5" /> Back to Sign In
             </button>
           )}

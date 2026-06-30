@@ -597,7 +597,7 @@ export default function TeacherProfileDetail({
   return (
     <div style={{ background: BG, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }} className="pb-20 text-left select-none">
       {/* ── Top Custom Header Bar ── */}
-      <div className="px-6 md:px-16 py-4 flex items-center gap-4 border-b border-[#1A1A1A]">
+      <div className="px-6 md:px-16 py-4 flex items-center gap-4 border-b border-[#1A1A1A] hidden md:flex">
         <button onClick={onBack} className="text-zinc-400 hover:text-white transition-colors cursor-pointer mr-2 flex items-center gap-1 bg-transparent border-none">
           <ArrowLeft size={16} />
           <span className="text-xs font-semibold uppercase tracking-wider font-mono">Back</span>
@@ -724,8 +724,38 @@ export default function TeacherProfileDetail({
         </div>
       </section>
 
-      {/* ── Stats Ribbon Section ── */}
-      <div style={{ background: "#111214", borderBottom: `1px solid ${BORDER}` }} className="w-full grid grid-cols-2 md:grid-cols-5 text-center font-mono">
+      {/* ── Mobile Instagram-style Stats Ribbon Section ── */}
+      <div className="flex flex-row justify-around items-center w-full py-5 border-y border-zinc-900 bg-[#000000] text-center md:hidden">
+        {/* Videos count */}
+        <div className="flex-1 px-2">
+          <div className="text-lg font-bold text-white leading-none">{videosCountStr}</div>
+          <div className="text-zinc-400 text-xs mt-1 font-mono uppercase tracking-wider">Lectures</div>
+        </div>
+
+        {/* Followers count */}
+        <div className="flex-1 px-2">
+          <div className="text-lg font-bold text-white leading-none">
+            {loadingFollowers ? '...' : studentsCountStr}
+          </div>
+          <div className="text-zinc-400 text-xs mt-1 font-mono uppercase tracking-wider">Aspirants</div>
+        </div>
+
+        {/* Reviews/Ratings Group (Star rating inside Turmeric, Trust score inside rich green) */}
+        <div className="flex-1 px-2">
+          <div className="flex items-center gap-1 justify-center leading-none">
+            <span className="text-lg font-bold text-amber-500">
+              {loadingReviews ? '...' : ratingStr}★
+            </span>
+            <span className="text-emerald-500 text-xs font-bold font-mono">
+              ({trustScoreStr}%)
+            </span>
+          </div>
+          <div className="text-zinc-400 text-xs mt-1 font-mono uppercase tracking-wider">Reviews</div>
+        </div>
+      </div>
+
+      {/* ── Desktop Stats Ribbon Section ── */}
+      <div style={{ background: "#111214", borderBottom: `1px solid ${BORDER}` }} className="w-full hidden md:grid grid-cols-2 md:grid-cols-5 text-center font-mono">
         {/* Videos count */}
         <div style={{ borderRight: `1px solid ${BORDER}` }} className="flex flex-col items-center py-6 gap-1 border-b md:border-b-0 border-[#1D1F24]">
           <Video size={14} className="text-zinc-500" />

@@ -303,7 +303,7 @@ export default function DetailsModal({
               <div className="space-y-6">
                 <div className="border-b border-brand-border pb-6">
                   <h2 className="text-xl md:text-2xl font-display font-medium text-brand-accent">{profile?.name}</h2>
-                  <p className="text-xs text-brand-gray mt-2 max-w-3xl">{profile?.description}</p>
+                  <p className="text-xs text-brand-gray mt-2 max-w-3xl">{(profile as any)?.description}</p>
                   <div className="mt-3 flex items-center gap-3">
                     <span className="text-[10px] font-mono uppercase bg-zinc-800 text-zinc-350 px-2 py-0.5 rounded">
                       Curated learning sequence

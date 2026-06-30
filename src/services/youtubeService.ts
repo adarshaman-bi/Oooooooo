@@ -43,12 +43,12 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
   // LAYER 2: Check Supabase database cache
   if (supabaseClient) {
     try {
-      const { data: dbCache, error: dbError } = await supabaseClient
+      const { data: dbCache, error: dbError } = (await supabaseClient
         .from('youtube_videos_cache')
         .select('*')
         .eq('playlist_id', playlistId)
         .order('published_at', { ascending: false })
-        .limit(50);
+        .limit(50)) as any;
 
       if (!dbError && dbCache && dbCache.length > 0) {
         // Check if cache is fresh (< 24 hours old)
@@ -92,12 +92,12 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
       
       // Graceful fallback: return whatever is in database even if stale
       if (supabaseClient) {
-        const { data: staleData } = await supabaseClient
+        const { data: staleData } = (await supabaseClient
           .from('youtube_videos_cache')
           .select('*')
           .eq('playlist_id', playlistId)
           .order('published_at', { ascending: false })
-          .limit(50);
+          .limit(50)) as any;
         
         if (staleData && staleData.length > 0) {
           console.log(`[FALLBACK] Returning stale database data for ${playlistId}`);
@@ -150,12 +150,12 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
     
     // Graceful fallback: return stale database data on API failure
     if (supabaseClient) {
-      const { data: staleData } = await supabaseClient
+      const { data: staleData } = (await supabaseClient
         .from('youtube_videos_cache')
         .select('*')
         .eq('playlist_id', playlistId)
         .order('published_at', { ascending: false })
-        .limit(50);
+        .limit(50)) as any;
       
       if (staleData && staleData.length > 0) {
         console.log(`[FALLBACK] API failed, returning stale database data for ${playlistId}`);
@@ -186,9 +186,9 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
         updated_at: new Date().toISOString()
       }));
 
-      const { error: upsertError } = await supabaseClient
+      const { error: upsertError } = (await supabaseClient
         .from('youtube_videos_cache')
-        .upsert(upsertData, { onConflict: 'id' });
+        .upsert(upsertData as any, { onConflict: 'id' })) as any;
 
       if (upsertError) {
         console.error('[CACHE] Failed to upsert to database:', upsertError);
