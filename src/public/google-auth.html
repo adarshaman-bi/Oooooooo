@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Biovised - Google Authentication</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+    
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+      border: 1px solid #1F1F1F;
+      background: #090909;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader {
+      border: 2px solid #1A1A1A;
+      border-top: 2px solid #ffffff;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 24px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .status {
+      font-size: 11px;
+      color: #a1a1aa;
+      line-height: 1.6;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 20px;
+    }
+
+    .error-container {
+      display: none;
+      width: 100%;
+    }
+
+    .error-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ef4444;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .error-message {
+      font-size: 11px;
+      color: #f87171;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      padding: 12px;
+      border-radius: 4px;
+      word-break: break-all;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    button {
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid #ffffff;
+      padding: 10px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: background 0.15s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #e4e4e7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="loader" id="loader"></div>
+    <div class="title">Biovised Account</div>
+    <div class="status" id="status">Connecting Google auth broker to core platform...</div>
+    
+    <div class="error-container" id="error-container">
+      <div class="error-title">Auth Error</div>
+      <div id="error-message" class="error-message"></div>
+      <button onclick="window.close()">Close Window</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    async function initAndAuth() {
+      const loader = document.getElementById('loader');
+      const status = document.getElementById('status');
+      const errContainer = document.getElementById('error-container');
+      const errMessage = document.getElementById('error-message');
+
+      try {
+        const configStr = localStorage.getItem('biovised_firebase_config');
+        if (!configStr) {
+          throw new Error('Local storage key "biovised_firebase_config" was not parsed. Open popup through platform gateway.');
+        }
+        const firebaseConfig = JSON.parse(configStr);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        status.innerText = "Complete alignment in Google Account popup...";
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+
+        status.innerText = "Synchronizing workspace state context...";
+
+        // Send sign-in metrics back to parent application frame
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_SUCCESS',
+            idToken: credential?.idToken,
+            accessToken: credential?.accessToken,
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL
+          }, window.location.origin);
+        }
+        
+        status.innerText = "Authorization successful. Aligning interface...";
+        setTimeout(() => {
+          window.close();
+        }, 1000);
+
+      } catch (error) {
+        console.error(error);
+        loader.style.display = 'none';
+        status.style.display = 'none';
+        errContainer.style.display = 'block';
+        errMessage.innerText = error.message || String(error);
+
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_FAILURE',
+            error: error.message || String(error)
+          }, window.location.origin);
+        }
+      }
+    }
+
+    // Initialize execution flow
+    initAndAuth();
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Biovised",
+  "description": "Premium educational discovery directory and zero-trust trust score indexer for JEE and NEET students and teachers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

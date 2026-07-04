@@ -1,0 +1,225 @@
+{
+  "appName": "Biovised",
+  "version": "1.0.0",
+  "environment": "localhost / development & production Vercel Edge Network",
+  "rules": {
+    "typescript": "Strict enforcement (tsc --noEmit must pass with zero errors before all local verification)",
+    "boilerplate": "Absolute zero tolerance for unused template boilerplate, dead placeholder features, or dummy variables in production workflows",
+    "git": "Do not commit or deploy/push to git/Vercel unless explicitly requested by the user",
+    "esm": "ES module resolution lifecycle awareness - dotenv.config() must run before static module references in backend scripts"
+  },
+  "coreTechStack": {
+    "frontend": {
+      "framework": "React v19.0.1",
+      "routing": "React Router DOM v7.18.0",
+      "styling": "Tailwind CSS v4.1.14 & Vanilla CSS",
+      "animations": "Framer Motion (motion) v12.23.24",
+      "icons": "Lucide React v0.546.0"
+    },
+    "backend": {
+      "runtime": "Node.js (ESM)",
+      "framework": "Express v4.21.2",
+      "compiler": "tsx (development) / esbuild (production bundling)"
+    },
+    "stateManagement": {
+      "architecture": "React Context API (AuthContext, ThemeContext, PlayerContext, SearchContext)",
+      "persistedState": "Supabase PostgreSQL cache & localStorage"
+    },
+    "database": {
+      "provider": "Supabase PostgreSQL",
+      "connectionType": "Supabase JS Client SDK v2.108.2"
+    }
+  },
+  "criticalSystemPaths": {
+    "voiceSearch": {
+      "path": "src/components/MicModal.tsx",
+      "dependencies": [
+        "Web Speech Recognition API",
+        "Web Audio AnalyserNode",
+        "motion"
+      ]
+    },
+    "videoPlayer": {
+      "path": "src/components/VideoPlayer.tsx",
+      "dependencies": [
+        "React Context",
+        "lucide-react"
+      ]
+    },
+    "lecturesFeed": {
+      "path": "src/components/LecturesGrid.tsx",
+      "dependencies": [
+        "src/components/LectureCard.tsx"
+      ]
+    },
+    "youtubeIngestLayer": {
+      "path": "src/services/youtubeService.ts",
+      "dependencies": [
+        "dotenv",
+        "@supabase/supabase-js"
+      ]
+    },
+    "databaseService": {
+      "path": "src/services/dbService.ts",
+      "dependencies": [
+        "@supabase/supabase-js"
+      ]
+    },
+    "themeEngine": {
+      "path": "src/context/ThemeContext.tsx",
+      "dependencies": [
+        "src/index.css"
+      ]
+    }
+  },
+  "databaseSchema": {
+    "tables": {
+      "public.teachers": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "name": "VARCHAR(255)",
+          "subject": "VARCHAR(255)",
+          "avatar": "VARCHAR(1024)",
+          "rating": "NUMERIC(3, 2)",
+          "bio": "TEXT",
+          "is_verified": "BOOLEAN",
+          "subjects": "JSONB",
+          "exams": "JSONB",
+          "features": "JSONB"
+        }
+      },
+      "public.playlists": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "title": "VARCHAR(255)",
+          "category": "VARCHAR(255)",
+          "thumbnail": "VARCHAR(1024)",
+          "description": "TEXT",
+          "teacher_id": "VARCHAR(255) REFERENCES public.teachers(id)",
+          "lectures_count": "INTEGER",
+          "exam_type": "VARCHAR(100)",
+          "is_active": "BOOLEAN"
+        }
+      },
+      "public.videos": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "title": "VARCHAR(255)",
+          "video_url": "VARCHAR(1024)",
+          "duration": "VARCHAR(50)",
+          "playlist_id": "VARCHAR(255) REFERENCES public.playlists(id)",
+          "views": "INTEGER",
+          "thumbnail_url": "VARCHAR(1024)",
+          "subject": "VARCHAR(255)",
+          "exam_type": "VARCHAR(100)",
+          "content_type": "VARCHAR(50)",
+          "teacher_id": "VARCHAR(255)",
+          "teacher_name": "VARCHAR(255)",
+          "likes_count": "INTEGER",
+          "publish_date": "TIMESTAMPTZ",
+          "is_active": "BOOLEAN"
+        }
+      },
+      "public.profiles": {
+        "primaryKey": "uid (UUID) REFERENCES auth.users(id)",
+        "fields": {
+          "email": "VARCHAR(255)",
+          "display_name": "VARCHAR(255)",
+          "role": "VARCHAR(50) (user / admin / moderator)",
+          "exam_type": "VARCHAR(100)",
+          "appearing_year": "VARCHAR(50)",
+          "preferred_subjects": "JSONB",
+          "onboarding_completed": "BOOLEAN",
+          "login_type": "VARCHAR(50)"
+        }
+      },
+      "public.test_series": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "title": "VARCHAR(255)",
+          "total_tests": "INTEGER",
+          "category": "VARCHAR(255)",
+          "price": "NUMERIC(10, 2)",
+          "features": "JSONB"
+        }
+      },
+      "public.institutes": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "name": "VARCHAR(255)",
+          "logo": "VARCHAR(1024)",
+          "description": "TEXT",
+          "rating": "NUMERIC(3, 2)",
+          "trust_score": "INTEGER",
+          "is_verified": "BOOLEAN",
+          "exams": "JSONB",
+          "features": "JSONB"
+        }
+      },
+      "public.batches": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "name": "VARCHAR(255)",
+          "institute_id": "VARCHAR(255)",
+          "institute_name": "VARCHAR(255)",
+          "subject": "VARCHAR(255)",
+          "price": "NUMERIC(10, 2)",
+          "discount_price": "NUMERIC(10, 2)",
+          "features": "JSONB"
+        }
+      },
+      "public.channels": {
+        "primaryKey": "id (VARCHAR)",
+        "fields": {
+          "name": "VARCHAR(255)",
+          "avatar": "VARCHAR(1024)",
+          "website": "VARCHAR(1024)",
+          "exams": "JSONB",
+          "teacher_id": "VARCHAR(255)",
+          "subscribers": "VARCHAR(100)",
+          "playlists_count": "INTEGER",
+          "is_active": "BOOLEAN"
+        }
+      }
+    }
+  },
+  "activeIntegrations": {
+    "supabase": "Auth / Database / RLS Policies / User profiles binding",
+    "youtube_data_api_v3": "Ingestion of channels, playlists, videos, and duration metrics",
+    "google_adk": "Agent Development Kit framework for orchestrating specialized subagents",
+    "google_adk_devtools": "Interactive visual debugger and tools dashboard for local developer loop",
+    "google_genai": "Gemini models integration for recommendation engine suggestions"
+  },
+  "changeHistory": [
+    {
+      "date": "2026-06-29",
+      "type": "feat",
+      "description": "Multi-stage YouTube ingestion engine integrated. Refactored youtubeService.ts to map direct channels/playlists/videos schema to Supabase, bypassing cache tables.",
+      "resolvedBreakingErrors": [
+        "Repaired undefined environment variables inside ESM static modules by moving config definitions inline"
+      ]
+    },
+    {
+      "date": "2026-06-30",
+      "type": "refactor",
+      "description": "Integrated MicModal voice visualizer using Web Audio API frequency analysis, peach glow effects, and framer-motion slide sheet transitions.",
+      "resolvedBreakingErrors": [
+        "Standardized light theme overrides for active footer active navigation tabs and sticky headers"
+      ]
+    },
+    {
+      "date": "2026-07-01",
+      "type": "dependency",
+      "description": "Installed @google/adk and @google/adk-devtools to the node modules ecosystem.",
+      "resolvedBreakingErrors": [
+        "Bypassed Windows local binary download CA self-signed cert blocker with command modifications"
+      ]
+    },
+    {
+      "date": "2026-07-02",
+      "type": "architecture",
+      "description": "Established unified application manifest single source of truth file mapping project paths, schemas, stack configurations, and dev constraints.",
+      "resolvedBreakingErrors": []
+    }
+  ]
+}
