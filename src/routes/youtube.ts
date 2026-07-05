@@ -426,6 +426,98 @@ router.get('/channel/:channelId', async (req, res) => {
   }
 });
 
+// GET /api/youtube/channel/:channelId/live-videos - NEW: Fetch live and past-live videos
+router.get('/channel/:channelId/live-videos', async (req, res) => {
+  const { channelId } = req.params;
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  
+  if (!apiKey || apiKey === 'YOUR_YOUTUBE_DATA_API_V3_KEY') {
+    return res.status(500).json({ error: 'YOUTUBE_API_KEY environment variable is not defined or configured on the backend.' });
+  }
+
+  try {
+    // Fetch completed live streams (past-live)
+    const completedRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=completed&order=date&maxResults=50&key=${apiKey}`
+    );
+    const completedJson = await completedRes.json();
+
+    if (completedJson.error) {
+      console.error(`YouTube API search error for completed live streams ${channelId}:`, completedJson.error);
+      return res.status(500).json({ error: completedJson.error.message || 'YouTube search error.' });
+    }
+
+    const completedItems = completedJson.items || [];
+    
+    if (completedItems.length === 0) {
+      return res.json({ status: 'ok', data: { liveVideos: [], totalFound: 0 } });
+    }
+
+    // Extract video IDs
+    const videoIds = completedItems.map((item: any) => item.id?.videoId).filter(Boolean);
+    
+    if (videoIds.length === 0) {
+      return res.json({ status: 'ok', data: { liveVideos: [], totalFound: 0 } });
+    }
+
+    // Batch fetch video details with liveStreamingDetails to confirm they are actual live streams
+    const batchSize = 50;
+    const allLiveVideos = [];
+    
+    for (let i = 0; i < videoIds.length; i += batchSize) {
+      const batch = videoIds.slice(i, i + batchSize);
+      const videosRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,liveStreamingDetails,statistics&id=${batch.join(',')}&key=${apiKey}`
+      );
+      const videosJson = await videosRes.json();
+
+      if (videosJson.error) {
+        console.error(`YouTube API videos error:`, videosJson.error);
+        continue;
+      }
+
+      const videoItems = videosJson.items || [];
+      
+      for (const video of videoItems) {
+        // Only include if it has liveStreamingDetails (confirms it was a live broadcast)
+        if (video.liveStreamingDetails) {
+          const snippet = video.snippet || {};
+          const contentDetails = video.contentDetails || {};
+          const liveDetails = video.liveStreamingDetails || {};
+          const statistics = video.statistics || {};
+
+          allLiveVideos.push({
+            id: video.id,
+            title: snippet.title || 'Untitled',
+            description: snippet.description || '',
+            thumbnail: snippet.thumbnails?.high?.url || snippet.thumbnails?.medium?.url || '',
+            publishedAt: snippet.publishedAt || '',
+            duration: contentDetails.duration || '',
+            viewCount: parseInt(statistics.viewCount || '0', 10),
+            likeCount: parseInt(statistics.likeCount || '0', 10),
+            actualStartTime: liveDetails.actualStartTime || '',
+            actualEndTime: liveDetails.actualEndTime || '',
+            scheduledStartTime: liveDetails.scheduledStartTime || '',
+            source_type: 'live'
+          });
+        }
+      }
+    }
+
+    return res.json({ 
+      status: 'ok', 
+      data: { 
+        liveVideos: allLiveVideos, 
+        totalFound: allLiveVideos.length,
+        channelId 
+      } 
+    });
+  } catch (err: any) {
+    console.error(`Error fetching live videos for channel ${channelId}:`, err);
+    return res.status(500).json({ error: err.message || 'Failed to fetch live videos.' });
+  }
+});
+
 // GET /api/youtube/lectures/:playlistId
 router.get('/lectures/:playlistId', async (req, res) => {
   let { playlistId } = req.params;
