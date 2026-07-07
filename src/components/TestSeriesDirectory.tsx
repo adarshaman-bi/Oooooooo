@@ -32,7 +32,14 @@ export default function TestSeriesDirectory({
 }: TestSeriesDirectoryProps) {
   
   // Active selected test series for detail modal/drawer
-  const [activeDetailsId, setActiveDetailsId] = useState<string | null>(null);
+  const [activeDetailsId, setActiveDetailsId] = useState<string | null>(() => {
+    const saved = sessionStorage.getItem('biovised_selected_test_series_id');
+    if (saved) {
+      sessionStorage.removeItem('biovised_selected_test_series_id');
+      return saved;
+    }
+    return null;
+  });
 
   // Filter & Search logic
   const filteredCatalog = useMemo(() => {

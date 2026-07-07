@@ -12,6 +12,7 @@ import {
 import teachersDiscography from '../config/teachersDiscography.json';
 import { SafeImage } from './SafeImage';
 import { formatViews, formatSubscribers } from '../utils/youtubeUtils';
+import { handleRowKeyDown } from './HorizontalRow';
 
 interface LectureDetailViewProps {
   lecture: Lecture;
@@ -489,7 +490,11 @@ export default function LectureDetailView({
                     {discographyPlaylists.length} courses
                   </span>
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth no-scrollbar select-none">
+                <div 
+                  tabIndex={0}
+                  onKeyDown={handleRowKeyDown}
+                  className="flex gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth no-scrollbar select-none outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                >
                   {discographyPlaylists.map((pl: any) => (
                     <div 
                       key={pl.playlist_id} 

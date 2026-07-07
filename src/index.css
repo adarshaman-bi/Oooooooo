@@ -234,9 +234,13 @@
 }
 
 /* Base custom styles with theme support */
-body, html {
+body, html, #root {
   font-family: var(--font-sans);
   transition: background-color 0.3s ease, color 0.3s ease;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 /* Dark Theme (Default) */

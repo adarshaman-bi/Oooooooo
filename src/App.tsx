@@ -1746,6 +1746,7 @@ function AppContent() {
         onVoiceSearchClick={startSpeechRecognition}
         themeMode={themeMode}
         onToggleTheme={toggleTheme}
+        onBack={handleBackNavigation}
       />
 
       {/* Theme Toast Notification */}
@@ -2083,6 +2084,8 @@ function AppContent() {
                         setCurrentView('explore');
                       }}
                       onSelectChannel={(id, type) => setDetailModal({ id, type })}
+                      followedIds={followedIds}
+                      handleFollowToggle={handleFollowToggle}
                     />
                   )}
 
@@ -2139,11 +2142,11 @@ function AppContent() {
               )}
 
               {activeExploreTab === 'teachers' && (
-                <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 pb-24 text-left">
+                <div className="max-w-7xl mx-auto px-4 py-4 space-y-4 pb-24 text-left">
                   {/* Banner deleted per UI/UX Refactor */}
 
                   {isInitialLoading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 animate-fade-in">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 animate-fade-in">
                       {Array.from({ length: 12 }).map((_, idx) => (
                         <TeacherCardSkeleton key={idx} />
                       ))}
@@ -2162,11 +2165,15 @@ function AppContent() {
                     });
                     
                     if (filteredStaticTeachers.length === 0) {
-                      return <p className="text-xs text-zinc-500 py-10 text-center font-mono">No educators listed matching criteria.</p>;
+                      return (
+                        <div className="max-w-7xl mx-auto px-4">
+                          <p className="text-xs text-zinc-500 py-10 text-center font-mono">No educators listed matching criteria.</p>
+                        </div>
+                      );
                     }
                     
                     return (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto px-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-4 sm:gap-4">
                         {filteredStaticTeachers.map((t) => {
                           const dbTeacher = teachers.find(dbT => dbT.id === t.id);
                           return (

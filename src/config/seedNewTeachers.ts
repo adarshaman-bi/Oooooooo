@@ -5,8 +5,13 @@ import * as path from 'path';
 
 dotenv.config();
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const rawUrl = process.env.SUPABASE_URL;
+const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const isConfigured = rawUrl && rawUrl.trim() !== '' && rawKey && rawKey.trim() !== '';
+
+const supabaseUrl = isConfigured ? rawUrl.trim() : 'https://placeholder.supabase.co';
+const supabaseKey = isConfigured ? rawKey.trim() : 'placeholder-anon-key';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Clean target data payload of new premium educators

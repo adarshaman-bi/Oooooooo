@@ -34,6 +34,7 @@ import ChannelHeader from './ChannelHeader';
 import LectureCard from './LectureCard';
 import { SafeImage } from './SafeImage';
 import YoutubeThumbnailImg from './YoutubeThumbnailImg';
+import { handleRowKeyDown } from './HorizontalRow';
 
 interface VideoLibraryProps {
   onBackToHome: () => void;
@@ -638,26 +639,6 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
   return (
     <div className="w-full min-h-screen bg-[#070708] text-white font-sans selection:bg-white selection:text-black">
       
-      {/* 1. COMPACT HEADER */}
-      <header className="border-b border-[#18181B] bg-[#0A0A0B]/85 backdrop-blur sticky top-0 z-50 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBackToHome}
-              className="p-1 px-3 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-[11px] font-mono font-bold tracking-wider uppercase transition-colors"
-            >
-              ← BIOVISED Portal
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 bg-white/10 rounded-lg border border-white/20">
-                <Youtube className="w-4 h-4 text-white" />
-              </span>
-              <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-white">Playlist <span className="text-[#EEEEEE] font-mono text-xs">Video Library</span></h2>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 py-6 pb-28">
 
         {/* ==========================================
@@ -826,7 +807,11 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
               {(playlists || []).filter(p => p.channelId === selectedChannel.channelId).length === 0 ? (
                 <p className="text-xs text-zinc-500 font-mono py-12 text-center bg-[#09090A] border border-neutral-900 rounded-xl">No playlists registered for this channel yet.</p>
               ) : (
-                <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth">
+                <div 
+                  tabIndex={0}
+                  onKeyDown={handleRowKeyDown}
+                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                >
                   {(playlists || []).filter(p => p.channelId === selectedChannel.channelId).map((play) => (
                     <div
                       key={play.id}
@@ -889,7 +874,11 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
                   <p className="text-xs text-zinc-550 font-mono">No chapter playlists synced for the {selectedSubject} subject yet.</p>
                 </div>
               ) : (
-                <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth">
+                <div 
+                  tabIndex={0}
+                  onKeyDown={handleRowKeyDown}
+                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                >
                   {(filteredFeaturedPlaylists || []).map((play) => (
                     <div
                       key={play.id}
@@ -944,7 +933,11 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
                   <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">Continue Watching</h3>
                 </div>
 
-                <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth">
+                <div 
+                  tabIndex={0}
+                  onKeyDown={handleRowKeyDown}
+                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                >
                   {(watchHistory || []).slice(0, 10).map((item) => {
                     const progressPercent = Math.max(3, Math.min(100, Math.floor((item.progressSeconds / item.durationSeconds) * 100)));
                     return (
@@ -1020,7 +1013,11 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
                   <p className="text-xs text-zinc-650 font-mono uppercase tracking-wider">No new classes imported in past 7 days. Sync channels via Content Manager.</p>
                 </div>
               ) : (
-                <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth">
+                <div 
+                  tabIndex={0}
+                  onKeyDown={handleRowKeyDown}
+                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                >
                   {(recentWeekVideos || []).slice(0, 10).map((vid) => (
                     <div
                       key={vid.videoId}
@@ -1073,7 +1070,11 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
                   <p className="text-xs text-zinc-550 font-mono">No channels registered yet. Call Admin setups.</p>
                 </div>
               ) : (
-                <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth">
+                <div 
+                  tabIndex={0}
+                  onKeyDown={handleRowKeyDown}
+                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                >
                   {(channels || []).map((chan) => (
                     <div
                       key={chan.channelId}
@@ -1117,14 +1118,6 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
             animate={{ opacity: 1 }}
             className="space-y-6 text-left"
           >
-            {/* Back Row navigation */}
-            <button
-              onClick={() => setSelectedPlaylist(null)}
-              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white font-semibold font-mono"
-            >
-              ← Return to Library Index
-            </button>
-
             {/* Playlist Header card */}
             <div className="p-6 rounded-2xl bg-[#09090A] border border-neutral-910 flex flex-col md:flex-row gap-6 items-start md:items-center">
               <div className="w-full md:w-56 aspect-video bg-neutral-950 rounded-xl overflow-hidden shrink-0 border border-neutral-800 shadow">

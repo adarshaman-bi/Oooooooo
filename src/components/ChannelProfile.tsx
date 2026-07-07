@@ -414,11 +414,7 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
             </div>
 
             {/* CATEGORY 3: "LECTURES" CATEGORY LAYOUT */}
-            <div className="space-y-4 text-left">
-              <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-900 pb-2">
-                Individual Video Lectures ({lectures?.length || 0})
-              </h3>
-
+            <div className="space-y-8 text-left">
               {isLoadingLectures ? (
                 <div className="py-12 flex flex-col items-center justify-center space-y-2">
                   <div className="w-5 h-5 border-2 border-zinc-700 border-t-transparent rounded-full animate-spin" />
@@ -428,69 +424,152 @@ export default function ChannelProfile({ targetId, onClose, onSelectLecture }: C
                 <div className="p-12 text-center border border-dashed border-zinc-900 rounded-xl">
                   <p className="text-xs text-zinc-500 font-mono">No video lectures available for this stream.</p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {lectures.map((lec) => {
-                    const avgRating = itemRatings[lec.id] || 0;
-                    return (
-                      <div
-                        key={lec.id}
-                        className="bg-zinc-900/20 border border-zinc-900 rounded-xl overflow-hidden flex flex-col justify-between group"
-                      >
-                        <div className="relative aspect-video bg-black overflow-hidden">
-                          <img 
-                            src={lec.thumbnail} 
-                            alt={lec.title} 
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                          
-                          <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/85 backdrop-blur-xs rounded-lg font-mono text-[9px] font-bold text-amber-400 tracking-wider border border-amber-400/10">
-                            <span>{avgRating > 0 ? `★ ${avgRating.toFixed(1)} / 5` : '★ 0.0 / 5'}</span>
-                          </div>
+              ) : (() => {
+                const liveLectures = lectures.filter(l => (l as any).source_type === 'live');
+                const standardLectures = lectures.filter(l => (l as any).source_type !== 'live');
 
-                          <div 
-                            onClick={() => onSelectLecture(lec)}
-                            className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                          >
-                            <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white">
-                              <Play className="w-3.5 h-3.5 fill-current pl-0.5" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                          <div className="space-y-1">
-                            <h4 className="text-xs font-bold text-white uppercase tracking-tight line-clamp-2 leading-snug">
-                              {lec.title}
-                            </h4>
-                            {lec.description && (
-                              <p className="text-[10px] text-zinc-550 line-clamp-2 leading-relaxed">
-                                {lec.description}
-                              </p>
-                            )}
-                          </div>
-                          
-                          <div className="flex gap-2 pt-2 border-t border-zinc-900/40">
-                            <button
-                              onClick={() => setSelectedItem({ id: lec.id, title: lec.title, type: 'video' })}
-                              className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[9px] uppercase tracking-wider transition-colors cursor-pointer border border-zinc-800"
-                            >
-                              Write/Read Reviews
-                            </button>
-                            <button
-                              onClick={() => onSelectLecture(lec)}
-                              className="py-1.5 px-3 rounded-lg bg-white text-black font-mono text-[9px] uppercase tracking-wider font-bold transition-colors cursor-pointer"
-                            >
-                              Stream
-                            </button>
-                          </div>
+                return (
+                  <>
+                    {/* Live Section */}
+                    {liveLectures.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-mono font-bold text-red-500 uppercase tracking-widest border-b border-zinc-900 pb-2 flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
+                          Live lectures & streams ({liveLectures.length})
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                          {liveLectures.map((lec) => {
+                            const avgRating = itemRatings[lec.id] || 0;
+                            return (
+                              <div
+                                key={lec.id}
+                                className="bg-zinc-900/20 border border-red-950/40 rounded-xl overflow-hidden flex flex-col justify-between group relative"
+                              >
+                                <div className="relative aspect-video bg-black overflow-hidden">
+                                  <img 
+                                    src={lec.thumbnail} 
+                                    alt={lec.title} 
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="absolute top-2 right-2 bg-red-600 text-white font-mono text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow">
+                                    Live
+                                  </div>
+                                  <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/85 backdrop-blur-xs rounded-lg font-mono text-[9px] font-bold text-amber-400 tracking-wider border border-amber-400/10">
+                                    <span>{avgRating > 0 ? `★ ${avgRating.toFixed(1)} / 5` : '★ 0.0 / 5'}</span>
+                                  </div>
+                                  <div 
+                                    onClick={() => onSelectLecture(lec)}
+                                    className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                  >
+                                    <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white">
+                                      <Play className="w-3.5 h-3.5 fill-current pl-0.5" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                                  <div className="space-y-1">
+                                    <h4 className="text-xs font-bold text-white uppercase tracking-tight line-clamp-2 leading-snug">
+                                      {lec.title}
+                                    </h4>
+                                    {lec.description && (
+                                      <p className="text-[10px] text-zinc-550 line-clamp-2 leading-relaxed">
+                                        {lec.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-2 pt-2 border-t border-zinc-900/40">
+                                    <button
+                                      onClick={() => setSelectedItem({ id: lec.id, title: lec.title, type: 'video' })}
+                                      className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[9px] uppercase tracking-wider transition-colors cursor-pointer border border-zinc-800"
+                                    >
+                                      Write/Read Reviews
+                                    </button>
+                                    <button
+                                      onClick={() => onSelectLecture(lec)}
+                                      className="py-1.5 px-3 rounded-lg bg-white text-black font-mono text-[9px] uppercase tracking-wider font-bold transition-colors cursor-pointer"
+                                    >
+                                      Stream
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    )}
+
+                    {/* Standard Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-900 pb-2">
+                        Individual Video Lectures ({standardLectures.length})
+                      </h3>
+                      {standardLectures.length === 0 ? (
+                        <p className="text-xs text-zinc-500 py-6 text-center font-mono bg-zinc-950/20 rounded-xl">No standard video lectures found.</p>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                          {standardLectures.map((lec) => {
+                            const avgRating = itemRatings[lec.id] || 0;
+                            return (
+                              <div
+                                key={lec.id}
+                                className="bg-zinc-900/20 border border-zinc-900 rounded-xl overflow-hidden flex flex-col justify-between group"
+                              >
+                                <div className="relative aspect-video bg-black overflow-hidden">
+                                  <img 
+                                    src={lec.thumbnail} 
+                                    alt={lec.title} 
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/85 backdrop-blur-xs rounded-lg font-mono text-[9px] font-bold text-amber-400 tracking-wider border border-amber-400/10">
+                                    <span>{avgRating > 0 ? `★ ${avgRating.toFixed(1)} / 5` : '★ 0.0 / 5'}</span>
+                                  </div>
+                                  <div 
+                                    onClick={() => onSelectLecture(lec)}
+                                    className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                  >
+                                    <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white">
+                                      <Play className="w-3.5 h-3.5 fill-current pl-0.5" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                                  <div className="space-y-1">
+                                    <h4 className="text-xs font-bold text-white uppercase tracking-tight line-clamp-2 leading-snug">
+                                      {lec.title}
+                                    </h4>
+                                    {lec.description && (
+                                      <p className="text-[10px] text-zinc-550 line-clamp-2 leading-relaxed">
+                                        {lec.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-2 pt-2 border-t border-zinc-900/40">
+                                    <button
+                                      onClick={() => setSelectedItem({ id: lec.id, title: lec.title, type: 'video' })}
+                                      className="flex-1 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[9px] uppercase tracking-wider transition-colors cursor-pointer border border-zinc-800"
+                                    >
+                                      Write/Read Reviews
+                                    </button>
+                                    <button
+                                      onClick={() => onSelectLecture(lec)}
+                                      className="py-1.5 px-3 rounded-lg bg-white text-black font-mono text-[9px] uppercase tracking-wider font-bold transition-colors cursor-pointer"
+                                    >
+                                      Stream
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </>
         )}

@@ -21,36 +21,36 @@ export default function LectureCard({ lecture, onClick, onChannelClick, isActive
   const title = lecture.title;
   
   // Use explicit key={url} to prevent cache-lock or bleeding
-  const thumbnailUrl = lecture.thumbnailUrl;
+  const thumbnailUrl = 'thumbnailUrl' in lecture ? (lecture as any).thumbnailUrl : ('thumbnail_url' in lecture ? (lecture as any).thumbnail_url : (lecture as any).thumbnail);
   
   const duration = 'duration' in lecture ? lecture.duration : '30m';
   const subject = 'subject' in lecture ? lecture.subject : 'Academic';
-  const viewsCount = 'viewsCount' in lecture ? lecture.viewsCount : 0;
-  const isPending = 'verificationStatus' in lecture && lecture.verificationStatus === 'pending';
+  const viewsCount = 'viewsCount' in lecture ? lecture.viewsCount : ('views' in lecture ? (lecture as any).views : 0);
+  const isPending = 'verificationStatus' in lecture ? lecture.verificationStatus === 'pending' : ('verification_status' in lecture ? (lecture as any).verification_status === 'pending' : false);
 
   // Extract channel properties correctly
-  const channelName = isDto ? lecture.channel.name : ('teacherName' in lecture ? lecture.teacherName : 'Verified Educator');
+  const channelName = isDto ? lecture.channel.name : ('teacherName' in lecture ? lecture.teacherName : ('teacher_name' in lecture ? (lecture as any).teacher_name : 'Verified Educator'));
   const channelAvatar = isDto ? lecture.channel.avatarUrl : undefined;
   const subscriberText = isDto ? lecture.channel.subscriberCountFormatted : undefined;
 
   // Extract YouTube ID if valid
   const YOUTUBE_ID_REGEX = /^[A-Za-z0-9_-]{11}$/;
   let ytId = '';
+  const parsedVidId = 'video_id' in lecture ? (lecture as any).video_id : ('videoId' in lecture ? (lecture as any).videoId : '');
+  
   if (id && YOUTUBE_ID_REGEX.test(id)) {
     ytId = id;
+  } else if (parsedVidId && YOUTUBE_ID_REGEX.test(parsedVidId)) {
+    ytId = parsedVidId;
   } else if ('youtubeVideoId' in lecture && (lecture as any).youtubeVideoId && YOUTUBE_ID_REGEX.test((lecture as any).youtubeVideoId)) {
     ytId = (lecture as any).youtubeVideoId;
   } else {
-    const videoUrl = 'videoUrl' in lecture ? (lecture as any).videoUrl : '';
+    const videoUrl = 'videoUrl' in lecture ? (lecture as any).videoUrl : ('video_url' in lecture ? (lecture as any).video_url : '');
     if (videoUrl) {
-      const embedMatch = videoUrl.match(/embed\/([^?]+)/);
-      if (embedMatch && embedMatch[1] && YOUTUBE_ID_REGEX.test(embedMatch[1])) {
-        ytId = embedMatch[1];
-      } else {
-        const watchMatch = videoUrl.match(/v=([^&]+)/);
-        if (watchMatch && watchMatch[1] && YOUTUBE_ID_REGEX.test(watchMatch[1])) {
-          ytId = watchMatch[1];
-        }
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = videoUrl.match(regExp);
+      if (match && match[2] && match[2].length === 11 && YOUTUBE_ID_REGEX.test(match[2])) {
+        ytId = match[2];
       }
     }
   }
@@ -128,7 +128,7 @@ export default function LectureCard({ lecture, onClick, onChannelClick, isActive
       </div>
 
       {/* Profile Logo and Sub-row Details layout (Contract Compliant) */}
-      <div className="p-4 space-y-3.5 text-left flex-grow flex flex-col justify-between">
+      <div className="p-3.5 space-y-2.5 text-left flex-grow flex flex-col justify-between">
         <div className="space-y-2">
           {/* Lecture Title (Compelling human readable, not-larping styling) */}
           <h4 className="text-xs font-bold text-white tracking-tight leading-snug line-clamp-2 uppercase min-h-[32px] group-hover:text-white transition-colors">

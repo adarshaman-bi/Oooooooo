@@ -49,11 +49,11 @@ export const TestSeriesCard: React.FC<TestSeriesCardProps> = ({ id, item, onClic
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       onClick={onClick}
-      className="bg-zinc-950 border border-zinc-900 hover:border-zinc-750 rounded-2xl p-5 flex flex-col justify-between text-left cursor-pointer transition-all hover:shadow-[0_4px_24px_rgba(0,0,0,0.8)] relative group overflow-hidden"
+      className="bg-zinc-950 border border-zinc-900 hover:border-zinc-750 rounded-2xl p-3.5 flex flex-col justify-between text-left cursor-pointer transition-all hover:shadow-[0_4px_24px_rgba(0,0,0,0.8)] relative group overflow-hidden"
     >
       <div>
         {/* Aspect Ratio 16:9 Banner Header Image */}
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-850 mb-4 select-none pointer-events-none">
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-850 mb-3 select-none pointer-events-none">
           <SafeImage
             src={item.bannerUrl}
             alt={item.provider}
@@ -114,14 +114,14 @@ export const TestSeriesCard: React.FC<TestSeriesCardProps> = ({ id, item, onClic
         </div>
 
         {/* Short Description */}
-        <p className="text-xs text-zinc-400 line-clamp-3 font-sans leading-relaxed mb-4">
+        <p className="text-xs text-zinc-400 line-clamp-3 font-sans leading-relaxed mb-3">
           {item.shortDescription || item.description || "No description available."}
         </p>
       </div>
 
       <div>
         {/* Meta stats: Rating & Price */}
-        <div className="border-t border-zinc-900 pt-3 flex justify-between items-center text-xs font-mono">
+        <div className="border-t border-zinc-900 pt-2.5 flex justify-between items-center text-xs font-mono">
           
           {/* Star Rating or Verification Pending */}
           <div className="space-y-0.5">

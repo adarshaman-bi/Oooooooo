@@ -27,10 +27,11 @@ const getGuestProfile = (): UserProfile => ({
   examType: safeLS(LS_KEYS.GUEST_EXAM, false, 'NEET'),
   appearingYear: safeLS(LS_KEYS.GUEST_YEAR, false, DATA_DEFAULTS.APPEARING_YEAR),
   preferredSubjects: safeLS(LS_KEYS.GUEST_SUBJECTS, true, []),
-  watchedContent: [],
-  savedContent: [],
-  hiddenContent: [],
-  likedContent: [],
+  watchedContent: safeLS('biovised_pref_watchedContent', true, []),
+  savedContent: safeLS('biovised_pref_savedContent', true, []),
+  hiddenContent: safeLS('biovised_pref_hiddenContent', true, []),
+  likedContent: safeLS('biovised_pref_likedContent', true, []),
+  watchLaterContent: safeLS('biovised_pref_watchLaterContent', true, []),
   onboardingCompleted: localStorage.getItem(LS_KEYS.GUEST_UID) !== null,
   loginType: 'guest',
   createdAt: new Date().toISOString(),
@@ -262,6 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'biovised_pref_savedContent': newPrefs.savedContent !== undefined ? JSON.stringify(newPrefs.savedContent) : undefined,
         'biovised_pref_hiddenContent': newPrefs.hiddenContent !== undefined ? JSON.stringify(newPrefs.hiddenContent) : undefined,
         'biovised_pref_likedContent': newPrefs.likedContent !== undefined ? JSON.stringify(newPrefs.likedContent) : undefined,
+        'biovised_pref_watchLaterContent': newPrefs.watchLaterContent !== undefined ? JSON.stringify(newPrefs.watchLaterContent) : undefined,
         'biovised_pref_onboardingCompleted': newPrefs.onboardingCompleted !== undefined ? String(newPrefs.onboardingCompleted) : undefined,
       };
       Object.entries(prefMap).forEach(([k, v]) => {
@@ -288,6 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       savedContent: [],
       hiddenContent: [],
       likedContent: [],
+      watchLaterContent: [],
       onboardingCompleted: false,
     };
     if (isGuestSession(supabaseUser, isGuest, user?.uid)) {
@@ -295,7 +298,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'biovised_pref_examType', 'biovised_pref_appearingYear',
         'biovised_pref_preferredSubjects', 'biovised_pref_watchedContent',
         'biovised_pref_savedContent', 'biovised_pref_hiddenContent',
-        'biovised_pref_likedContent', 'biovised_pref_onboardingCompleted',
+        'biovised_pref_likedContent', 'biovised_pref_watchLaterContent',
+        'biovised_pref_onboardingCompleted',
         'biovised_is_guest',
       ];
       keys.forEach(k => { try { localStorage.removeItem(k); } catch {} });

@@ -10,16 +10,21 @@ import { normalizeYoutubeVideoResource, getDurationInSeconds, isAcademicContent 
 
 dotenv.config();
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const rawUrl = process.env.SUPABASE_URL;
+const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
+const isSupabaseConfigured = rawUrl && rawUrl.trim() !== '' && rawKey && rawKey.trim() !== '';
+
+if (!isSupabaseConfigured) {
   console.warn('\n⚠️ WARNING: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing from the environment. Please populate the .env file with your Supabase credentials to enable database connectivity.\n');
 }
 
+const supabaseUrl = isSupabaseConfigured ? rawUrl.trim() : 'https://placeholder-project.supabase.co';
+const supabaseKey = isSupabaseConfigured ? rawKey.trim() : 'placeholder-service-role-key-for-local-boot';
+
 const supabaseAdmin = createClient(
-  supabaseUrl || 'https://placeholder-project.supabase.co',
-  supabaseKey || 'placeholder-service-role-key-for-local-boot',
+  supabaseUrl,
+  supabaseKey,
   {
     auth: {
       persistSession: false,
@@ -45,7 +50,12 @@ app.use(cors({
       'https://www.biovise.vercel.app'
     ];
 
-    if (origin.includes('vercel.app') || allowedOrigins.includes(origin)) {
+    if (
+      origin.includes('vercel.app') || 
+      origin.includes('run.app') || 
+      allowedOrigins.includes(origin) ||
+      origin.startsWith('http://localhost:')
+    ) {
       return callback(null, true);
     }
 
@@ -203,7 +213,7 @@ const DEMO_LECTURES: Record<string, any[]> = {
 };
 
 // API Endpoint for getting configuration
-app.get('/api/youtube/channels', (req, res) => {
+app.get('/api/youtube/channels', (_req, res) => {
   res.json({ status: 'ok', data: VERIFIED_CHANNELS });
 });
 
@@ -2732,7 +2742,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

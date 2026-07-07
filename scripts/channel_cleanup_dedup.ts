@@ -110,10 +110,11 @@ async function refreshChannelMetadata() {
   const { data: distinctChannels, error } = await supabase
     .from('playlists')
     .select('channel_id, channel_title')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .group('channel_id, channel_title'); // Note: Supabase JS v2 might need manual dedup if group isn't supported directly in select like SQL
 
   // Manual dedup if needed
-  const uniqueChannels = Array.from(new Map((distinctChannels as any[])?.map(c => [c.channel_id, c]) || []).values()) as any[];
+  const uniqueChannels = Array.from(new Map(distinctChannels?.map(c => [c.channel_id, c]) || []).values());
 
   if (!uniqueChannels || uniqueChannels.length === 0) {
     console.log('No active channels found.');

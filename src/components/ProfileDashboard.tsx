@@ -16,7 +16,9 @@ import {
   User,
   CheckCircle,
   LogOut,
-  ShieldAlert
+  ShieldAlert,
+  Sun,
+  Moon
 } from 'lucide-react';
 import ModeratorDashboard from './ModeratorDashboard';
 
@@ -26,6 +28,8 @@ interface ProfileDashboardProps {
   activeLecture: Lecture | null;
   onLogoutSuccess?: () => void;
   onNavigate?: (view: 'explore' | 'profile' | 'moderator' | 'notifications' | 'search' | 'admin-educators') => void;
+  themeMode?: 'light' | 'dark';
+  onToggleTheme?: () => void;
 }
 
 export default function ProfileDashboard({
@@ -33,7 +37,9 @@ export default function ProfileDashboard({
   onOpenTeacher,
   activeLecture,
   onLogoutSuccess,
-  onNavigate
+  onNavigate,
+  themeMode,
+  onToggleTheme
 }: ProfileDashboardProps) {
   const { user, updatePreferences, resetPreferences, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'history' | 'watchlist' | 'following' | 'admin'>('history');
@@ -143,6 +149,29 @@ export default function ProfileDashboard({
                   {yr}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-[10px] font-mono text-brand-gray uppercase tracking-wider">Appearance Theme</label>
+            <div className="flex flex-wrap gap-1.5 md:justify-end">
+              <button
+                onClick={onToggleTheme}
+                className="flex items-center gap-1.5 text-[10px] font-mono py-1 px-3 rounded-lg font-medium border border-brand-border bg-brand-black text-brand-gray hover:text-brand-accent hover:border-zinc-400 cursor-pointer transition-all"
+                title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`}
+              >
+                {themeMode === 'dark' ? (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Light Theme</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Dark Theme</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 

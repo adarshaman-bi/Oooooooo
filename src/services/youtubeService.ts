@@ -9,11 +9,13 @@ const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || (import.meta as any).env?
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || (import.meta as any).env?.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || (import.meta as any).env?.VITE_SUPABASE_SERVICE_ROLE_KEY;
 const YOUTUBE_BASE = 'https://www.googleapis.com/youtube/v3';
+let isYoutubeServiceApiKeyValid = true;
 
 // Initialize Supabase client for caching (service role for server-side writes)
 let supabaseClient: ReturnType<typeof createClient> | null = null;
-if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const isSupabaseConfigured = SUPABASE_URL && SUPABASE_URL.trim() !== '' && SUPABASE_SERVICE_ROLE_KEY && SUPABASE_SERVICE_ROLE_KEY.trim() !== '';
+if (isSupabaseConfigured) {
+  supabaseClient = createClient(SUPABASE_URL.trim(), SUPABASE_SERVICE_ROLE_KEY.trim(), {
     auth: {
       persistSession: false,
       autoRefreshToken: false
@@ -179,10 +181,17 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
   // ═══════════════════════════════════════════════════════════════════
   if (supabaseClient) {
     try {
-      const { data: dbCache, error: dbError } = (await supabaseClient
-        .from('videos')
-        .select('*')
-        .eq('playlist_id', playlistId)
+      const isChannel = playlistId.startsWith('UC');
+      const { data: dbCache, error: dbError } = (await (isChannel
+        ? supabaseClient
+            .from('videos')
+            .select('*')
+            .eq('channel_id', playlistId)
+        : supabaseClient
+            .from('videos')
+            .select('*')
+            .eq('playlist_id', playlistId)
+      )
         .order('publish_date', { ascending: false })
         .limit(200)) as any;
 
@@ -228,10 +237,10 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
   const dbVideos: any[] = [];
 
   const apiKey = YOUTUBE_API_KEY;
-  const isDemo = !apiKey || apiKey === 'YOUR_YOUTUBE_DATA_API_V3_KEY' || apiKey.startsWith('MY_') || apiKey.length < 5;
+  const isDemo = !apiKey || apiKey === 'YOUR_YOUTUBE_DATA_API_V3_KEY' || apiKey.startsWith('MY_') || apiKey.length < 5 || !isYoutubeServiceApiKeyValid;
 
   if (isDemo) {
-    console.warn('⚠️ YouTube API Key missing. Returning stale database data if available.');
+    console.warn('⚠️ YouTube API Key missing or marked invalid. Returning stale database data if available.');
     return returnStaleDBData(playlistId);
   }
 
@@ -507,7 +516,14 @@ export const getLiveTeacherLectures = async (playlistId: string): Promise<Saniti
       }
     }
   } catch (error: any) {
-    console.error('❌ YouTube API Multi-Stage Fetch Failed:', error.response?.data || error.message);
+    const apiError = error.response?.data?.error;
+    const errorMsg = apiError
+      ? `${apiError.message} (Code: ${apiError.code}, Reason: ${apiError.errors?.[0]?.reason || 'unknown'})`
+      : error.message;
+    console.warn('[WARNING] YouTube API Multi-Stage Fetch Failed:', errorMsg);
+    if (apiError?.message?.includes('API key not valid') || apiError?.code === 400 || apiError?.code === 403) {
+      isYoutubeServiceApiKeyValid = false;
+    }
     return returnStaleDBData(playlistId);
   }
 
@@ -526,10 +542,17 @@ async function returnStaleDBData(playlistId: string): Promise<SanitizedVideo[]> 
   if (!supabaseClient) return [];
 
   try {
-    const { data: staleData } = (await supabaseClient
-      .from('videos')
-      .select('*')
-      .eq('playlist_id', playlistId)
+    const isChannel = playlistId.startsWith('UC');
+    const { data: staleData } = (await (isChannel
+      ? supabaseClient
+          .from('videos')
+          .select('*')
+          .eq('channel_id', playlistId)
+      : supabaseClient
+          .from('videos')
+          .select('*')
+          .eq('playlist_id', playlistId)
+    )
       .order('publish_date', { ascending: false })
       .limit(200)) as any;
 
