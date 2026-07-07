@@ -11,8 +11,7 @@ import LectureCard from './components/LectureCard';
 import TestSeriesDirectory from './components/TestSeriesDirectory';
 import { TEST_SERIES_CATALOG } from './data/testSeriesData';
 import HomeDashboard from './components/HomeDashboard';
-import VideoPlayerContainer from './components/VideoPlayerContainer';
-import LectureDetailView from './components/LectureDetailView';
+import VideoPlayer from './components/VideoPlayer';
 import DetailsModal from './components/DetailsModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicRating } from './components/DynamicRating';
@@ -562,7 +561,16 @@ function AppContent() {
 
   // Modals managers
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [detailModal, setDetailModal] = useState<{ id: string; type: 'teacher' | 'institute' } | null>(null);
+  const [detailModalState, setDetailModalState] = useState<{ id: string; type: 'teacher' | 'institute' } | null>(null);
+  const setDetailModal = (modal: { id: string; type: 'teacher' | 'institute' } | null) => {
+    if (modal && modal.type === 'teacher') {
+      setSelectedTeacherId(modal.id);
+      setCurrentView('teacher-detail');
+    } else {
+      setDetailModalState(modal);
+    }
+  };
+  const detailModal = detailModalState;
   const [specsModalOpen, setSpecsModalOpen] = useState(false);
 
   // Database loaded sets initialized to safe empty arrays to prevent hydration mismatches
@@ -2033,40 +2041,12 @@ function AppContent() {
               {activeLecture ? (
                 /* Dedicated Video Player View (Plays in its own clean page to prevent design collapse) */
                 <ErrorBoundary>
-                  <div className="min-h-[80vh] flex flex-col pb-4 text-left">
-                    <div className="w-full max-w-7xl mx-auto px-4 py-4">
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                        {/* Video Player Column */}
-                        <div className="lg:col-span-2 space-y-4">
-                          <VideoPlayerContainer
-                            lecture={activeLecture}
-                            onClose={handleBackNavigation}
-                            playlistLectures={lectures.filter(l => l.playlistId === activeLecture.playlistId)}
-                            onSelectLecture={setActiveLecture}
-                          />
-                          {/* Detail view below player on mobile */}
-                          <div className="block lg:hidden">
-                            <LectureDetailView
-                              lecture={activeLecture}
-                              onSelectLecture={setActiveLecture}
-                              onClose={handleBackNavigation}
-                              onOpenAuth={() => setAuthModalOpen(true)}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Detail view sidebar on desktop */}
-                        <div className="hidden lg:block lg:col-span-1">
-                          <LectureDetailView
-                            lecture={activeLecture}
-                            onSelectLecture={setActiveLecture}
-                            onClose={handleBackNavigation}
-                            onOpenAuth={() => setAuthModalOpen(true)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <VideoPlayer
+                    lecture={activeLecture}
+                    onClose={handleBackNavigation}
+                    playlistLectures={lectures.filter(l => l.playlistId === activeLecture.playlistId)}
+                    onSelectLecture={setActiveLecture}
+                  />
                 </ErrorBoundary>
               ) : (
                 <>

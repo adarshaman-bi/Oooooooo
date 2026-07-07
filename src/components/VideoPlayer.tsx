@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
+import { usePlayer } from '../context/PlayerContext';
 import {
   Play,
   Pause,
@@ -81,7 +82,7 @@ export default function VideoPlayer({
   const { user, isGuest, updatePreferences } = useAuth();
 
   // Playback states synchronized with YT IFrame Player API
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying, setIsPlaying } = usePlayer();
   const [hasPlayed, setHasPlayed] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [currentTimeSec, setCurrentTimeSec] = useState(0);

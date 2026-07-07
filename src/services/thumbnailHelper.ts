@@ -60,8 +60,9 @@ export const getPlaylistThumbnail = (playlist: Playlist): string => {
 };
 
 export const getLectureThumbnail = (lec: Lecture): string => {
-  if (lec.thumbnailUrl && (lec.thumbnailUrl.startsWith('http://') || lec.thumbnailUrl.startsWith('https://'))) {
-    return lec.thumbnailUrl;
+  const thumb = lec.thumbnailUrl || (lec as any).thumbnail;
+  if (thumb && (thumb.startsWith('http://') || thumb.startsWith('https://'))) {
+    return thumb;
   }
 
   const YOUTUBE_ID_REGEX = /^[A-Za-z0-9_-]{11}$/;

@@ -57,11 +57,12 @@ export default function LectureDetailView({
   // Active tab state
   const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');
 
-  // Find teacher in discography json layer
   const teacherProfile = React.useMemo(() => {
+    const lectureTeacherName = lecture.teacherName || '';
+    const lectureTeacherId = lecture.teacherId || '';
     return teachersDiscography.find(t => 
-      t.teacher_name.toLowerCase() === lecture.teacherName.toLowerCase() ||
-      lecture.teacherId.toLowerCase().includes(t.teacher_name.toLowerCase().replace(/\s+/g, ''))
+      (t.teacher_name && t.teacher_name.toLowerCase() === lectureTeacherName.toLowerCase()) ||
+      (t.teacher_name && lectureTeacherId.toLowerCase().includes(t.teacher_name.toLowerCase().replace(/\s+/g, '')))
     );
   }, [lecture]);
 

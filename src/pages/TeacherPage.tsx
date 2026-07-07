@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import TeacherProfileDetail from '../components/TeacherProfileDetail';
 import DetailsModal from '../components/DetailsModal';
-import VideoPlayerContainer from '../components/VideoPlayerContainer';
+import VideoPlayer from '../components/VideoPlayer';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import { toggleFollow } from '../services/dbService';
@@ -73,20 +73,10 @@ const TeacherPage: React.FC<TeacherPageProps> = ({ teacherId: teacherIdProp }) =
   // Handle playing video lectures in a pristine fullscreen focus container
   if (activeLecture) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col p-4 md:p-8">
-        <div className="max-w-5xl mx-auto w-full space-y-4">
-          <button 
-            onClick={() => setActiveLecture(null)}
-            className="text-zinc-400 hover:text-white flex items-center gap-1.5 text-xs font-mono tracking-wider uppercase bg-transparent border-none cursor-pointer"
-          >
-            ← Back to Teacher Profile
-          </button>
-          <VideoPlayerContainer 
-            lecture={activeLecture} 
-            onClose={() => setActiveLecture(null)}
-          />
-        </div>
-      </div>
+      <VideoPlayer 
+        lecture={activeLecture} 
+        onClose={() => setActiveLecture(null)}
+      />
     );
   }
 
