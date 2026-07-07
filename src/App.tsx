@@ -90,12 +90,6 @@ import {
 import { getPlaylistThumbnail, getLectureThumbnail } from './services/thumbnailHelper';
 import { BatchCard } from './components/BatchCard';
 import { InstituteCard } from './components/InstituteCard';
-import TeacherPage from './pages/TeacherPage';
-import TeacherPage from './pages/TeacherPage';
-import TeacherPage from './pages/TeacherPage';
-import TeacherPage from './pages/TeacherPage';
-import TeacherPage from './pages/TeacherPage';
-import TeacherPage from './pages/TeacherPage';
 
 function LectureCardSkeleton() {
   return (

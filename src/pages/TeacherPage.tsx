@@ -41,7 +41,7 @@ const TeacherPage: React.FC<TeacherPageProps> = ({ teacherId: teacherIdProp }) =
           .from('videos')
           .select('*')
           .eq('teacher_id', teacherId)
-          .eq('source_type', 'live')
+          .eq('content_type', 'live')
           .eq('is_active', true)
           .order('publish_date', { ascending: false })
           .limit(20);
