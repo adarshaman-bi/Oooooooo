@@ -54,6 +54,7 @@ import { ViewName, ExploreTab } from './config/constants';
 import YoutubeThumbnailImg from './components/YoutubeThumbnailImg';
 import VideoLibrary from './components/VideoLibrary';
 import teachersData from './config/teachersData.json';
+import TeacherPage from './pages/TeacherPage';
 import {
   Star,
   Award,
@@ -89,6 +90,12 @@ import {
 import { getPlaylistThumbnail, getLectureThumbnail } from './services/thumbnailHelper';
 import { BatchCard } from './components/BatchCard';
 import { InstituteCard } from './components/InstituteCard';
+import TeacherPage from './pages/TeacherPage';
+import TeacherPage from './pages/TeacherPage';
+import TeacherPage from './pages/TeacherPage';
+import TeacherPage from './pages/TeacherPage';
+import TeacherPage from './pages/TeacherPage';
+import TeacherPage from './pages/TeacherPage';
 
 function LectureCardSkeleton() {
   return (
@@ -1677,6 +1684,14 @@ function AppContent() {
         return 0;
     }
   };
+
+  const location = window.location.pathname;
+  const teacherRouteMatch = location.match(/^\/teacher\/([^/]+)$/) || location.match(/^\/teachers\/([^/]+)$/);
+  const teacherIdFromRoute = teacherRouteMatch?.[1];
+
+  if (teacherIdFromRoute) {
+    return <TeacherPage teacherId={teacherIdFromRoute} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#000000] text-[#FFFFFF] flex flex-col font-sans selection:bg-white selection:text-black transition-colors duration-200">

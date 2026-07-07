@@ -27,6 +27,30 @@ export interface UserProfile {
   onboardingCompleted?: boolean;
 }
 
+export interface Teacher {
+  id: string;
+  name: string;
+  bio?: string;
+  specialization?: string;
+  avatar_url?: string;
+  social_links?: Record<string, string>;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Video {
+  id: string;
+  title?: string;
+  description?: string;
+  thumbnail_url?: string;
+  teacher_id?: string;
+  source_type?: string;
+  is_active?: boolean;
+  publish_date?: string;
+  [key: string]: unknown;
+}
+
 export interface TeacherProfile {
   id: string;
   name: string;

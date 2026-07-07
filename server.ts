@@ -34,7 +34,27 @@ const PORT = Number(process.env.PORT) || 3000;
 import { TEACHER_TO_CHANNEL } from './src/config/constants.js';
 
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://biovise.vercel.app',
+      'https://www.biovise.vercel.app'
+    ];
+
+    if (origin.includes('vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'apikey', 'prefer']
+}));
 app.use(express.json());
 app.use('/api/youtube', youtubeRouter);
 app.use(lectureRouter);
