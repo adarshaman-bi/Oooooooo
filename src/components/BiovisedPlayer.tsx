@@ -22,6 +22,11 @@ import {
 
 const PROGRESS_FILL = "#ffffff"; // played bar + thumb — white, the only "highlight" colour anywhere, matching real YouTube
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+// YouTube's IFrame API frequently never reports real quality levels (a known,
+// long-standing deprecation on their end) — without a fallback, the Quality
+// submenu is stuck on "Detecting available resolutions…" forever. This list
+// is shown after a short grace period if the API hasn't given us anything.
+const FALLBACK_QUALITIES = ["hd1080", "hd720", "large", "medium"];
 
 export interface Lecture {
   id: string;
@@ -226,6 +231,7 @@ export default function BiovisedPlayer({
   const [networkError, setNetworkError] = useState(false);
   const [quality, setQuality] = useState("auto");
   const [availableQualities, setAvailableQualities] = useState<string[]>([]);
+  const [qualityDetectTimedOut, setQualityDetectTimedOut] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
@@ -326,6 +332,13 @@ export default function BiovisedPlayer({
   }, [videoId, reloadKey]);
 
   useEffect(() => {
+    if (!playerReady) return;
+    setQualityDetectTimedOut(false);
+    const t = setTimeout(() => setQualityDetectTimedOut(true), 5000);
+    return () => clearTimeout(t);
+  }, [playerReady]);
+
+  useEffect(() => {
     pollRef.current = setInterval(() => {
       const p = playerRef.current;
       if (p?.getCurrentTime) {
@@ -358,12 +371,6 @@ export default function BiovisedPlayer({
     clearTimeout(hideTimer.current);
     if (playing && !showSettings) hideTimer.current = setTimeout(() => setShowControls(false), 3000);
   }, [playing, showSettings]);
-
-  const wakeControlsForceHide = useCallback(() => {
-    setShowControls(true);
-    clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setShowControls(false), 2500);
-  }, []);
 
   useEffect(() => {
     wakeControls();
@@ -540,8 +547,11 @@ export default function BiovisedPlayer({
 
   // ---- tap zones ----
   const handleZoneClick = (side: "left" | "center" | "right") => () => {
-    if (locked) { wakeControls(); return; }
-    if (dragInfo.current.moved) return;
+    if (locked) {
+      wakeControls();
+      return;
+    }
+    if (dragInfo.current.moved) return; // a brightness/volume drag just ended here, not a tap
     const now = Date.now();
     if (side !== "center" && lastTap.current.side === side && now - lastTap.current.time < 300) {
       seekBy(side === "left" ? -10 : 10, side);
@@ -549,9 +559,17 @@ export default function BiovisedPlayer({
     } else {
       lastTap.current = { side, time: now };
       if (side === "center") {
-        setTimeout(() => { if (Date.now() - lastTap.current.time >= 280) togglePlay(); }, 300);
+        setTimeout(() => {
+          if (Date.now() - lastTap.current.time >= 280) togglePlay();
+        }, 300);
+      } else if (showControls) {
+        // Controls already visible — this tap means "hide them", so cancel
+        // any pending auto-hide timer and hide immediately instead of letting
+        // both this and wakeControls() fight over the state.
+        clearTimeout(hideTimer.current);
+        setShowControls(false);
       } else {
-        wakeControlsForceHide();
+        wakeControls();
       }
     }
   };
@@ -572,7 +590,7 @@ export default function BiovisedPlayer({
         dragInfo.current.moved = true;
         setSliderShown(side === "left" ? "brightness" : "volume");
       }
-      const next = Math.min(1, Math.max(0, startVal + dy / 120));
+      const next = Math.min(1, Math.max(0, startVal + dy / 140));
       if (side === "left") setBrightness(next);
       else setVolumeClamped(next * 100);
     };
@@ -591,7 +609,7 @@ export default function BiovisedPlayer({
     };
   }, [setVolumeClamped]);
 
-  // ---- precision-aware scrubbing ----
+  // ---- progress bar: gentle, precision-aware scrubbing ----
   const pctFromEvent = (clientX: number) => {
     const rect = barRef.current!.getBoundingClientRect();
     return Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
@@ -599,35 +617,35 @@ export default function BiovisedPlayer({
   const onBarDown = (e: React.PointerEvent) => {
     if (locked) return;
     barRef.current?.setPointerCapture?.(e.pointerId);
-    const initialPct = pctFromEvent(e.clientX);
-    scrubRef.current = { active: true, startY: e.clientY, baseVal: initialPct };
+    scrubRef.current = { active: true, startY: e.clientY, baseVal: pctFromEvent(e.clientX) };
     setScrubbing(true);
-    const initialTime = initialPct * duration;
-    setDragTime(initialTime);
-    playerRef.current?.seekTo(initialTime, false);
+    setDragTime(pctFromEvent(e.clientX) * duration);
   };
+  const dragTimeRef = useRef<number | null>(null);
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       if (!scrubRef.current.active) return;
+      // YouTube-style scrub: the thumb tracks the finger 1:1 along the bar,
+      // no vertical-distance damping — that was making the bar feel like it
+      // "stuck" after a small drag whenever the finger drifted vertically.
       const rawPct = pctFromEvent(e.clientX);
-      const nextTime = rawPct * duration;
-      setDragTime(nextTime);
-      playerRef.current?.seekTo(nextTime, false);
+      const t = rawPct * duration;
+      dragTimeRef.current = t;
+      setDragTime(t);
     };
     const onUp = (e: PointerEvent) => {
       if (scrubRef.current.active) {
         try {
           barRef.current?.releasePointerCapture?.(e.pointerId);
         } catch {}
-        const finalPct = pctFromEvent(e.clientX);
-        const finalTime = finalPct * duration;
-        if (playerRef.current) {
-          playerRef.current.seekTo(finalTime, true);
+        if (playerRef.current && dragTimeRef.current != null) {
+          playerRef.current.seekTo(dragTimeRef.current, true);
         }
         scrubRef.current.active = false;
         setScrubbing(false);
         setPrecisionMode(false);
         setDragTime(null);
+        dragTimeRef.current = null;
         wakeControls();
       }
     };
@@ -637,8 +655,7 @@ export default function BiovisedPlayer({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [duration, dragTime]);
+  }, [duration, wakeControls]);
 
   const displayTime = scrubbing && dragTime != null ? dragTime : current;
   const progressPct = duration ? (displayTime / duration) * 100 : 0;
@@ -716,7 +733,19 @@ export default function BiovisedPlayer({
           <div className="h-full cursor-pointer" style={isTouchDevice ? { touchAction: "none" } : undefined} onPointerDown={onPointerDown("right")} onClick={handleZoneClick("right")} />
         </div>
       )}
-      {locked && <div className="absolute inset-0 z-10 cursor-pointer" onClick={() => setShowControls((s) => !s)} />}
+      {locked && (
+        <div
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={() => {
+            if (showControls) {
+              clearTimeout(hideTimer.current);
+              setShowControls(false);
+            } else {
+              wakeControls();
+            }
+          }}
+        />
+      )}
 
       {seekFlash && <SeekFlash key={seekFlash.key} side={seekFlash.side} amount={seekFlash.amount} onDone={() => setSeekFlash(null)} />}
       {isTouchDevice && sliderShown === "brightness" && (
@@ -724,13 +753,13 @@ export default function BiovisedPlayer({
           side="left"
           value={brightness}
           icon={brightness < 0.5 
-            ? <Moon size={11} className={iconCls} strokeWidth={2.25} />
-            : <Sun size={11} className={iconCls} strokeWidth={2.25} />
+            ? <Moon size={20} className={iconCls} strokeWidth={2.25} />
+            : <Sun size={20} className={iconCls} strokeWidth={2.25} />
           }
         />
       )}
       {isTouchDevice && sliderShown === "volume" && (
-        <VerticalSlider side="right" value={volume / 100} icon={<VolumeIcon muted={muted} volume={volume} size={11} className={iconCls} />} />
+        <VerticalSlider side="right" value={volume / 100} icon={<VolumeIcon muted={muted} volume={volume} size={20} className={iconCls} />} />
       )}
 
       {(showControls || !playing) && !locked && (
@@ -778,11 +807,11 @@ export default function BiovisedPlayer({
           : { paddingTop: "3.25rem" }
         }
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <button onClick={onClose} className="shrink-0" aria-label="Back">
             <ChevronLeft size={22} className={iconCls} strokeWidth={2.25} />
           </button>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-white text-[13px] font-semibold truncate leading-tight">{lecture.title || "Untitled lecture"}</p>
             {(lecture.subject || lecture.teacherName) && (
               <p className="text-white/60 text-[11px] leading-tight truncate">
@@ -792,7 +821,7 @@ export default function BiovisedPlayer({
           </div>
         </div>
         {!locked && (
-          <button onClick={() => { setLocked(true); wakeControls(); }} className="shrink-0 pl-2" aria-label="Lock controls">
+          <button onClick={() => { setLocked(true); wakeControls(); }} className="shrink-0 pl-3" aria-label="Lock controls">
             <Lock size={18} className={iconCls} strokeWidth={2.25} />
           </button>
         )}
@@ -836,13 +865,15 @@ export default function BiovisedPlayer({
             {showSettings === "quality" && (
               <SubMenu title="Quality" onBack={() => setShowSettings("root")}>
                 <OptionRow label="Auto" active={quality === "auto"} onClick={() => changeQuality("auto")} />
-                {availableQualities.length === 0 ? (
-                  <div className="px-3 py-2.5 text-white/50 text-xs italic">Detecting available resolutions…</div>
-                ) : (
+                {availableQualities.length === 0 && !qualityDetectTimedOut && (
+                  <div className="px-3 py-2.5 text-white/40 text-[12px] italic">Detecting available resolutions…</div>
+                )}
+                {availableQualities.length === 0 && qualityDetectTimedOut &&
+                  FALLBACK_QUALITIES.map((q) => <OptionRow key={q} label={qualityLabel(q)} active={quality === q} onClick={() => changeQuality(q)} />)}
+                {availableQualities.length > 0 &&
                   availableQualities
                     .filter((q) => q !== "auto")
-                    .map((q) => <OptionRow key={q} label={qualityLabel(q)} active={quality === q} onClick={() => changeQuality(q)} />)
-                )}
+                    .map((q) => <OptionRow key={q} label={qualityLabel(q)} active={quality === q} onClick={() => changeQuality(q)} />)}
               </SubMenu>
             )}
             {showSettings === "captions" && (
@@ -1066,12 +1097,12 @@ function ShortcutRow({ keys, action }: { keys: string; action: string }) {
 
 function VerticalSlider({ side, value, icon }: { side: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className={`absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-none ${side === "left" ? "left-4" : "right-4"}`}>
-      <div className="w-1 h-12 rounded-full bg-black/60 overflow-hidden relative">
+    <div className={`absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none ${side === "left" ? "left-4" : "right-4"}`}>
+      <div className="w-2 h-28 rounded-full bg-white/25 overflow-hidden relative">
         {/* fill from bottom */}
         <div className="absolute bottom-0 left-0 right-0 bg-white transition-none" style={{ height: `${Math.round(value * 100)}%` }} />
       </div>
-      <div className="w-5 h-5 rounded-full bg-black/40 flex items-center justify-center border border-white/5">
+      <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center border border-white/5">
         {icon}
       </div>
     </div>

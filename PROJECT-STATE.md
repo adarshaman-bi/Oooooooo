@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Patched 5 target issues based on visual bug list: (1) Resolved controls wake/sleep race condition by unifying zone tap and locked overlay checks to hide immediately if open (clearing timer) or call `wakeControls()`; (2) fixed seek progress bar dragging by removing vertical dampening to ensure 1:1 cursor tracking and refactored the pointermove/pointerup `useEffect` dependencies using a ref snapshot (`dragTimeRef`) to prevent jank; (3) thickened volume/brightness overlays to `w-2 h-28`, set icon size to `size={20}`, and lowered divisor to `140` to increase drag sensitivity; (4) added a `5s` timeout grace period to fall back to a static quality levels array (`FALLBACK_QUALITIES`) if YouTube's API fails to report available qualities; and (5) expanded top bar title width with `flex-1 min-w-0` and increased Lock button spacing to `pl-3`.
+- **Why**: Fix touch-drag dropouts, prevent settings resolution hangs, eliminate title bar overlap crowding, and ensure tap overlay transitions never race with auto-hide intervals.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
 - **Change**: Executed Final UX Polish Pass: (1) Relocated Previous/Next buttons beside Play/Pause directly below the progress bar and cleaned up the mobile duplicate footer; (2) added hardware-accelerated momentum scroll parameters to Speed and Quality settings dropdowns to prevent lag/stutter; (3) added `3.25rem` top padding to the title bar overlay to prevent overlapping with native YouTube iframe title elements; (4) unified tap zone control auto-hiding to trigger a consistent 2.5s fade countdown across playing and paused states; (5) rebuilt seek dragging to bind pointer capture directly to `barRef` and map raw horizontal positions 1:1, allowing smooth, continuous scrubbing; (6) streamlined volume/brightness sliders to `1px` thin premium tracks with moon/sun icon sizing; and (7) accelerated seek double-tap indicators to flash instantly (350ms total).
 - **Why**: Solidify visual constraints, enhance drag accuracy, resolve title collisions, and bring overlay HUD layouts in line with premium native OTT players.
 
