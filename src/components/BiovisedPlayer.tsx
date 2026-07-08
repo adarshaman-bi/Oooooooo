@@ -20,8 +20,8 @@ import {
  *   keyboard shortcut set.
  */
 
-const PROGRESS_FILL = "#ffffff";
-const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const PROGRESS_FILL = "#ffffff"; // played bar + thumb — white, the only "highlight" colour anywhere, matching real YouTube
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 export interface Lecture {
   id: string;
@@ -146,6 +146,29 @@ function loadYouTubeApi(): Promise<any> {
     document.head.appendChild(tag);
   });
   return ytApiPromise;
+}
+
+function preconnectYouTube() {
+  const hosts = ["https://www.youtube.com", "https://i.ytimg.com", "https://www.google.com"];
+  for (const href of hosts) {
+    if (document.head.querySelector(`link[rel="preconnect"][href="${href}"]`)) continue;
+    const link = document.createElement("link");
+    link.rel = "preconnect";
+    link.href = href;
+    link.crossOrigin = "";
+    document.head.appendChild(link);
+  }
+}
+
+// Fire the moment this component's code is loaded into the app — e.g. as soon as a
+// lecture LIST page (which imports this component) mounts, not gated behind the
+// student actually tapping a specific video. This is the real fix for the slow
+// first-load feeling: script download + DNS/TLS handshake happen in the background
+// while the student is still scrolling/choosing, so by the time they tap play the
+// heavy network setup is usually already warm.
+if (typeof window !== "undefined") {
+  preconnectYouTube();
+  loadYouTubeApi();
 }
 
 function useTouchDevice() {
@@ -635,13 +658,13 @@ export default function BiovisedPlayer({
           the user's own play button triggers PLAYING for the first time.
           hasStartedOnce never resets — removed permanently after first playback. */}
       {!hasStartedOnce && (
-        <div className="absolute inset-0 z-[15] bg-black flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 z-20 bg-black flex items-center justify-center pointer-events-none">
           {!playerReady && <span className="text-white/40 text-xs">Loading video…</span>}
         </div>
       )}
 
       {hasStartedOnce && buffering && (
-        <div className="absolute inset-0 z-[15] flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
           <div className="w-8 h-8 rounded-full border-2 border-white/25 border-t-white animate-spin" />
         </div>
       )}
@@ -770,9 +793,13 @@ export default function BiovisedPlayer({
             {showSettings === "quality" && (
               <SubMenu title="Quality" onBack={() => setShowSettings("root")}>
                 <OptionRow label="Auto" active={quality === "auto"} onClick={() => changeQuality("auto")} />
-                {(availableQualities.length ? availableQualities : ["hd1080", "hd720", "large", "medium", "small"])
-                  .filter((q) => q !== "auto")
-                  .map((q) => <OptionRow key={q} label={qualityLabel(q)} active={quality === q} onClick={() => changeQuality(q)} />)}
+                {availableQualities.length === 0 ? (
+                  <div className="px-3 py-2.5 text-white/50 text-xs italic">Detecting available resolutions…</div>
+                ) : (
+                  availableQualities
+                    .filter((q) => q !== "auto")
+                    .map((q) => <OptionRow key={q} label={qualityLabel(q)} active={quality === q} onClick={() => changeQuality(q)} />)
+                )}
               </SubMenu>
             )}
             {showSettings === "captions" && (
@@ -1005,22 +1032,56 @@ function VerticalSlider({ side, value, icon }: { side: string; value: number; ic
 }
 
 function SeekFlash({ side, amount, onDone }: { side: string; amount: number; onDone: () => void }) {
+  const [active, setActive] = useState(false);
+
   useEffect(() => {
-    const t = setTimeout(onDone, 700);
-    return () => clearTimeout(t);
+    // Mount-triggered state flip using requestAnimationFrame
+    const frame = requestAnimationFrame(() => {
+      setActive(true);
+    });
+
+    // Start fade out after 500ms
+    const fadeOutTimer = setTimeout(() => {
+      setActive(false);
+    }, 500);
+
+    // Call onDone when the transition finishes (approx 800ms total)
+    const doneTimer = setTimeout(() => {
+      onDone();
+    }, 800);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(fadeOutTimer);
+      clearTimeout(doneTimer);
+    };
   }, [onDone]);
+
+  const isLeft = side === "left";
+
   return (
     <div
-      className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none ${side === "left" ? "left-[15%]" : "right-[15%]"}`}
-      style={{ animation: "bvSeekPop 0.45s cubic-bezier(.34,1.56,.64,1) forwards" }}
+      className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-300 ease-out ${
+        isLeft ? "left-[15%]" : "right-[15%]"
+      } ${
+        active ? "opacity-100 scale-100" : "opacity-0 scale-75"
+      }`}
     >
-      <style>{`@keyframes bvSeekPop{0%{opacity:0;transform:translateY(-50%) scale(.5)}60%{transform:translateY(-50%) scale(1.08)}100%{opacity:1;transform:translateY(-50%) scale(1)}}`}</style>
-      <div className="w-14 h-14 rounded-full bg-black/55 backdrop-blur-sm flex flex-col items-center justify-center gap-0.5">
-        {side === "left"
-          ? <RotateCcw size={16} className="text-white" strokeWidth={2.25} />
-          : <RotateCw size={16} className="text-white" strokeWidth={2.25} />
-        }
-        <span className="text-[9px] font-bold text-white">{amount}s</span>
+      <div className="w-20 h-20 rounded-full bg-black/65 backdrop-blur-sm flex flex-col items-center justify-center gap-1 shadow-lg border border-white/10">
+        <div className="flex items-center text-white select-none">
+          {isLeft ? (
+            <>
+              <ChevronLeft size={20} className="-mr-1.5" strokeWidth={2.5} />
+              <ChevronLeft size={20} strokeWidth={2.5} />
+            </>
+          ) : (
+            <>
+              <ChevronRightIcon size={20} strokeWidth={2.5} />
+              <ChevronRightIcon size={20} className="-ml-1.5" strokeWidth={2.5} />
+            </>
+          )}
+        </div>
+        <span className="text-[11px] font-bold text-white tracking-wide">{amount}s</span>
       </div>
     </div>
   );

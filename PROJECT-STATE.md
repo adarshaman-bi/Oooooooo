@@ -48,6 +48,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 ### July 8, 2026
 - **Tool**: Antigravity
 - **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Applied five targeted fixes: (1) replaced arbitrary `z-[15]` with valid `z-20` z-indices to prevent YouTube title leaks, (2) filtered out fake resolutions in the Quality settings menu and added a loading detection placeholder, (3) set the minimum speed rate to 0.5x, (4) added animated Pop-in/out double-chevron circular badges for seek acknowledgment, (5) preconnected/preloaded the YouTube IFrame API script on component module import.
+- **Why**: Enhance visual fidelity, fix resolution menu drift, speed up video load times, and align UX with strict design specifications.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
   - [src/components/AuthModal.tsx](file:///c:/onion.so/src/components/AuthModal.tsx)
 - **Change**: Restored guest login option unconditionally by removing the restrictive environment variable check (`VITE_ENABLE_GUEST_MODE`).
 - **Why**: The login option was completely hidden when VITE_ENABLE_GUEST_MODE was not explicitly set to `'true'` in `.env`.
