@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Configured custom player stacking precedence over YouTube's native title overlay: (1) explicitly set the underlying iframe wrapper container to `z-0` to force correct browser painting priority, and (2) shifted the custom top bar background gradient to start with a solid opaque black (`from-black via-black/70`) at the very top.
+- **Why**: Prevent YouTube's native title text from showing through the translucent top bar gradient when active, ensuring only the custom platform video player title is visible.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
 - **Change**: Made the custom player top bar `paddingTop` conditional based on device presence: (1) uses standard compact margins (`1rem` / `max(1rem, env(safe-area-inset-top))`) on mobile touch devices, and (2) retains the larger anti-collision spacing offset (`3.25rem` / `max(3.25rem, env(safe-area-inset-top))`) strictly on desktop devices.
 - **Why**: Prevent the title bar overlay from pushing down too low inside compact mobile screens, keeping it from colliding with the centered play button while retaining YouTube overlap defenses on desktop.
 

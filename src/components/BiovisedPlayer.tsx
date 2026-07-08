@@ -701,7 +701,7 @@ export default function BiovisedPlayer({
       onPointerMove={wakeControls}
     >
       {/* iframe — brightness filter applied here so the black cover below sits outside it */}
-      <div className="absolute inset-0 pointer-events-none" style={{ filter: `brightness(${0.35 + brightness * 0.9})` }}>
+      <div className="absolute inset-0 z-0 pointer-events-none" style={{ filter: `brightness(${0.35 + brightness * 0.9})` }}>
         <div ref={iframeHostRef} key={reloadKey} className="w-full h-full" />
       </div>
 
@@ -801,7 +801,7 @@ export default function BiovisedPlayer({
 
       {/* top bar */}
       <div
-        className={`absolute top-0 left-0 right-0 z-30 flex items-start justify-between p-3 bg-gradient-to-b from-black/85 via-black/40 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`absolute top-0 left-0 right-0 z-30 flex items-start justify-between p-3 bg-gradient-to-b from-black via-black/70 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         style={videoOnly
           ? {
               paddingTop: isTouchDevice ? "max(1rem, env(safe-area-inset-top))" : "max(3.25rem, env(safe-area-inset-top))",
