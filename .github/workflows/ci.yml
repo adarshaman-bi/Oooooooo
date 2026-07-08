@@ -24,12 +24,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install TruffleHog
-        run: |
-          curl -sSfL https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_linux_amd64.tar.gz \
-            | tar xz -C /tmp
-      - name: Scan for secrets
-        run: /tmp/trufflehog filesystem --only-verified "${{ github.workspace }}"
+      - name: TruffleHog Secret Scan
+        uses: docker://trufflesecurity/trufflehog:latest
+        with:
+          args: filesystem --only-verified /github/workspace
 
   # ── 2. Dependency Audit ────────────────────────────────────────────
   deps:
