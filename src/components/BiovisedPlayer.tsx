@@ -523,7 +523,12 @@ export default function BiovisedPlayer({
       if (side === "center") {
         setTimeout(() => { if (Date.now() - lastTap.current.time >= 280) togglePlay(); }, 300);
       } else {
-        setShowControls((s) => !s);
+        if (showControls) {
+          setShowControls(false);
+          clearTimeout(hideTimer.current);
+        } else {
+          wakeControls();
+        }
       }
     }
   };
@@ -769,7 +774,7 @@ export default function BiovisedPlayer({
       {showSettings && (
         <>
           <div className="absolute inset-0 z-30" onClick={closeSettings} />
-          <div className="absolute top-12 right-3 z-40 w-56 rounded-xl bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 overflow-hidden text-white text-[13px] shadow-xl">
+          <div className="absolute top-12 right-3 bottom-3 z-40 w-56 max-h-[calc(100%-3.75rem)] rounded-xl bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 overflow-y-auto text-white text-[13px] shadow-xl">
             {showSettings === "root" && (
               <>
                 <SettingsRow label="Speed" value={`${speed}x`} onClick={() => setShowSettings("speed")} />
@@ -1040,10 +1045,10 @@ function SeekFlash({ side, amount, onDone }: { side: string; amount: number; onD
       setActive(true);
     });
 
-    // Start fade out after 500ms
+    // Start fade out after 650ms
     const fadeOutTimer = setTimeout(() => {
       setActive(false);
-    }, 500);
+    }, 650);
 
     // Call onDone when the transition finishes (approx 800ms total)
     const doneTimer = setTimeout(() => {
@@ -1067,21 +1072,21 @@ function SeekFlash({ side, amount, onDone }: { side: string; amount: number; onD
         active ? "opacity-100 scale-100" : "opacity-0 scale-75"
       }`}
     >
-      <div className="w-20 h-20 rounded-full bg-black/65 backdrop-blur-sm flex flex-col items-center justify-center gap-1 shadow-lg border border-white/10">
+      <div className="w-12 h-12 rounded-full bg-black/45 flex flex-col items-center justify-center gap-0.5 shadow-lg border border-white/10">
         <div className="flex items-center text-white select-none">
           {isLeft ? (
             <>
-              <ChevronLeft size={20} className="-mr-1.5" strokeWidth={2.5} />
-              <ChevronLeft size={20} strokeWidth={2.5} />
+              <ChevronLeft size={13} className="-mr-1" strokeWidth={2.5} />
+              <ChevronLeft size={13} strokeWidth={2.5} />
             </>
           ) : (
             <>
-              <ChevronRightIcon size={20} strokeWidth={2.5} />
-              <ChevronRightIcon size={20} className="-ml-1.5" strokeWidth={2.5} />
+              <ChevronRightIcon size={13} strokeWidth={2.5} />
+              <ChevronRightIcon size={13} className="-ml-1" strokeWidth={2.5} />
             </>
           )}
         </div>
-        <span className="text-[11px] font-bold text-white tracking-wide">{amount}s</span>
+        <span className="text-[9px] font-bold text-white tracking-wide">{amount}s</span>
       </div>
     </div>
   );

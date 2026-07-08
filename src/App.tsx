@@ -1739,6 +1739,8 @@ function AppContent() {
           setSearchQuery('');
           setCurrentView('explore');
           setActiveExploreTab('home');
+          setActiveLecture(null);
+          setDetailModal(null);
         }}
         currentView={currentView as any}
         searchVal={searchQuery}
