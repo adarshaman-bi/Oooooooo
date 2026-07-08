@@ -551,4 +551,96 @@ const dataModel = `# Data Model
 
 fs.writeFileSync(path.join(VAULT_ROOT, '03-Architecture/Data-Model.md'), dataModel);
 
+// ─── Write Conceptual MOC Hubs to Interconnect the Graph ────────────────
+const hubs = {
+  // Folder Hubs
+  '01-Frontend.md': `# Frontend Layer 🎨
+
+Provides the user interface, routing controllers, and client state handlers.
+
+- **Vault Directory**: \`01-Frontend/\`
+- **Related Notes**: [[Vault-MOC]], [[Welcome]]
+
+### 📂 Sub-modules
+- **Entry point**: [[Frontend Entry]]
+- **Contexts**: [[AuthContext]], [[PlayerContext]], [[SearchContext]], [[ThemeContext]].
+- **Core Views**: [[BiovisedPlayer]], [[AuthModal]], [[VideoLibrary]], [[LecturesGrid]], [[TeacherProfileDetail]], [[HomeDashboard]], [[ContentManagerTab]], [[ModeratorDashboard]].
+- **Services**: [[dbService]], [[youtubeService]], [[recommendationEngine]].
+`,
+
+  '02-Backend-Data.md': `# Backend & Data Layer 🗄️
+
+Handles Express server routing, YouTube Data API sync pipelines, and Supabase database interactions.
+
+- **Vault Directory**: \`02-Backend-Data/\`
+- **Related Notes**: [[Vault-MOC]], [[Welcome]]
+
+### 📂 Sub-modules
+- **Database & API Client**: [[Database & API]]
+- **Server Application**: [[server]], [[seedDB]], [[check_table]].
+- **Migrations**: [[004_rls_hardening]], [[schema_update]], [[supabase_migration]].
+`,
+
+  '03-Architecture.md': `# System Architecture 🏗️
+
+High-level system design blueprints, database data models, and architectural decisions.
+
+- **Vault Directory**: \`03-Architecture/\`
+- **Related Notes**: [[Vault-MOC]], [[Welcome]]
+
+### 📂 Documentation
+- **Flowchart**: [[System-Overview]]
+- **Database schemas**: [[Data-Model]]
+`,
+
+  '04-Testing-QA.md': `# Testing & Workflow Automation 🧪
+
+Automated E2E Playwright specs and GitHub Actions continuous integration runners.
+
+- **Vault Directory**: \`04-Testing-QA/\`
+- **Related Notes**: [[Vault-MOC]], [[Welcome]]
+
+### 📂 Sub-modules
+- **E2E Specs**: [[auth.spec]], [[hooks.test]], [[security.test]].
+- **CI Workflows**: [[ci]], [[backup]].
+`,
+
+  '05-Security.md': `# Security Specification 🔒
+
+Details ABAC rules, security tests, lockout features, and encryption invariants.
+
+- **Vault Directory**: \`05-Security/\`
+- **Related Notes**: [[Vault-MOC]], [[Welcome]]
+
+### 📂 Sub-modules
+- **Audits**: [[ACCESSIBILITY_AUDIT]], [[BACKUP_DR]], [[OWASP_COMPLIANCE]].
+`,
+
+  // Concept Hubs (Interconnects the Welcome Map)
+  'Frontend Entry.md': `# Frontend Entry Point 🗺️
+
+The initial bootstrap files and main root navigation router of the client-side single page application.
+
+- **Related Notes**: [[01-Frontend]], [[App]], [[main]], [[index]]
+`,
+
+  'State Management.md': `# State Management ⚡
+
+Global React contexts driving user authentication states, active video lecture configurations, search parameters, and color themes.
+
+- **Related Notes**: [[01-Frontend]], [[AuthContext]], [[PlayerContext]], [[SearchContext]], [[ThemeContext]]
+`,
+
+  'Database & API.md': `# Database & API Clients 🔌
+
+Core interfaces communicating with Supabase PostgreSQL tables and querying YouTube API channels/playlists.
+
+- **Related Notes**: [[02-Backend-Data]], [[dbService]], [[youtubeService]], [[apiClient]], [[supabaseClient]]
+`
+};
+
+Object.entries(hubs).forEach(([filename, content]) => {
+  fs.writeFileSync(path.join(VAULT_ROOT, filename), content);
+});
+
 console.log("Vault Generation Completed Successfully!");
