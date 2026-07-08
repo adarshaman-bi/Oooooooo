@@ -801,7 +801,7 @@ export default function BiovisedPlayer({
 
       {/* top bar */}
       <div
-        className={`absolute top-0 left-0 right-0 z-30 flex items-start justify-between p-3 bg-gradient-to-b from-black via-black/70 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`absolute top-0 left-0 right-0 z-30 flex items-start justify-between p-3 bg-gradient-to-b from-black/25 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         style={videoOnly
           ? {
               paddingTop: isTouchDevice ? "max(1rem, env(safe-area-inset-top))" : "max(3.25rem, env(safe-area-inset-top))",
@@ -811,18 +811,10 @@ export default function BiovisedPlayer({
           : { paddingTop: isTouchDevice ? "1rem" : "3.25rem" }
         }
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0">
           <button onClick={onClose} className="shrink-0" aria-label="Back">
             <ChevronLeft size={22} className={iconCls} strokeWidth={2.25} />
           </button>
-          <div className="min-w-0 flex-1">
-            <p className="text-white text-[13px] font-semibold truncate leading-tight">{lecture.title || "Untitled lecture"}</p>
-            {(lecture.subject || lecture.teacherName) && (
-              <p className="text-white/60 text-[11px] leading-tight truncate">
-                {[lecture.subject, lecture.examType, lecture.teacherName].filter(Boolean).join(" \u2022 ")}
-              </p>
-            )}
-          </div>
         </div>
         {!locked && (
           <button onClick={() => { setLocked(true); wakeControls(); }} className="shrink-0 pl-3" aria-label="Lock controls">

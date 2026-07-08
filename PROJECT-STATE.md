@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Removed custom platform video player title overlay text and subject metadata: (1) deleted the custom title label rendering inside the header bar, and (2) lightened the header background gradient to `from-black/25 to-transparent` to allow YouTube's native title overlay to show through clearly.
+- **Why**: Clean up duplicate visual titles by yielding overlay precedence to YouTube's native title rendering, while keeping Back and Lock controls intact.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
 - **Change**: Configured custom player stacking precedence over YouTube's native title overlay: (1) explicitly set the underlying iframe wrapper container to `z-0` to force correct browser painting priority, and (2) shifted the custom top bar background gradient to start with a solid opaque black (`from-black via-black/70`) at the very top.
 - **Why**: Prevent YouTube's native title text from showing through the translucent top bar gradient when active, ensuring only the custom platform video player title is visible.
 
