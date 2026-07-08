@@ -559,9 +559,13 @@ export default function BiovisedPlayer({
     } else {
       lastTap.current = { side, time: now };
       if (side === "center") {
-        setTimeout(() => {
-          if (Date.now() - lastTap.current.time >= 280) togglePlay();
-        }, 300);
+        if (!showControls) {
+          wakeControls();
+        } else {
+          setTimeout(() => {
+            if (Date.now() - lastTap.current.time >= 280) togglePlay();
+          }, 300);
+        }
       } else if (showControls) {
         // Controls already visible — this tap means "hide them", so cancel
         // any pending auto-hide timer and hide immediately instead of letting
@@ -698,7 +702,7 @@ export default function BiovisedPlayer({
           ? "fixed inset-0 z-50 bg-black overflow-hidden select-none outline-none"
           : `relative w-full ${theaterMode && !isTouchDevice ? "max-w-[960px]" : "max-w-[720px]"} aspect-video bg-black overflow-hidden select-none shadow-2xl outline-none transition-[max-width] duration-300 ${isTouchDevice ? "" : "rounded-2xl"}`
       }
-      onPointerMove={wakeControls}
+      onPointerMove={isTouchDevice ? undefined : wakeControls}
     >
       {/* iframe — brightness filter applied here so the black cover below sits outside it */}
       <div className="absolute inset-0 z-0 pointer-events-none" style={{ filter: `brightness(${0.35 + brightness * 0.9})` }}>
@@ -747,7 +751,6 @@ export default function BiovisedPlayer({
         />
       )}
 
-      {seekFlash && <SeekFlash key={seekFlash.key} side={seekFlash.side} amount={seekFlash.amount} onDone={() => setSeekFlash(null)} />}
       {isTouchDevice && sliderShown === "brightness" && (
         <VerticalSlider
           side="left"
@@ -1063,12 +1066,12 @@ function SettingsRow({ label, value, onClick }: { label: string; value: string; 
 
 function SubMenu({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
   return (
-    <div>
-      <button onClick={onBack} className="w-full flex items-center gap-2 px-3 py-2.5 border-b border-white/10 text-white/80 hover:bg-white/10">
+    <div className="flex flex-col">
+      <button onClick={onBack} className="w-full flex items-center gap-2 px-3 py-2.5 border-b border-white/10 text-white/80 hover:bg-white/10 shrink-0">
         <ChevronLeft size={14} />
         <span className="font-medium">{title}</span>
       </button>
-      <div className="max-h-64 overflow-y-auto">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
@@ -1105,58 +1108,4 @@ function VerticalSlider({ side, value, icon }: { side: string; value: number; ic
   );
 }
 
-function SeekFlash({ side, amount, onDone }: { side: string; amount: number; onDone: () => void }) {
-  const [active, setActive] = useState(false);
-
-  useEffect(() => {
-    // Mount-triggered state flip using requestAnimationFrame
-    const frame = requestAnimationFrame(() => {
-      setActive(true);
-    });
-
-    // Start fade out after 200ms
-    const fadeOutTimer = setTimeout(() => {
-      setActive(false);
-    }, 200);
-
-    // Call onDone when the transition finishes (approx 350ms total)
-    const doneTimer = setTimeout(() => {
-      onDone();
-    }, 350);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(fadeOutTimer);
-      clearTimeout(doneTimer);
-    };
-  }, [onDone]);
-
-  const isLeft = side === "left";
-
-  return (
-    <div
-      className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-all duration-300 ease-out ${
-        isLeft ? "left-[15%]" : "right-[15%]"
-      } ${
-        active ? "opacity-100 scale-100" : "opacity-0 scale-75"
-      }`}
-    >
-      <div className="w-12 h-12 rounded-full bg-black/45 flex flex-col items-center justify-center gap-0.5 shadow-lg border border-white/10">
-        <div className="flex items-center text-white select-none">
-          {isLeft ? (
-            <>
-              <ChevronLeft size={13} className="-mr-1" strokeWidth={2.5} />
-              <ChevronLeft size={13} strokeWidth={2.5} />
-            </>
-          ) : (
-            <>
-              <ChevronRightIcon size={13} strokeWidth={2.5} />
-              <ChevronRightIcon size={13} className="-ml-1" strokeWidth={2.5} />
-            </>
-          )}
-        </div>
-        <span className="text-[9px] font-bold text-white tracking-wide">{amount}s</span>
-      </div>
-    </div>
-  );
-}
+// Double-tap visual indicators removed per UX guidelines to keep interface lightweight

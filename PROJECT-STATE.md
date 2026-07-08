@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Executed visual layout and toggle sync fixes: (1) Standardized the auto-hide controls sleep timer to exactly 3 seconds (`3000ms`) to match YouTube's native timing; (2) removed `max-h-64 overflow-y-auto` from the `SubMenu` options container to eliminate nested mobile scrolling contexts, letting settings panels scroll smoothly inside a single accelerated container; (3) completely removed the double-tap chevron forward/backward visual indicators (`SeekFlash` component and JSX); (4) disabled `onPointerMove` wake events on touch devices (`isTouchDevice ? undefined : wakeControls`); and (5) unified the screen tap zone handler so tapping when controls are hidden shows them, and tapping when controls are visible hides them (preventing single-tap blinking races).
+- **Why**: Prevent nested touch-scroll locking, resolve controls blinking/flashing on mobile tap-to-reveal gestures, sync hide timeouts, and eliminate double-tap visual overlays.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
 - **Change**: Removed custom platform video player title overlay text and subject metadata: (1) deleted the custom title label rendering inside the header bar, and (2) lightened the header background gradient to `from-black/25 to-transparent` to allow YouTube's native title overlay to show through clearly.
 - **Why**: Clean up duplicate visual titles by yielding overlay precedence to YouTube's native title rendering, while keeping Back and Lock controls intact.
 
