@@ -20,15 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@v3
-        with:
-          extra_args: --only-verified
+      - name: Install TruffleHog
+        run: |
+          curl -sSfL https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_linux_amd64.tar.gz \
+            | tar xz -C /tmp
+      - name: Scan for secrets
+        run: /tmp/trufflehog filesystem --only-verified "${{ github.workspace }}"
 
   # ── 2. Dependency Audit ────────────────────────────────────────────
   deps:
