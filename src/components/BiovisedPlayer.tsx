@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play, Pause, ChevronLeft, ChevronRight as ChevronRightIcon, Lock, Unlock, Settings,
-  RotateCcw, RotateCw, Volume1, Volume2, VolumeX, Sun, Check, Expand, Shrink,
-  Rows3, AlertTriangle, Flag, SkipBack, SkipForward
+  RotateCcw, RotateCw, Volume, Volume1, Volume2, VolumeX, Sun, Check, Expand, Shrink,
+  Rows3, AlertTriangle, Flag, SkipBack, SkipForward, Moon
 } from "lucide-react";
 
 /**
@@ -160,12 +160,6 @@ function preconnectYouTube() {
   }
 }
 
-// Fire the moment this component's code is loaded into the app — e.g. as soon as a
-// lecture LIST page (which imports this component) mounts, not gated behind the
-// student actually tapping a specific video. This is the real fix for the slow
-// first-load feeling: script download + DNS/TLS handshake happen in the background
-// while the student is still scrolling/choosing, so by the time they tap play the
-// heavy network setup is usually already warm.
 if (typeof window !== "undefined") {
   preconnectYouTube();
   loadYouTubeApi();
@@ -265,6 +259,7 @@ export default function BiovisedPlayer({
             if (cancelled) return;
             setPlayerReady(true);
             setDuration(e.target.getDuration());
+            // Restore saved preferences (volume/speed/captions/quality) before first play.
             const saved = loadPrefs();
             e.target.setVolume(saved.volume);
             if (saved.muted) e.target.mute();
@@ -273,7 +268,7 @@ export default function BiovisedPlayer({
             setMuted(saved.muted);
             setSpeed(saved.speed);
             if (saved.captionsOn) {
-              try { e.target.setOption("captions", "track", { languageCode: "en" }); setCaptionsOn(true); } catch { /* no captions */ }
+              try { e.target.setOption("captions", "track", { languageCode: "en" }); setCaptionsOn(true); } catch { /* no captions on this video */ }
             }
             try {
               const levels = e.target.getAvailableQualityLevels?.() || [];
@@ -282,7 +277,13 @@ export default function BiovisedPlayer({
                 e.target.setPlaybackQuality(saved.quality);
                 setQuality(saved.quality);
               }
-            } catch { /* quality API not available */ }
+            } catch { /* quality API not available for this embed */ }
+            // Autoplay immediately once ready
+            try {
+              e.target.playVideo();
+            } catch (err) {
+              /* autoplay blocked or player not ready yet */
+            }
           },
           onStateChange: (e: any) => {
             if (cancelled) return;
@@ -359,6 +360,8 @@ export default function BiovisedPlayer({
     return () => clearTimeout(hideTimer.current);
   }, [playing, wakeControls]);
 
+  const closeSettings = () => setShowSettings(null);
+
   const togglePlay = useCallback(() => {
     const p = playerRef.current;
     if (!p) return;
@@ -382,11 +385,26 @@ export default function BiovisedPlayer({
   const changeSpeed = (s: number) => {
     setSpeed(s);
     playerRef.current?.setPlaybackRate(s);
+    closeSettings();
   };
 
   const changeQuality = (q: string) => {
     setQuality(q);
-    try { playerRef.current?.setPlaybackQuality(q); } catch { /* hint only */ }
+    try {
+      playerRef.current?.setPlaybackQuality(q);
+    } catch {
+      /* YouTube's iframe API treats quality as a hint, not a guarantee — it may
+         still pick a different level based on the viewer's actual bandwidth. */
+    }
+    closeSettings();
+  };
+
+  const cycleSpeed = () => {
+    const cycle = [1, 1.25, 1.5, 1.75, 2, 0.5];
+    const currentIndex = cycle.indexOf(speed);
+    const nextSpeed = cycle[(currentIndex + 1) % cycle.length];
+    setSpeed(nextSpeed);
+    playerRef.current?.setPlaybackRate(nextSpeed);
   };
 
   const retryPlayback = () => {
@@ -523,12 +541,7 @@ export default function BiovisedPlayer({
       if (side === "center") {
         setTimeout(() => { if (Date.now() - lastTap.current.time >= 280) togglePlay(); }, 300);
       } else {
-        if (showControls) {
-          setShowControls(false);
-          clearTimeout(hideTimer.current);
-        } else {
-          wakeControls();
-        }
+        wakeControls();
       }
     }
   };
@@ -576,9 +589,12 @@ export default function BiovisedPlayer({
   const onBarDown = (e: React.PointerEvent) => {
     if (locked) return;
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-    scrubRef.current = { active: true, startY: e.clientY, baseVal: pctFromEvent(e.clientX) };
+    const initialPct = pctFromEvent(e.clientX);
+    scrubRef.current = { active: true, startY: e.clientY, baseVal: initialPct };
     setScrubbing(true);
-    setDragTime(pctFromEvent(e.clientX) * duration);
+    const initialTime = initialPct * duration;
+    setDragTime(initialTime);
+    playerRef.current?.seekTo(initialTime, false);
   };
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -589,11 +605,15 @@ export default function BiovisedPlayer({
       const rawPct = pctFromEvent(e.clientX);
       const damp = precise ? 0.25 : 1;
       const blended = scrubRef.current.baseVal + (rawPct - scrubRef.current.baseVal) * damp;
-      setDragTime(Math.min(1, Math.max(0, blended)) * duration);
+      const nextTime = Math.min(1, Math.max(0, blended)) * duration;
+      setDragTime(nextTime);
+      playerRef.current?.seekTo(nextTime, false);
     };
     const onUp = () => {
       if (scrubRef.current.active) {
-        if (playerRef.current && dragTime != null) playerRef.current.seekTo(dragTime, true);
+        if (playerRef.current && dragTime != null) {
+          playerRef.current.seekTo(dragTime, true);
+        }
         scrubRef.current.active = false;
         setScrubbing(false);
         setPrecisionMode(false);
@@ -612,7 +632,6 @@ export default function BiovisedPlayer({
 
   const displayTime = scrubbing && dragTime != null ? dragTime : current;
   const progressPct = duration ? (displayTime / duration) * 100 : 0;
-  const closeSettings = () => setShowSettings(null);
   const iconCls = "text-white/95 drop-shadow-sm";
 
   if (!videoId) {
@@ -690,9 +709,18 @@ export default function BiovisedPlayer({
       {locked && <div className="absolute inset-0 z-10 cursor-pointer" onClick={() => setShowControls((s) => !s)} />}
 
       {seekFlash && <SeekFlash key={seekFlash.key} side={seekFlash.side} amount={seekFlash.amount} onDone={() => setSeekFlash(null)} />}
-      {isTouchDevice && sliderShown === "brightness" && <VerticalSlider side="left" value={brightness} icon={<Sun size={15} className={iconCls} strokeWidth={2.25} />} />}
+      {isTouchDevice && sliderShown === "brightness" && (
+        <VerticalSlider
+          side="left"
+          value={brightness}
+          icon={brightness < 0.5 
+            ? <Moon size={13} className={iconCls} strokeWidth={2.25} />
+            : <Sun size={13} className={iconCls} strokeWidth={2.25} />
+          }
+        />
+      )}
       {isTouchDevice && sliderShown === "volume" && (
-        <VerticalSlider side="right" value={volume / 100} icon={<VolumeIcon muted={muted} volume={volume} size={15} className={iconCls} />} />
+        <VerticalSlider side="right" value={volume / 100} icon={<VolumeIcon muted={muted} volume={volume} size={13} className={iconCls} />} />
       )}
 
       {(showControls || !playing) && !locked && (
@@ -792,7 +820,7 @@ export default function BiovisedPlayer({
             )}
             {showSettings === "speed" && (
               <SubMenu title="Speed" onBack={() => setShowSettings("root")}>
-                {SPEEDS.map((s) => <OptionRow key={s} label={`${s}x`} active={s === speed} onClick={() => changeSpeed(s)} />)}
+                {[...SPEEDS].reverse().map((s) => <OptionRow key={s} label={`${s}x`} active={s === speed} onClick={() => changeSpeed(s)} />)}
               </SubMenu>
             )}
             {showSettings === "quality" && (
@@ -899,9 +927,10 @@ export default function BiovisedPlayer({
 
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setShowSettings("speed")}
-                className="text-[11px] font-semibold"
+                onClick={cycleSpeed}
+                className="text-[11px] font-bold px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors"
                 style={{ color: "rgba(255,255,255,0.95)", opacity: speed !== 1 ? 1 : 0.85 }}
+                aria-label="Cycle speed"
               >
                 {speed}x
               </button>
@@ -1024,12 +1053,12 @@ function ShortcutRow({ keys, action }: { keys: string; action: string }) {
 
 function VerticalSlider({ side, value, icon }: { side: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className={`absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none ${side === "left" ? "left-4" : "right-4"}`}>
-      <div className="w-8 h-28 rounded-full bg-black/50 backdrop-blur-sm flex flex-col items-end justify-end overflow-hidden relative">
+    <div className={`absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none ${side === "left" ? "left-4" : "right-4"}`}>
+      <div className="w-3.5 h-16 rounded-full bg-black/45 flex flex-col items-end justify-end overflow-hidden relative border border-white/5">
         {/* fill from bottom */}
-        <div className="absolute bottom-0 left-0 right-0 rounded-full bg-white/90 transition-none" style={{ height: `${Math.round(value * 100)}%` }} />
+        <div className="absolute bottom-0 left-0 right-0 bg-white/95 transition-none" style={{ height: `${Math.round(value * 100)}%` }} />
       </div>
-      <div className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+      <div className="w-6 h-6 rounded-full bg-black/45 flex items-center justify-center border border-white/5">
         {icon}
       </div>
     </div>

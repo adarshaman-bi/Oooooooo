@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Executed UX Polish Pass refinements: (1) Added autoplay trigger in YouTube `onReady` handler to automatically play loaded videos; (2) added auto-closing logic on speed/quality selection and descending display order for playback speed levels in the settings menu; (3) enabled real-time seek tracking updates inside progress bar drag `onMove` to align with YouTube scrubbing; (4) added inline quick speed toggle next to settings to cycle play rate instantly without sheets; (5) shrank volume and brightness overlay sliders with moon/sun icon toggles depending on levels; and (6) bound left/right tap zone reveals to auto-hide timers directly.
+- **Why**: Boost responsiveness, streamline layout density, speed up playback starts, and match modern YouTube overlay design language.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
   - [src/App.tsx](file:///c:/onion.so/src/App.tsx)
 - **Change**: Applied visual and functional tweaks (Round 3 fixes): (1) Shrunk seek feedback badge to `w-12 h-12` with lower opacity (`bg-black/45`) and longer lifecycle duration (~800ms); (2) added `setActiveLecture(null)` and `setDetailModal(null)` to the Header logo click handler to ensure clicking it returns cleanly to home; (3) replaced settings wrapper `overflow-hidden` with `overflow-y-auto` and constrained max-height to prevent clipping on mobile; and (4) synchronized manual tap-to-reveal control toggles to use the standard auto-hide timers.
 - **Why**: Resolve visual layout breaks on mobile settings, fix seek badge bulkiness, and ensure logo interactions always clear active video play state.
