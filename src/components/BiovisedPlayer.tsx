@@ -201,6 +201,10 @@ export default function BiovisedPlayer({
   const isTouchDevice = useTouchDevice();
   const isLandscape = useLandscape();
 
+  const currentIndex = playlistLectures.findIndex((l) => l.id === lecture.id);
+  const prevLecture = currentIndex > 0 ? playlistLectures[currentIndex - 1] : null;
+  const nextLecture = currentIndex >= 0 && currentIndex < playlistLectures.length - 1 ? playlistLectures[currentIndex + 1] : null;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeHostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
@@ -354,6 +358,12 @@ export default function BiovisedPlayer({
     clearTimeout(hideTimer.current);
     if (playing && !showSettings) hideTimer.current = setTimeout(() => setShowControls(false), 3000);
   }, [playing, showSettings]);
+
+  const wakeControlsForceHide = useCallback(() => {
+    setShowControls(true);
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setShowControls(false), 2500);
+  }, []);
 
   useEffect(() => {
     wakeControls();
@@ -541,7 +551,7 @@ export default function BiovisedPlayer({
       if (side === "center") {
         setTimeout(() => { if (Date.now() - lastTap.current.time >= 280) togglePlay(); }, 300);
       } else {
-        wakeControls();
+        wakeControlsForceHide();
       }
     }
   };
@@ -562,7 +572,7 @@ export default function BiovisedPlayer({
         dragInfo.current.moved = true;
         setSliderShown(side === "left" ? "brightness" : "volume");
       }
-      const next = Math.min(1, Math.max(0, startVal + dy / 200));
+      const next = Math.min(1, Math.max(0, startVal + dy / 120));
       if (side === "left") setBrightness(next);
       else setVolumeClamped(next * 100);
     };
@@ -588,7 +598,7 @@ export default function BiovisedPlayer({
   };
   const onBarDown = (e: React.PointerEvent) => {
     if (locked) return;
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    barRef.current?.setPointerCapture?.(e.pointerId);
     const initialPct = pctFromEvent(e.clientX);
     scrubRef.current = { active: true, startY: e.clientY, baseVal: initialPct };
     setScrubbing(true);
@@ -599,20 +609,20 @@ export default function BiovisedPlayer({
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       if (!scrubRef.current.active) return;
-      const dy = Math.abs(e.clientY - scrubRef.current.startY);
-      const precise = dy > 40;
-      setPrecisionMode(precise);
       const rawPct = pctFromEvent(e.clientX);
-      const damp = precise ? 0.25 : 1;
-      const blended = scrubRef.current.baseVal + (rawPct - scrubRef.current.baseVal) * damp;
-      const nextTime = Math.min(1, Math.max(0, blended)) * duration;
+      const nextTime = rawPct * duration;
       setDragTime(nextTime);
       playerRef.current?.seekTo(nextTime, false);
     };
-    const onUp = () => {
+    const onUp = (e: PointerEvent) => {
       if (scrubRef.current.active) {
-        if (playerRef.current && dragTime != null) {
-          playerRef.current.seekTo(dragTime, true);
+        try {
+          barRef.current?.releasePointerCapture?.(e.pointerId);
+        } catch {}
+        const finalPct = pctFromEvent(e.clientX);
+        const finalTime = finalPct * duration;
+        if (playerRef.current) {
+          playerRef.current.seekTo(finalTime, true);
         }
         scrubRef.current.active = false;
         setScrubbing(false);
@@ -714,13 +724,13 @@ export default function BiovisedPlayer({
           side="left"
           value={brightness}
           icon={brightness < 0.5 
-            ? <Moon size={13} className={iconCls} strokeWidth={2.25} />
-            : <Sun size={13} className={iconCls} strokeWidth={2.25} />
+            ? <Moon size={11} className={iconCls} strokeWidth={2.25} />
+            : <Sun size={11} className={iconCls} strokeWidth={2.25} />
           }
         />
       )}
       {isTouchDevice && sliderShown === "volume" && (
-        <VerticalSlider side="right" value={volume / 100} icon={<VolumeIcon muted={muted} volume={volume} size={13} className={iconCls} />} />
+        <VerticalSlider side="right" value={volume / 100} icon={<VolumeIcon muted={muted} volume={volume} size={11} className={iconCls} />} />
       )}
 
       {(showControls || !playing) && !locked && (
@@ -762,10 +772,10 @@ export default function BiovisedPlayer({
 
       {/* top bar */}
       <div
-        className={`absolute top-0 left-0 right-0 z-30 flex items-start justify-between p-3 bg-gradient-to-b from-black/75 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`absolute top-0 left-0 right-0 z-30 flex items-start justify-between p-3 bg-gradient-to-b from-black/85 via-black/40 to-transparent transition-opacity duration-200 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         style={videoOnly
-          ? { paddingTop: "max(1rem, env(safe-area-inset-top))", paddingLeft: "max(0.75rem, env(safe-area-inset-left))", paddingRight: "max(0.75rem, env(safe-area-inset-right))" }
-          : { paddingTop: "1rem" }
+          ? { paddingTop: "max(3.25rem, env(safe-area-inset-top))", paddingLeft: "max(0.75rem, env(safe-area-inset-left))", paddingRight: "max(0.75rem, env(safe-area-inset-right))" }
+          : { paddingTop: "3.25rem" }
         }
       >
         <div className="flex items-center gap-2 min-w-0">
@@ -802,7 +812,7 @@ export default function BiovisedPlayer({
       {showSettings && (
         <>
           <div className="absolute inset-0 z-30" onClick={closeSettings} />
-          <div className="absolute top-12 right-3 bottom-3 z-40 w-56 max-h-[calc(100%-3.75rem)] rounded-xl bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 overflow-y-auto text-white text-[13px] shadow-xl">
+          <div className="absolute top-12 right-3 bottom-3 z-40 w-56 max-h-[calc(100%-3.75rem)] rounded-xl bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 overflow-y-auto overscroll-contain [webkit-overflow-scrolling:touch] [will-change:transform] text-white text-[13px] shadow-xl">
             {showSettings === "root" && (
               <>
                 <SettingsRow label="Speed" value={`${speed}x`} onClick={() => setShowSettings("speed")} />
@@ -887,12 +897,36 @@ export default function BiovisedPlayer({
 
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-4">
+              {/* Previous button */}
+              {onSelectLecture && (
+                <button
+                  disabled={!prevLecture}
+                  onClick={() => prevLecture && onSelectLecture(prevLecture)}
+                  className="disabled:opacity-30 cursor-pointer"
+                  aria-label="Previous lecture"
+                >
+                  <SkipBack size={16} className={iconCls} strokeWidth={2.25} fill="currentColor" />
+                </button>
+              )}
+
               <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"}>
                 {playing
                   ? <Pause size={18} className={iconCls} strokeWidth={2.25} fill="currentColor" />
                   : <Play size={18} className={iconCls} strokeWidth={2.25} fill="currentColor" />
                 }
               </button>
+
+              {/* Next button */}
+              {onSelectLecture && (
+                <button
+                  disabled={!nextLecture}
+                  onClick={() => nextLecture && onSelectLecture(nextLecture)}
+                  className="disabled:opacity-30 cursor-pointer"
+                  aria-label="Next lecture"
+                >
+                  <SkipForward size={16} className={iconCls} strokeWidth={2.25} fill="currentColor" />
+                </button>
+              )}
 
               {!isTouchDevice && (
                 <>
@@ -969,9 +1003,6 @@ export default function BiovisedPlayer({
   }
 
   // Mobile portrait: video on top, info below
-  const currentIndex = playlistLectures.findIndex((l) => l.id === lecture.id);
-  const prevLecture = currentIndex > 0 ? playlistLectures[currentIndex - 1] : null;
-  const nextLecture = currentIndex >= 0 && currentIndex < playlistLectures.length - 1 ? playlistLectures[currentIndex + 1] : null;
 
   return (
     <div className="w-full min-h-[100dvh] bg-neutral-950 flex flex-col">
@@ -983,24 +1014,6 @@ export default function BiovisedPlayer({
         </p>
         {lecture.description && (
           <p className="text-white/70 text-[13px] mt-3 leading-relaxed">{lecture.description}</p>
-        )}
-        {(prevLecture || nextLecture) && onSelectLecture && (
-          <div className="flex items-center justify-between mt-5 border-t border-white/10 pt-4">
-            <button
-              disabled={!prevLecture}
-              onClick={() => prevLecture && onSelectLecture(prevLecture)}
-              className="flex items-center gap-1 text-[13px] disabled:opacity-30"
-            >
-              <SkipBack size={16} /> Previous
-            </button>
-            <button
-              disabled={!nextLecture}
-              onClick={() => nextLecture && onSelectLecture(nextLecture)}
-              className="flex items-center gap-1 text-[13px] disabled:opacity-30"
-            >
-              Next <SkipForward size={16} />
-            </button>
-          </div>
         )}
       </div>
     </div>
@@ -1053,12 +1066,12 @@ function ShortcutRow({ keys, action }: { keys: string; action: string }) {
 
 function VerticalSlider({ side, value, icon }: { side: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className={`absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none ${side === "left" ? "left-4" : "right-4"}`}>
-      <div className="w-3.5 h-16 rounded-full bg-black/45 flex flex-col items-end justify-end overflow-hidden relative border border-white/5">
+    <div className={`absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1 pointer-events-none ${side === "left" ? "left-4" : "right-4"}`}>
+      <div className="w-1 h-12 rounded-full bg-black/60 overflow-hidden relative">
         {/* fill from bottom */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/95 transition-none" style={{ height: `${Math.round(value * 100)}%` }} />
+        <div className="absolute bottom-0 left-0 right-0 bg-white transition-none" style={{ height: `${Math.round(value * 100)}%` }} />
       </div>
-      <div className="w-6 h-6 rounded-full bg-black/45 flex items-center justify-center border border-white/5">
+      <div className="w-5 h-5 rounded-full bg-black/40 flex items-center justify-center border border-white/5">
         {icon}
       </div>
     </div>
@@ -1074,15 +1087,15 @@ function SeekFlash({ side, amount, onDone }: { side: string; amount: number; onD
       setActive(true);
     });
 
-    // Start fade out after 650ms
+    // Start fade out after 200ms
     const fadeOutTimer = setTimeout(() => {
       setActive(false);
-    }, 650);
+    }, 200);
 
-    // Call onDone when the transition finishes (approx 800ms total)
+    // Call onDone when the transition finishes (approx 350ms total)
     const doneTimer = setTimeout(() => {
       onDone();
-    }, 800);
+    }, 350);
 
     return () => {
       cancelAnimationFrame(frame);

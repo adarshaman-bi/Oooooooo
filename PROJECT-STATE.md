@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Executed Final UX Polish Pass: (1) Relocated Previous/Next buttons beside Play/Pause directly below the progress bar and cleaned up the mobile duplicate footer; (2) added hardware-accelerated momentum scroll parameters to Speed and Quality settings dropdowns to prevent lag/stutter; (3) added `3.25rem` top padding to the title bar overlay to prevent overlapping with native YouTube iframe title elements; (4) unified tap zone control auto-hiding to trigger a consistent 2.5s fade countdown across playing and paused states; (5) rebuilt seek dragging to bind pointer capture directly to `barRef` and map raw horizontal positions 1:1, allowing smooth, continuous scrubbing; (6) streamlined volume/brightness sliders to `1px` thin premium tracks with moon/sun icon sizing; and (7) accelerated seek double-tap indicators to flash instantly (350ms total).
+- **Why**: Solidify visual constraints, enhance drag accuracy, resolve title collisions, and bring overlay HUD layouts in line with premium native OTT players.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
 - **Change**: Executed UX Polish Pass refinements: (1) Added autoplay trigger in YouTube `onReady` handler to automatically play loaded videos; (2) added auto-closing logic on speed/quality selection and descending display order for playback speed levels in the settings menu; (3) enabled real-time seek tracking updates inside progress bar drag `onMove` to align with YouTube scrubbing; (4) added inline quick speed toggle next to settings to cycle play rate instantly without sheets; (5) shrank volume and brightness overlay sliders with moon/sun icon toggles depending on levels; and (6) bound left/right tap zone reveals to auto-hide timers directly.
 - **Why**: Boost responsiveness, streamline layout density, speed up playback starts, and match modern YouTube overlay design language.
 
