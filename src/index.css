@@ -515,11 +515,7 @@ body, html, #root {
 
 /* YouTube Immersive Layering */
 .player-wrapper {
-  position: relative !important;
-  width: 100% !important;
-  aspect-ratio: 16/9 !important;
-  overflow: hidden !important;
-  background: #000 !important;
+  /* Layout sizing and overrides are controlled dynamically via PlayerShell.tsx */
 }
 
 #yt-iframe-player {

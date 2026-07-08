@@ -4,6 +4,7 @@ import { supabase } from '../utils/supabaseClient';
 import { fetchUserProfile, createUserProfile, updateUserExamPreference, updateUserPreferences } from '../services/dbService';
 import { UserProfile, UserRole } from '../types';
 import { LS_KEYS, DATA_DEFAULTS } from '../config/constants';
+import { getAuthRedirectUrl } from '../utils/security';
 
 // ─── Guest localStorage helpers ──────────────────────────────────────────────
 /** Safely read and parse a JSON value from localStorage. Returns `fallback` on any error. */
@@ -100,11 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setUser(profile);
     } else {
-      setSupabaseUser(null);
-      setIsGuest(true);
-      localStorage.setItem('biovised_is_guest', 'true');
-      setUser(getGuestProfile());
+      setUser(null);
+      setIsGuest(false);
     }
+    setSupabaseUser(null);
     setLoading(false);
   };
 
@@ -128,20 +128,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { subscription.unsubscribe(); };
   }, []);
 
-  const getURL = () => {
-    const origin = typeof window !== 'undefined' && window.location.origin
-      ? window.location.origin
-      : import.meta.env.VITE_REDIRECT_URL ?? 'https://ooooooooooo-pi.vercel.app';
-    const base = origin.endsWith('/') ? origin : `${origin}/`;
-    return `${base}auth/callback`;
-  };
-
   const signInGoogle = async () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: getURL() },
+        options: { redirectTo: getAuthRedirectUrl() },
       });
       if (error) throw error;
     } catch (err) {
@@ -216,9 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     setLoading(true);
-    setIsGuest(true);
     try { sessionStorage.removeItem(LS_KEYS.GUEST_BYPASSED); } catch {}
-    // Clear all guest preference keys
     const guestPrefKeys = [
       LS_KEYS.GUEST_EXAM, LS_KEYS.GUEST_YEAR, LS_KEYS.GUEST_SUBJECTS,
       'biovised_pref_watchedContent', 'biovised_pref_savedContent',
@@ -226,7 +216,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       'biovised_pref_onboardingCompleted',
     ];
     guestPrefKeys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
-    localStorage.setItem('biovised_is_guest', 'true');
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -234,6 +223,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn('Supabase signOut exception bypassed:', err);
     }
     setSupabaseUser(null);
+    setIsGuest(true);
+    localStorage.setItem('biovised_is_guest', 'true');
     setUser(getGuestProfile());
     setLoading(false);
   };

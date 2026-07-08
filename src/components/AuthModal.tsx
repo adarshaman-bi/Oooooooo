@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, GraduationCap, X, RotateCcw, Check, AlertCircle, Eye, EyeOff, LogIn } from 'lucide-react';
 import { UserRole } from '../types';
 import { supabase } from '../utils/supabaseClient';
+import { getAuthRedirectUrl } from '../utils/security';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,6 +31,10 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
   const [emailTouched, setEmailTouched] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [loginLockedUntil, setLoginLockedUntil] = useState(0);
+  const LOCKOUT_THRESHOLD = 3;
+  const LOCKOUT_DURATION_MS = 60_000;
 
   useEffect(() => {
     if (isOpen) {
@@ -97,9 +102,18 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
     setSuccess('');
     setSubmitting(true);
 
+    // Check login lockout
+    if (mode === 'signin' && Date.now() < loginLockedUntil) {
+      const remaining = Math.ceil((loginLockedUntil - Date.now()) / 1000);
+      setError(`Too many login attempts. Try again in ${remaining}s.`);
+      setSubmitting(false);
+      return;
+    }
+
     try {
       if (mode === 'signin') {
         await signInEmail(email, password);
+        setLoginAttempts(0);
         // Persist email mock prefill for standard usage
         localStorage.setItem('biovised_remember_email', email);
         onClose();
@@ -131,31 +145,27 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
         friendlyError = 'Please provide a valid, properly formatted email address.';
       }
       setError(friendlyError);
+      if (mode === 'signin') {
+        const newCount = loginAttempts + 1;
+        setLoginAttempts(newCount);
+        if (newCount >= LOCKOUT_THRESHOLD) {
+          setLoginLockedUntil(Date.now() + LOCKOUT_DURATION_MS);
+          setError(`Too many failed login attempts. Locked out for 60s.`);
+        }
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  const getURL = () => {
-    let url = typeof window !== 'undefined' && window.location.origin
-      ? window.location.origin
-      : (import.meta as any).env?.VITE_REDIRECT_URL || 'https://ooooooooooo-pi.vercel.app';
-    url = url.endsWith('/') ? url : `${url}/`;
-    return `${url}auth/callback`;
-  };
-
   const handleGoogleSignIn = async () => {
     setError('');
     try {
-      const redirectUrl = getURL();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: redirectUrl
-        }
+        options: { redirectTo: getAuthRedirectUrl() },
       });
       if (error) throw error;
-      onClose();
     } catch (err: any) {
       setError('Google Sign-In failed: ' + (err?.message || 'Check connection or Supabase settings.'));
     }

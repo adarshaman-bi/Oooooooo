@@ -1509,10 +1509,10 @@ export default function ModeratorDashboard() {
     }
   };
 
-  if (!user || user.email !== 'adarshaman898@gmail.com') {
+  if (!user || (user.role !== 'admin' && user.role !== 'moderator' && user.role !== 'super_admin')) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center text-rose-400 font-mono">
-        ACCESS DENIED. System administrative privileges required to view the moderation console.
+        ACCESS DENIED. Moderator or admin privileges required to view the moderation console.
       </div>
     );
   }

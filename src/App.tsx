@@ -11,7 +11,7 @@ import LectureCard from './components/LectureCard';
 import TestSeriesDirectory from './components/TestSeriesDirectory';
 import { TEST_SERIES_CATALOG } from './data/testSeriesData';
 import HomeDashboard from './components/HomeDashboard';
-import VideoPlayer from './components/VideoPlayer';
+import BiovisedPlayer from './components/BiovisedPlayer';
 import DetailsModal from './components/DetailsModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicRating } from './components/DynamicRating';
@@ -723,7 +723,7 @@ function AppContent() {
     
     if (path === '/admin/educators') {
       if (user) {
-        if (user.email === 'adarshaman898@gmail.com' || user.role === 'admin' || user.role === 'moderator') {
+        if (user.role === 'admin' || user.role === 'moderator' || user.role === 'super_admin') {
           setCurrentView('admin-educators');
         } else {
           // Redirect to home if they are not allowed
@@ -990,16 +990,22 @@ function AppContent() {
   const [externalCount, setExternalCount] = useState(0);
   const [hasExecutedSearch, setHasExecutedSearch] = useState<boolean>(false);
 
-  const executeSearch = (query: string) => {
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const suggestionsAbortRef = useRef<AbortController | null>(null);
+
+  const executeSearch = async (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) return;
-    
+
+    if (searchAbortRef.current) searchAbortRef.current.abort();
+    searchAbortRef.current = new AbortController();
+    const signal = searchAbortRef.current.signal;
+
     setSearchQuery(trimmed);
     setHasExecutedSearch(true);
-    
+
     const cacheKey = `${trimmed}_${examFilter}_${subjectFilter}_${contentTypeFilter}_${activeExploreTab || 'home'}`;
     if (searchCache.current.has(cacheKey)) {
-      console.log(`[Cache Hit] Serving search results from client cache for: ${trimmed}`);
       const cachedData = searchCache.current.get(cacheKey);
       setServerSearchResults(cachedData.results);
       setSearchedExternal(cachedData.searchedExternal);
@@ -1013,58 +1019,45 @@ function AppContent() {
     setIsLabourIllusionActive(true);
     setLabourProgress(10);
     setLabourStatusMessage("Querying verified catalog databases...");
-    
-    // Save to history
     recordSearchQuery(trimmed);
 
     let finalResults: any[] = [];
     let extSearched = false;
     let extCount = 0;
 
-    let illusionTimers: NodeJS.Timeout[] = [];
-    const steps = [
-      { delay: 250, progress: 35, msg: "Searching verified curriculum database..." },
-      { delay: 500, progress: 65, msg: "Resolving educator profiles and ratings..." },
-      { delay: 750, progress: 90, msg: "Retrieving mapped chapter lessons..." },
-      { delay: 1000, progress: 100, msg: "Formatting results..." }
-    ];
+    const illusionTimeout = setTimeout(() => {
+      setIsLabourIllusionActive(false);
+      setServerSearchResults(finalResults);
+      setSearchedExternal(extSearched);
+      setExternalCount(extCount);
+    }, 1200);
 
-    steps.forEach(step => {
-      const t = setTimeout(() => {
-        setLabourProgress(step.progress);
-        setLabourStatusMessage(step.msg);
-        if (step.progress === 100) {
-          setIsLabourIllusionActive(false);
-          setServerSearchResults(finalResults);
-          setSearchedExternal(extSearched);
-          setExternalCount(extCount);
-        }
-      }, step.delay);
-      illusionTimers.push(t);
-    });
-
-    fetch(`/api/search/global?q=${encodeURIComponent(trimmed)}&examType=${examFilter}&subject=${subjectFilter}&contentType=${contentTypeFilter}&activeTab=${activeExploreTab || 'home'}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'ok') {
-          finalResults = data.results || [];
-          extSearched = data.searchedExternal || false;
-          extCount = data.externalCount || 0;
-          
-          searchCache.current.set(cacheKey, {
-            results: finalResults,
-            searchedExternal: extSearched,
-            externalCount: extCount
-          });
-        }
-      })
-      .catch(err => console.error('[Global Search Sync Failed]:', err))
-      .finally(() => {
-        setIsSearchingServer(false);
-      });
+    try {
+      const res = await fetch(
+        `/api/search/global?q=${encodeURIComponent(trimmed)}&examType=${examFilter}&subject=${subjectFilter}&contentType=${contentTypeFilter}&activeTab=${activeExploreTab || 'home'}`,
+        { signal }
+      );
+      const data = await res.json();
+      if (data.status === 'ok') {
+        finalResults = data.results || [];
+        extSearched = data.searchedExternal || false;
+        extCount = data.externalCount || 0;
+        searchCache.current.set(cacheKey, { results: finalResults, searchedExternal: extSearched, externalCount: extCount });
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      console.warn('[Search] Request failed:', err);
+    } finally {
+      setIsSearchingServer(false);
+      clearTimeout(illusionTimeout);
+      setLabourProgress(100);
+      setIsLabourIllusionActive(false);
+      setServerSearchResults(finalResults);
+      setSearchedExternal(extSearched);
+      setExternalCount(extCount);
+    }
   };
 
-  // PHASE 5: Server-side search API integration - suggestions only
   useEffect(() => {
     if (debouncedSearchQuery.trim() === '') {
       setServerSearchResults([]);
@@ -1075,19 +1068,30 @@ function AppContent() {
       setHasExecutedSearch(false);
       return;
     }
-
-    // Reset results flag if user edits/continues typing
     setHasExecutedSearch(false);
 
-    fetch(`/api/search/suggestions?q=${encodeURIComponent(debouncedSearchQuery)}&examType=${examFilter}`)
+    if (suggestionsAbortRef.current) suggestionsAbortRef.current.abort();
+    suggestionsAbortRef.current = new AbortController();
+    const signal = suggestionsAbortRef.current.signal;
+
+    fetch(`/api/search/suggestions?q=${encodeURIComponent(debouncedSearchQuery)}&examType=${examFilter}`, { signal })
       .then(res => res.json())
       .then(data => {
-        if (data.suggestions) {
+        if (!signal.aborted && data.suggestions) {
           setSearchSuggestions(data.suggestions);
         }
       })
-      .catch(err => console.warn('Suggestions fetch failed:', err));
+      .catch(err => {
+        if (err.name !== 'AbortError') console.warn('Suggestions fetch failed:', err);
+      });
   }, [debouncedSearchQuery, examFilter]);
+
+  useEffect(() => {
+    return () => {
+      if (searchAbortRef.current) searchAbortRef.current.abort();
+      if (suggestionsAbortRef.current) suggestionsAbortRef.current.abort();
+    };
+  }, []);
 
   // Trigger splash screen timer & force redirect on finish when auth loading is resolved
   useEffect(() => {
@@ -1625,7 +1629,7 @@ function AppContent() {
     return <AuthCallback />;
   }
 
-  // Gate check: If user is not authenticated and has not chosen guest mode yet, force them to land on the login page
+  // Gate check: not authenticated and hasn't chosen guest mode → show auth
   if (!loading && !firebaseUser && !guestBypassed) {
     return (
       <AuthModal
@@ -2003,9 +2007,9 @@ function AppContent() {
               onLogoutSuccess={() => setCurrentView('explore')}
               onNavigate={(view) => setCurrentView(view)}
             />
-          ) : currentView === 'moderator' && user?.email === 'adarshaman898@gmail.com' ? (
+          ) : currentView === 'moderator' && user && (user.role === 'admin' || user.role === 'moderator' || user.role === 'super_admin') ? (
             <ModeratorDashboard />
-          ) : currentView === 'admin-educators' && user && (user.email === 'adarshaman898@gmail.com' || user.role === 'admin' || user.role === 'moderator') ? (
+          ) : currentView === 'admin-educators' && user && (user.role === 'admin' || user.role === 'moderator' || user.role === 'super_admin') ? (
             <AdminEducators
               onBack={() => handleBackNavigation()}
               userEmail={user.email}
@@ -2041,7 +2045,7 @@ function AppContent() {
               {activeLecture ? (
                 /* Dedicated Video Player View (Plays in its own clean page to prevent design collapse) */
                 <ErrorBoundary>
-                  <VideoPlayer
+                  <BiovisedPlayer
                     lecture={activeLecture}
                     onClose={handleBackNavigation}
                     playlistLectures={lectures.filter(l => l.playlistId === activeLecture.playlistId)}

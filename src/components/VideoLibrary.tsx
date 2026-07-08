@@ -27,7 +27,8 @@ import {
   CornerDownRight,
   BookOpen
 } from 'lucide-react';
-import { YouTubeChannel, YouTubeVideo, Playlist, TEACHER_TO_CHANNEL } from '../types';
+import { YouTubeChannel, YouTubeVideo, Playlist, TEACHER_TO_CHANNEL, Lecture as TypesLecture } from '../types';
+import BiovisedPlayer from './BiovisedPlayer';
 import { getPlaylistThumbnail } from '../services/thumbnailHelper';
 import { formatSubscribers, mapVideoRow } from '../utils/youtubeUtils';
 import ChannelHeader from './ChannelHeader';
@@ -1239,271 +1240,56 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
           </motion.div>
         )}
 
-        {/* ==========================================
-            CUSTOM PREMIUM PLAYER PORTAL
-            (Plays in dedicated distraction-free page layout)
-           ========================================== */}
-        {selectedVideo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6 text-left"
-          >
-            {/* Back action */}
-            <div className="flex justify-between items-center">
-              <button
-                onClick={() => {
-                  setSelectedVideo(null);
-                  setPlayerIsReady(false);
-                }}
-                className="flex items-center gap-1.5 text-xs text-zinc-405 hover:text-white font-semibold font-mono"
-              >
-                ← Back to Syllabus Chapters
-              </button>
-              {activePlaylistProgressText && (
-                <span className="text-[11px] font-mono text-white font-bold">
-                  Progress Checklist: {activePlaylistProgressText}
-                </span>
-              )}
-            </div>
+        {selectedVideo && (() => {
+          const pseudoLecture: TypesLecture = {
+            id: selectedVideo.videoId,
+            title: selectedVideo.title,
+            description: selectedVideo.description || 'Verified YouTube Academic Video lecture.',
+            videoUrl: selectedVideo.videoUrl || `https://www.youtube.com/watch?v=${selectedVideo.videoId}`,
+            thumbnailUrl: `https://img.youtube.com/vi/${selectedVideo.videoId}/hqdefault.jpg`,
+            subject: selectedPlaylist?.subject || 'Academic',
+            examType: selectedPlaylist?.examType || 'JEE',
+            contentType: 'lecture',
+            teacherId: selectedVideo.channelId || 'youtube_channel',
+            teacherName: selectedVideo.channelName || 'YouTube Educator',
+            duration: selectedVideo.duration || '00:00',
+            viewsCount: selectedVideo.viewCount || 0,
+            likesCount: selectedVideo.likeCount || 0,
+            createdAt: selectedVideo.publishedAt || new Date().toISOString(),
+          };
 
-            {/* Custom Full Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              
-              {/* Left Column: Custom Built Player HUD controller (Col 8) */}
-              <div className="lg:col-span-8 space-y-4">
-                
-                {/* Visual Canvas containing actual YouTube Node iframe */}
-                <div
-                  ref={playerContainerRef}
-                  className={`relative w-full bg-black border border-neutral-900 overflow-hidden select-none transition-all ${
-                    isFullscreen ? 'fixed inset-0 z-[1000] w-screen h-screen' : 'aspect-video rounded-2xl shadow-2xl'
-                  }`}
-                >
-                  {/* Embedded Player node */}
-                  <div
-                    id="verse-player-iframe-slot"
-                    className="absolute inset-0 w-full h-full bg-black flex items-center justify-center"
-                    style={{ pointerEvents: 'auto' }}
-                  />
+          const playlistLectures = playlistVideos.map(video => ({
+            id: video.videoId,
+            title: video.title,
+            description: video.description || 'Verified YouTube Academic Video lecture.',
+            videoUrl: video.videoUrl || `https://www.youtube.com/watch?v=${video.videoId}`,
+            thumbnailUrl: `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`,
+            subject: selectedPlaylist?.subject || 'Academic',
+            examType: selectedPlaylist?.examType || 'JEE',
+            contentType: 'lecture',
+            teacherId: video.channelId || 'youtube_channel',
+            teacherName: video.channelName || 'YouTube Educator',
+            duration: video.duration || '00:00',
+            viewsCount: video.viewCount || 0,
+            likesCount: video.likeCount || 0,
+            createdAt: video.publishedAt || new Date().toISOString(),
+          }));
 
-                  {/* Simulated elegant custom HUD in overlay mode when requested */}
-                  {!playerIsReady && (
-                    <div className="absolute inset-0 bg-[#08080A] flex flex-col items-center justify-center gap-3 z-10 select-none">
-                      <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest leading-none">Initializing Secure Stream Port...</p>
-                    </div>
-                  )}
-
-                  {/* Simulated Fullscreen control banner */}
-                  {isFullscreen && (
-                    <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-                      <button
-                        onClick={toggleFs}
-                        className="bg-black/80 hover:bg-black border border-neutral-800 p-2 text-white rounded-lg transition-colors cursor-pointer text-xs font-mono font-bold"
-                      >
-                        Exit Fullscreen (Esc)
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Micro controller bar below video player - Premium Feel */}
-                <div className="p-4 rounded-xl bg-[#09090A] border border-neutral-910 flex flex-wrap items-center justify-between gap-4 z-20">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={handlePlayPause}
-                      disabled={!playerIsReady}
-                      className="p-2.5 bg-[#EEEEEE] text-black hover:bg-white hover:scale-102 rounded-full cursor-pointer transition-all disabled:opacity-50"
-                      title={isPlaying ? "Pause Video" : "Play Video"}
-                    >
-                      <Play className="w-4 h-4 fill-current" />
-                    </button>
-
-                    <button
-                      onClick={() => handleSeek('backward')}
-                      disabled={!playerIsReady}
-                      className="p-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg border border-neutral-800 transition-colors"
-                      title="Rewind 10 Sec"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-
-                    <div className="text-[11px] font-mono text-zinc-400">
-                      <span>{currentTime ? `${Math.floor(currentTime / 60)}:${`0${currentTime % 60}`.slice(-2)}` : '0:00'}</span>
-                      <span className="mx-1">/</span>
-                      <span>{totalDuration ? `${Math.floor(totalDuration / 60)}:${`0${totalDuration % 60}`.slice(-2)}` : '0:00'}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    {/* Volume Controls */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={toggleMute}
-                        disabled={!playerIsReady}
-                        className="p-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg border border-neutral-800 transition-colors"
-                      >
-                        {isMuted || playerVolume === 0 ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                      </button>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={isMuted ? 0 : playerVolume}
-                        onChange={(e) => changeVolume(Number(e.target.value))}
-                        className="w-16 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white"
-                      />
-                    </div>
-
-                    {/* Speed Controls */}
-                    <div className="flex items-center gap-1">
-                      {[1, 1.25, 1.5, 2].map((rate) => (
-                        <button
-                          key={rate}
-                          onClick={() => {
-                            setPlaybackRate(rate);
-                            if (ytPlayerRef.current?.setPlaybackRate) {
-                              ytPlayerRef.current.setPlaybackRate(rate);
-                            }
-                          }}
-                          className={`px-2 py-1 rounded text-[10px] font-mono font-bold transition-all ${
-                            playbackRate === rate ? 'bg-[#EEEEEE] text-black font-black' : 'bg-neutral-900 text-zinc-400 hover:text-white'
-                          }`}
-                        >
-                          {rate}x
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Maximize Controls */}
-                    <button
-                      onClick={toggleFs}
-                      className="p-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg border border-neutral-800 transition-colors"
-                      title="Enter Fullscreen"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Lecture details info card below */}
-                <div className="text-left space-y-2 py-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] text-[#A0A0A0] font-mono bg-white/10 border border-white/20 px-2 py-0.5 uppercase tracking-wide rounded font-bold">
-                      {selectedVideo.subject} Verified
-                    </span>
-                    {selectedVideo.topic && (
-                      <span className="text-[10px] text-zinc-400 font-mono bg-[#1C1C1E] px-2 py-0.5 rounded uppercase">
-                        #{selectedVideo.topic}
-                      </span>
-                    )}
-                    <button
-                      onClick={() => toggleMarkWatched(selectedVideo)}
-                      className={`ml-auto text-[10px] font-mono border rounded px-3 py-1 flex items-center gap-1 hover:scale-101 transition-all ${
-                        watchedVideoIds.includes(selectedVideo.videoId)
-                          ? 'bg-white/15 border-white/30 text-white'
-                          : 'bg-neutral-900 border-neutral-800 text-zinc-400'
-                      }`}
-                    >
-                      <CheckCircle className="w-3 h-3" />
-                      <span>{watchedVideoIds.includes(selectedVideo.videoId) ? 'Completed' : 'Mark Completed'}</span>
-                    </button>
-                  </div>
-
-                  <h3 className="text-sm sm:text-lg font-bold tracking-tight text-white uppercase font-sans leading-snug">
-                    {selectedVideo.title}
-                  </h3>
-                  <p className="text-xs text-zinc-450 font-mono truncate">Publisher: {selectedVideo.channelName}</p>
-                  
-                  {selectedVideo.description && (
-                    <div className="p-4 rounded-xl bg-neutral-900/30 border border-neutral-910/60 text-xs text-zinc-400 font-sans leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
-                      {selectedVideo.description}
-                    </div>
-                  )}
-
-                  {/* Hotkeys instruction alert banner */}
-                  <div className="p-2.5 rounded-lg border border-neutral-910 bg-neutral-950/40 text-[10.5px] font-mono text-zinc-500 flex items-center gap-2 leading-none">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span><b>Playlist keyboard triggers:</b> Space = play/pause, [<b>N</b>] = next video, [<b>P</b>] = previous video, [<b>F</b>] = fullscreen</span>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Right Column: Playlist Sidebar listing (Col 4) */}
-              <div className="lg:col-span-4 space-y-3.5">
-                <div className="p-4 rounded-xl bg-[#09090A] border border-neutral-910 text-left space-y-2">
-                  <span className="text-[9px] font-mono text-zinc-500 uppercase block font-bold leading-none">PLAYING CONTEXT</span>
-                  <h4 className="text-xs font-mono font-bold text-white uppercase line-clamp-1 truncate w-full">{selectedPlaylist?.title ?? ''}</h4>
-                  <div className="w-full bg-zinc-805 h-1.5 rounded overflow-hidden">
-                    <div 
-                      className="bg-white h-full transition-all duration-300" 
-                      style={{ 
-                        width: `${playlistVideos.length ? (playlistVideos.filter(v => watchedVideoIds.includes(v.videoId)).length / playlistVideos.length) * 100 : 0}%` 
-                      }} 
-                    />
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500">
-                    <span>{playlistVideos.length} Chapters total</span>
-                    <span>{playlistVideos.filter(v => watchedVideoIds.includes(v.videoId)).length} Watched</span>
-                  </div>
-                </div>
-
-                {/* List items scroll container */}
-                <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                  {playlistVideos.map((item, index) => {
-                    const isCurrent = item.videoId === selectedVideo.videoId;
-                    const isWatched = watchedVideoIds.includes(item.videoId);
-                    return (
-                      <div
-                        key={item.videoId}
-                        onClick={() => setSelectedVideo(item)}
-                        className={`p-2.5 rounded-xl border flex items-center gap-3 text-left cursor-pointer transition-all ${
-                          isCurrent
-                            ? 'bg-white/5 border-zinc-450 shadow'
-                            : 'bg-[#0E0E0F] border-neutral-900 hover:border-zinc-800'
-                        }`}
-                      >
-                        <div className="relative w-16 aspect-video rounded-lg overflow-hidden shrink-0 bg-neutral-950">
-                          <YoutubeThumbnailImg
-                            videoId={item.videoId}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                          {isWatched && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <CheckCircle className="w-5 h-5 text-white" />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[8px] font-mono text-zinc-500 font-bold">
-                              Ch.{index + 1}
-                            </span>
-                            {isCurrent && (
-                              <span className="text-[8px] bg-[#EEEEEE] text-black font-extrabold px-1.5 py-0.2 rounded uppercase animate-pulse leading-none">
-                                Watching
-                              </span>
-                            )}
-                          </div>
-                          <h5 className={`text-[11px] font-extrabold line-clamp-1 px-0.2 uppercase font-sans truncate ${isCurrent ? 'text-white' : 'text-zinc-200'}`}>
-                            {item.title}
-                          </h5>
-                          <span className="text-[10px] text-zinc-550 font-mono">{item.duration || 'Class'}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-              </div>
-
-            </div>
-          </motion.div>
-        )}
+          return (
+            <BiovisedPlayer
+              lecture={pseudoLecture}
+              onClose={() => {
+                setSelectedVideo(null);
+                setPlayerIsReady(false);
+              }}
+              playlistLectures={playlistLectures}
+              onSelectLecture={(lec) => {
+                const found = playlistVideos.find(v => v.videoId === lec.id);
+                if (found) setSelectedVideo(found);
+              }}
+            />
+          );
+        })()}
 
       </main>
 

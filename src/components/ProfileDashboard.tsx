@@ -196,7 +196,7 @@ export default function ProfileDashboard({
           { id: 'history', label: 'Watch History', icon: Clock },
           { id: 'watchlist', label: 'Watch Later', icon: Bookmark },
           { id: 'following', label: 'Educators Followed', icon: User },
-          ...(user.email === 'adarshaman898@gmail.com' ? [{ id: 'admin', label: 'Admin Panel', icon: ShieldAlert }] : [])
+          ...(user.role === 'admin' || user.role === 'moderator' || user.role === 'super_admin' ? [{ id: 'admin', label: 'Admin Panel', icon: ShieldAlert }] : [])
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -315,7 +315,7 @@ export default function ProfileDashboard({
           </div>
         )}
 
-        {user.email === 'adarshaman898@gmail.com' && activeTab === 'admin' && (
+        {(user.role === 'admin' || user.role === 'moderator' || user.role === 'super_admin') && activeTab === 'admin' && (
           <div className="pt-2 animate-fade-in space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#0C0C0C] border border-zinc-900 p-5 rounded-2xl gap-4 text-left">
               <div>

@@ -1,0 +1,53 @@
+name: Database Backup
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # Daily at 06:00 UTC
+  workflow_dispatch:       # Manual trigger
+
+env:
+  SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+  BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  backup:
+    name: Full Database Backup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pg_dump
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Dump database
+        run: |
+          FILENAME="biovised_$(date +%Y%m%d_%H%M%S).dump"
+          PGPASSWORD="$SUPABASE_DB_PASSWORD" pg_dump \
+            --host="$SUPABASE_DB_HOST" \
+            --port=5432 \
+            --username=postgres \
+            --dbname=postgres \
+            --format=custom \
+            --file="$FILENAME" \
+            --no-owner --no-privileges
+          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+
+      - name: Upload to S3/Backblaze
+        run: |
+          aws s3 cp "$FILENAME" "s3://$BACKUP_BUCKET/db/$FILENAME" \
+            --storage-class STANDARD_IA
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          curl -s -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{"text":"❌ Database backup FAILED for biovised"}'

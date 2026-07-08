@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, X, Eye, Clock } from 'lucide-react';
 import YoutubeThumbnailImg from './YoutubeThumbnailImg';
+import BiovisedPlayer from './BiovisedPlayer';
+import { Lecture as TypesLecture } from '../types';
 
 interface Lecture {
   id: string;
@@ -72,26 +74,40 @@ export const LecturesGrid: React.FC<LecturesGridProps> = ({ playlistId }) => {
   return (
     <div className="p-5 md:p-6 bg-zinc-950/40 border border-white/5 rounded-3xl text-white font-sans">
       
-      {/* 1. IN-BUILT PLAYER COMPONENT DISPLAY */}
+      {/* 1. PREMIUM BIOVISED PLAYER DISPLAY */}
       {activeVideoId && (
         <div 
           ref={playerRef}
-          className="mb-8 relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 transition-all duration-300"
+          className="mb-8 w-full transition-all duration-300"
         >
-          <iframe
-            src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-            title="In-Built Video Player"
-            className="absolute top-0 left-0 w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-          <button 
-            onClick={() => setActiveVideoId(null)} 
-            className="absolute top-4 right-4 bg-black/85 hover:bg-black/95 text-white border border-white/15 px-3 py-1.5 rounded-lg cursor-pointer font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95"
-          >
-            <X className="w-3.5 h-3.5" />
-            Close Player
-          </button>
+          {(() => {
+            const video = lectures.find(l => l.id === activeVideoId);
+            if (!video) return null;
+
+            const pseudoLecture: TypesLecture = {
+              id: video.id,
+              title: video.title,
+              description: video.description || 'Verified YouTube Academic Video lecture.',
+              videoUrl: video.videoUrl || `https://www.youtube.com/watch?v=${video.id}`,
+              thumbnailUrl: video.thumbnail,
+              subject: 'Academic',
+              examType: 'JEE',
+              contentType: 'lecture',
+              teacherId: 'youtube_video',
+              teacherName: 'YouTube Educator',
+              duration: video.duration || '00:00',
+              viewsCount: video.viewCount || 0,
+              likesCount: 0,
+              createdAt: video.publishedAt || new Date().toISOString(),
+            };
+
+            return (
+              <BiovisedPlayer
+                lecture={pseudoLecture}
+                onClose={() => setActiveVideoId(null)}
+              />
+            );
+          })()}
         </div>
       )}
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import TeacherProfileDetail from '../components/TeacherProfileDetail';
 import DetailsModal from '../components/DetailsModal';
-import VideoPlayer from '../components/VideoPlayer';
+import BiovisedPlayer from '../components/BiovisedPlayer';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import { toggleFollow } from '../services/dbService';
@@ -73,7 +73,7 @@ const TeacherPage: React.FC<TeacherPageProps> = ({ teacherId: teacherIdProp }) =
   // Handle playing video lectures in a pristine fullscreen focus container
   if (activeLecture) {
     return (
-      <VideoPlayer 
+      <BiovisedPlayer 
         lecture={activeLecture} 
         onClose={() => setActiveLecture(null)}
       />

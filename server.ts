@@ -7,6 +7,9 @@ import { createClient } from '@supabase/supabase-js';
 import youtubeRouter from './src/routes/youtube.js';
 import lectureRouter from './src/routes/lectureRoutes.js';
 import { normalizeYoutubeVideoResource, getDurationInSeconds, isAcademicContent } from './src/utils/youtubeUtils.js';
+import { sanitizeError, securityHeaders, rateLimiter, errorHandler } from './src/middleware/security.js';
+import { applyEndpointLimits } from './src/middleware/rateLimiter.js';
+import { slowQueryLogger } from './src/middleware/slowQueryLog.js';
 
 dotenv.config();
 
@@ -35,6 +38,32 @@ const supabaseAdmin = createClient(
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+async function verifyAuth(req: express.Request, requiredRoles: string[]): Promise<{ authorized: boolean; error?: string; status?: number }> {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { authorized: false, error: 'Authentication required', status: 401 };
+  }
+  try {
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !user) {
+      return { authorized: false, error: 'Invalid or expired session', status: 401 };
+    }
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('uid', user.id)
+      .maybeSingle();
+    const userRole = profile?.role || 'user';
+    if (!requiredRoles.includes(userRole)) {
+      return { authorized: false, error: 'Insufficient permissions', status: 403 };
+    }
+    return { authorized: true };
+  } catch {
+    return { authorized: false, error: 'Authentication failed', status: 401 };
+  }
+}
 
 import { TEACHER_TO_CHANNEL } from './src/config/constants.js';
 
@@ -65,7 +94,13 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'apikey', 'prefer']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+
+app.use(securityHeaders);
+applyEndpointLimits(app);
+app.use(slowQueryLogger);
+
 app.use('/api/youtube', youtubeRouter);
 app.use(lectureRouter);
 
@@ -1061,6 +1096,10 @@ const lastReviewsIngestionCache = new Map();
 
 // Ingestion API Endpoint: Pull comment thread reviews from YouTube Data API
 app.post('/api/youtube/ingest-reviews', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { videoId, teacherId, instituteId } = req.body;
   if (!videoId) {
     return res.status(400).json({ error: 'Missing videoId body parameter.' });
@@ -1266,6 +1305,10 @@ function extractTopicFromTitle(title: string, subject: string): string {
 
 // GET admin channels
 app.get('/api/youtube/admin-channels', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   try {
     const { data, error } = await supabaseAdmin
       .from('channels')
@@ -1323,6 +1366,10 @@ app.get('/api/youtube/admin-channels', async (req, res) => {
 
 // POST add channel
 app.post('/api/youtube/channels', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { handleOrId, examTags, subject } = req.body;
   if (!handleOrId) {
     return res.status(400).json({ error: 'Missing handleOrId parameter.' });
@@ -1442,6 +1489,10 @@ app.post('/api/youtube/channels', async (req, res) => {
 
 // GET admin playlists
 app.get('/api/youtube/admin-playlists', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { channelId, importStatus } = req.query;
   try {
     let query = supabaseAdmin.from('playlists').select('*');
@@ -1511,6 +1562,10 @@ app.get('/api/youtube/admin-playlists', async (req, res) => {
 
 // POST sync playlists for a channel
 app.post('/api/youtube/playlists/sync', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { channelId } = req.body;
   if (!channelId) {
     return res.status(400).json({ error: 'Missing channelId parameter.' });
@@ -1637,6 +1692,10 @@ app.post('/api/youtube/playlists/sync', async (req, res) => {
 
 // GET admin videos
 app.get('/api/youtube/admin-videos', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   try {
     const { data, error } = await supabaseAdmin
       .from('videos')
@@ -1671,6 +1730,10 @@ app.get('/api/youtube/admin-videos', async (req, res) => {
 
 // POST import/ingest videos for a playlist
 app.post('/api/youtube/playlists/import', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { playlistId } = req.body;
   if (!playlistId) {
     return res.status(400).json({ error: 'Missing playlistId parameter.' });
@@ -1873,6 +1936,10 @@ app.post('/api/youtube/playlists/import', async (req, res) => {
 
 // GET admin system sync audits
 app.get('/api/youtube/admin-logs', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   try {
     const { data, error } = await supabaseAdmin
       .from('sync_logs')
@@ -1899,6 +1966,10 @@ app.get('/api/youtube/admin-logs', async (req, res) => {
 
 // POST trigger Full Synchronisation (Automated Scheduler Endpoint simulation)
 app.post('/api/youtube/sync-all', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   try {
     console.log('[Scheduler Engine] Automatic YouTube sync initiated...');
     
@@ -1970,6 +2041,10 @@ app.post('/api/youtube/sync-all', async (req, res) => {
 
 // DELETE delete channel config, playlists, videos, and synclogs/lectures
 app.delete('/api/youtube/channels/:channelId', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { channelId } = req.params;
   try {
     console.log(`[Admin Catalog] Deleting channel configuration and resources for channel ID: ${channelId}`);
@@ -2010,6 +2085,10 @@ app.delete('/api/youtube/channels/:channelId', async (req, res) => {
 
 // Moderator: Unflag review
 app.post('/api/moderator/reviews/:reviewId/unflag', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { reviewId } = req.params;
   
   try {
@@ -2042,6 +2121,10 @@ app.post('/api/moderator/reviews/:reviewId/unflag', async (req, res) => {
 
 // Moderator: Delete spam review
 app.delete('/api/moderator/reviews/:reviewId', async (req, res) => {
+  const auth = await verifyAuth(req, ['admin', 'moderator', 'super_admin']);
+  if (!auth.authorized) {
+    return res.status(auth.status!).json({ error: auth.error });
+  }
   const { reviewId } = req.params;
 
   try {
@@ -2729,6 +2812,49 @@ app.get('/api/search/global', async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 });
+
+// ── Health Check & Observability ──────────────────────────────────────────
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    version: '2.0.0',
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
+app.get('/api/health/ready', async (_req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin.from('profiles').select('uid').limit(1);
+    if (error) throw error;
+    res.json({ status: 'ok', database: 'connected' });
+  } catch {
+    res.status(503).json({ status: 'degraded', database: 'disconnected' });
+  }
+});
+
+app.use((req, _res, next) => {
+  const start = Date.now();
+  const originalEnd = _res.end;
+  _res.end = function (...args: any[]) {
+    const duration = Date.now() - start;
+    console.log(JSON.stringify({
+      ts: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      status: _res.statusCode,
+      duration,
+      ip: req.ip,
+      userAgent: (req.headers['user-agent'] || '').substring(0, 100),
+    }));
+    return originalEnd.apply(this, args);
+  };
+  next();
+});
+
+app.use(errorHandler);
 
 // Serve Vite dev / static assets
 async function startServer() {

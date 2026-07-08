@@ -10,7 +10,16 @@ dotenv.config();
 const router = express.Router();
 
 router.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || '';
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://biovise.vercel.app',
+    'https://www.biovise.vercel.app'
+  ];
+  if (allowedOrigins.includes(origin) || origin.includes('vercel.app') || origin.includes('run.app') || origin.startsWith('http://localhost:')) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,Authorization');
   if (req.method === 'OPTIONS') {
