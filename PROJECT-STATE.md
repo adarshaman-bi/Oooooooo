@@ -49,6 +49,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 - **Tool**: Antigravity
 - **Files Touched**:
   - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
+- **Change**: Made the custom player top bar `paddingTop` conditional based on device presence: (1) uses standard compact margins (`1rem` / `max(1rem, env(safe-area-inset-top))`) on mobile touch devices, and (2) retains the larger anti-collision spacing offset (`3.25rem` / `max(3.25rem, env(safe-area-inset-top))`) strictly on desktop devices.
+- **Why**: Prevent the title bar overlay from pushing down too low inside compact mobile screens, keeping it from colliding with the centered play button while retaining YouTube overlap defenses on desktop.
+
+### July 8, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/BiovisedPlayer.tsx](file:///c:/onion.so/src/components/BiovisedPlayer.tsx)
 - **Change**: Patched 5 target issues based on visual bug list: (1) Resolved controls wake/sleep race condition by unifying zone tap and locked overlay checks to hide immediately if open (clearing timer) or call `wakeControls()`; (2) fixed seek progress bar dragging by removing vertical dampening to ensure 1:1 cursor tracking and refactored the pointermove/pointerup `useEffect` dependencies using a ref snapshot (`dragTimeRef`) to prevent jank; (3) thickened volume/brightness overlays to `w-2 h-28`, set icon size to `size={20}`, and lowered divisor to `140` to increase drag sensitivity; (4) added a `5s` timeout grace period to fall back to a static quality levels array (`FALLBACK_QUALITIES`) if YouTube's API fails to report available qualities; and (5) expanded top bar title width with `flex-1 min-w-0` and increased Lock button spacing to `pl-3`.
 - **Why**: Fix touch-drag dropouts, prevent settings resolution hangs, eliminate title bar overlap crowding, and ensure tap overlay transitions never race with auto-hide intervals.
 
