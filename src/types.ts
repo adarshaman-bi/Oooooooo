@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'teacher' | 'institute' | 'moderator' | 'admin';
+export type UserRole = 'user' | 'teacher' | 'institute' | 'moderator' | 'admin' | 'super_admin';
 
 /** Shared verification status across teachers, institutes, and content. */
 export type VerificationStatus = 'verified' | 'pending' | 'rejected';

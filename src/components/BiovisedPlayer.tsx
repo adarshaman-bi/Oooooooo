@@ -187,13 +187,13 @@ export default function BiovisedPlayer({
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeHostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const pollRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const lastTap = useRef({ side: null as string | null, time: 0 });
   const dragInfo = useRef({ active: false, side: null as string | null, startY: 0, startVal: 0, moved: false });
   const barRef = useRef<HTMLDivElement>(null);
   const scrubRef = useRef({ active: false, startY: 0, baseVal: 0 });
-  const volHoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const volHoverTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const [playerReady, setPlayerReady] = useState(false);
   const [embedBlocked, setEmbedBlocked] = useState(false);
