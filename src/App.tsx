@@ -1624,13 +1624,9 @@ function AppContent() {
     );
   }
 
-  // Handle OAuth callback rendering route
-  if (window.location.pathname === '/auth/callback') {
-    return <AuthCallback />;
-  }
-
   // Gate check: not authenticated and hasn't chosen guest mode → show auth
-  if (!loading && !firebaseUser && !guestBypassed) {
+  // BUT skip this check for the OAuth callback route — AuthCallback handles that
+  if (!loading && !firebaseUser && !guestBypassed && window.location.pathname !== '/auth/callback') {
     return (
       <AuthModal
         isOpen={true}

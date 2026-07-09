@@ -101,10 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setUser(profile);
     } else {
+      setSupabaseUser(null);
       setUser(null);
       setIsGuest(false);
     }
-    setSupabaseUser(null);
     setLoading(false);
   };
 
