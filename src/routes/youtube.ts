@@ -293,9 +293,19 @@ router.get('/reviews/:videoId', async (req, res) => {
       averageRating = total / reviews.length;
     }
 
+    // Strip internal user_id from response to prevent PII leaks
+    const sanitizedReviews = (reviews || []).map((r: any) => ({
+      id: r.id,
+      video_id: r.video_id,
+      rating: r.rating,
+      review_text: r.review_text,
+      created_at: r.created_at
+      // NOTE: user_id intentionally excluded from API response
+    }));
+
     return res.json({
       status: 'ok',
-      reviews: reviews || [],
+      reviews: sanitizedReviews,
       averageRating: parseFloat(averageRating.toFixed(1))
     });
   } catch (e: any) {
@@ -349,7 +359,21 @@ router.post('/reviews/:videoId', async (req, res) => {
       return res.status(500).json({ error: dbError.message });
     }
 
-    return res.json({ status: 'ok', data: newReview });
+    // Strip internal user_id from response to prevent PII leaks
+    const sanitizedReview = Array.isArray(newReview)
+      ? newReview.map((r: any) => ({
+          id: r.id,
+          video_id: r.video_id,
+          rating: r.rating,
+          review_text: r.review_text,
+          created_at: r.created_at
+        }))
+      : (() => {
+          const r = newReview as any;
+          return r ? { id: r.id, video_id: r.video_id, rating: r.rating, review_text: r.review_text, created_at: r.created_at } : null;
+        })();
+
+    return res.json({ status: 'ok', data: sanitizedReview });
   } catch (err: any) {
     console.error(`Error executing POST review for video ${videoId}:`, err);
     return res.status(500).json({ error: err.message || 'Failed to post review.' });

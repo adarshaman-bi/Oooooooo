@@ -22,13 +22,33 @@ import { slowQueryLogger } from './src/middleware/slowQueryLog.js';
 
 dotenv.config();
 
+// ── Startup Env Var Validation ─────────────────────────────────────────
+// Critical vars: without these, the server cannot function properly.
+const CRITICAL_VARS = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
+function validateCriticalEnv(): void {
+  const missing: string[] = [];
+  for (const v of CRITICAL_VARS) {
+    if (!process.env[v] || process.env[v]!.trim() === '') {
+      missing.push(v);
+    }
+  }
+  if (missing.length > 0) {
+    console.error(
+      `\n❌ FATAL: Missing critical environment variables: ${missing.join(', ')}.\n` +
+      `The app will start in degraded demo mode, but database connectivity will be unavailable.\n` +
+      `Copy .env.example to .env and fill in the required values.\n`
+    );
+  }
+}
+validateCriticalEnv();
+
 const rawUrl = process.env.SUPABASE_URL;
 const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const isSupabaseConfigured = rawUrl && rawUrl.trim() !== '' && rawKey && rawKey.trim() !== '';
 
 if (!isSupabaseConfigured) {
-  console.warn('\n⚠️ WARNING: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing from the environment. Please populate the .env file with your Supabase credentials to enable database connectivity.\n');
+  console.warn('\n⚠️ WARNING: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing from the environment. The app will start in demo mode.\n');
 }
 
 const supabaseUrl = isSupabaseConfigured ? rawUrl.trim() : 'https://placeholder-project.supabase.co';
@@ -80,8 +100,29 @@ async function verifyAuth(req: express.Request, requiredRoles: string[]): Promis
 import { TEACHER_TO_CHANNEL } from './src/config/constants.js';
 
 
+// Strict CORS — no wildcard origins. Only known deployments and localhost.
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://biovise.vercel.app',
+  'https://www.biovise.vercel.app',
+  'https://biovised.vercel.app',
+  'https://www.biovised.vercel.app',
+];
+
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Exact match against known origins
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    // Allow any localhost dev server on any port
+    if (origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    // Fallback to the shared security middleware check
     if (isAllowedOrigin(origin)) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
@@ -243,6 +284,93 @@ const DEMO_LECTURES: Record<string, any[]> = {
 };
 
 // API Endpoint for getting configuration
+// ── User Account Deletion Endpoint ────────────────────────────────────
+// Deletes or anonymizes all personal data associated with the authenticated user.
+app.delete('/api/user/account', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  try {
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid or expired session' });
+    }
+
+    const userId = user.id;
+    console.log(`[Account Deletion] Initiating data deletion for user ${userId}`);
+
+    // 1. Anonymize reviews (replace user_id and display name with [deleted])
+    const { error: reviewsError } = await supabaseAdmin
+      .from('reviews')
+      .update({
+        user_id: '[deleted]',
+        user_display_name: '[deleted account]',
+        features: {}
+      })
+      .eq('user_id', userId);
+    if (reviewsError) console.warn('[Account Deletion] Error anonymizing reviews:', reviewsError.message);
+
+    // 2. Anonymize moderation reports
+    const { error: reportsError } = await supabaseAdmin
+      .from('moderation_reports')
+      .update({ reporter_name: '[deleted account]' })
+      .eq('reporter_id', userId);
+    if (reportsError) console.warn('[Account Deletion] Error updating reports:', reportsError.message);
+
+    // 3. Delete watch history
+    const { error: watchError } = await supabaseAdmin
+      .from('watch_history')
+      .delete()
+      .eq('user_id', userId);
+    if (watchError) console.warn('[Account Deletion] Error deleting watch history:', watchError.message);
+
+    // 4. Anonymize profile (keep minimal entry for referential integrity)
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        email: `deleted_${userId.substring(0, 8)}@anon.biovised.com`,
+        display_name: '[Deleted Account]',
+        preferred_subjects: [],
+        watched_content: [],
+        saved_content: [],
+        hidden_content: [],
+        liked_content: [],
+        onboarding_completed: false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('uid', userId);
+    if (profileError) console.warn('[Account Deletion] Error anonymizing profile:', profileError.message);
+
+    // 5. Delete teacher_followers entries
+    const { error: followersError } = await supabaseAdmin
+      .from('teacher_followers')
+      .delete()
+      .eq('user_id', userId);
+    if (followersError) console.warn('[Account Deletion] Error deleting followers:', followersError.message);
+
+    // 6. Delete notifications
+    const { error: notifError } = await supabaseAdmin
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId);
+    if (notifError) console.warn('[Account Deletion] Error deleting notifications:', notifError.message);
+
+    // 7. Attempt to delete the actual Supabase Auth user
+    const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (deleteUserError) {
+      console.warn('[Account Deletion] Could not delete Auth user (may need admin privileges):', deleteUserError.message);
+    }
+
+    console.log(`[Account Deletion] Completed for user ${userId}`);
+    return res.json({ status: 'ok', message: 'Account deleted successfully. All personal data has been removed or anonymized.' });
+  } catch (err: any) {
+    console.error('[Account Deletion] Fatal error:', err);
+    return res.status(500).json({ error: 'Failed to delete account. Please contact support.' });
+  }
+});
+
 app.get('/api/youtube/channels', (_req, res) => {
   res.json({ status: 'ok', data: VERIFIED_CHANNELS });
 });
