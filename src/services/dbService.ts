@@ -162,11 +162,13 @@ export async function createUserProfile(profile: Partial<UserProfile>): Promise<
   if (!profile.uid) return;
   try {
     const now = new Date().toISOString();
+    // SECURITY: Client-side profile creation always uses role='user'.
+    // Privileged roles can only be granted via service-role / dashboard, never from the SPA.
     const dbProfile = {
       uid: profile.uid,
       email: profile.email || '',
       display_name: profile.displayName || 'Guest User',
-      role: profile.role || 'user',
+      role: 'user',
       exam_type: profile.examType || 'Both',
       appearing_year: profile.appearingYear || DATA_DEFAULTS.APPEARING_YEAR,
       preferred_subjects: profile.preferredSubjects || [],
@@ -179,7 +181,19 @@ export async function createUserProfile(profile: Partial<UserProfile>): Promise<
       created_at: now,
       updated_at: now,
     };
-    const { error } = await supabase.from('profiles').upsert(dbProfile);
+    // Use insert-only when possible; avoid upsert overwriting an admin role with 'user'.
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('uid')
+      .eq('uid', profile.uid)
+      .maybeSingle();
+
+    if (existing) {
+      // Profile already exists — do not overwrite role or core identity fields
+      return;
+    }
+
+    const { error } = await supabase.from('profiles').insert(dbProfile);
     if (error && !isIgnorableError(error)) {
       console.error('Error creating profile in Supabase:', error);
     }
@@ -204,6 +218,7 @@ export async function updateUserExamPreference(uid: string, examType: 'JEE' | 'N
 
 export async function updateUserPreferences(uid: string, preferences: Partial<UserProfile>): Promise<void> {
   try {
+    // Allowlist only safe preference fields — never role, uid, email, created_at
     const dbPayload: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (preferences.displayName !== undefined)       dbPayload.display_name = preferences.displayName;
     if (preferences.examType !== undefined)           dbPayload.exam_type = preferences.examType;
@@ -214,6 +229,10 @@ export async function updateUserPreferences(uid: string, preferences: Partial<Us
     if (preferences.hiddenContent !== undefined)      dbPayload.hidden_content = preferences.hiddenContent;
     if (preferences.likedContent !== undefined)       dbPayload.liked_content = preferences.likedContent;
     if (preferences.onboardingCompleted !== undefined) dbPayload.onboarding_completed = preferences.onboardingCompleted;
+    // Explicitly strip privilege / identity fields if present on Partial
+    delete (dbPayload as Record<string, unknown>).role;
+    delete (dbPayload as Record<string, unknown>).uid;
+    delete (dbPayload as Record<string, unknown>).email;
 
     const { error } = await supabase.from('profiles').update(dbPayload).eq('uid', uid);
     if (error && !isIgnorableError(error)) console.error('Error updating preferences:', error);

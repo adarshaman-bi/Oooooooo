@@ -7,9 +7,8 @@ const MAX_REQUESTS = 100;
 const ipMap = new Map<string, { count: number; resetAt: number }>();
 
 function getIp(req: Request): string {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
-  return req.ip || req.socket.remoteAddress || 'unknown';
+  // Use Express req.ip (respects trust proxy). Do not trust raw X-Forwarded-For alone.
+  return (req.ip || req.socket.remoteAddress || 'unknown').toString();
 }
 
 export function rateLimiter(req: Request, res: Response, next: NextFunction): void {
@@ -34,12 +33,37 @@ export function rateLimiter(req: Request, res: Response, next: NextFunction): vo
   next();
 }
 
+/** Shared CORS allowlist — used by Express cors() and routers. */
+export function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true; // same-origin / curl / server-to-server
+  const allowedExact = new Set([
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://biovise.vercel.app',
+    'https://www.biovise.vercel.app',
+  ]);
+  if (allowedExact.has(origin)) return true;
+  // Localhost any port (dev only)
+  if (/^http:\/\/localhost:\d+$/.test(origin)) return true;
+  // Explicit production domains from env (comma-separated)
+  const extra = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (extra.includes(origin)) return true;
+  // Only biovise-prefixed Vercel preview deploys (not arbitrary *.vercel.app)
+  if (/^https:\/\/biovise[\w-]*\.vercel\.app$/.test(origin)) return true;
+  return false;
+}
+
 export function securityHeaders(req: Request, res: Response, next: NextFunction): void {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '0');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // MicModal uses Web Speech / getUserMedia — allow microphone on same origin only
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
@@ -60,6 +84,20 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
 
   res.setHeader('Content-Security-Policy', csp);
   next();
+}
+
+/** YouTube ID format guards (prevent open proxy / SSRF-style injection). */
+export function isValidYoutubeVideoId(id: string): boolean {
+  return /^[A-Za-z0-9_-]{11}$/.test(id);
+}
+
+export function isValidYoutubeChannelId(id: string): boolean {
+  // UC… IDs are usually 24 chars; allow 10–64 alphanumerics (no protocols/paths)
+  return /^[A-Za-z0-9_-]{10,64}$/.test(id) && !/[./]/.test(id);
+}
+
+export function isValidYoutubePlaylistId(id: string): boolean {
+  return /^[A-Za-z0-9_-]{10,64}$/.test(id) && !/[./]/.test(id);
 }
 
 export function sanitizeError(err: unknown, defaultMsg = 'Internal server error'): string {

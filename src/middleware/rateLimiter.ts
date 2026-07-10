@@ -9,7 +9,8 @@ const stores = new Map<string, Map<string, RateLimitEntry>>();
 
 function createWindowedLimiter(windowMs: number, maxRequests: number) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const ip = (req.headers['x-forwarded-for'] as string || req.ip || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+    // Prefer Express-resolved req.ip (set trust proxy carefully). Avoid blind trust of first XFF hop alone.
+    const ip = (req.ip || req.socket.remoteAddress || 'unknown').toString();
     const now = Date.now();
 
     let entry = stores.get(ip);

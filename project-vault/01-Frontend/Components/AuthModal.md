@@ -18,5 +18,5 @@ Source file representing the `AuthModal` module.
 ---
 
 ## 🔗 Dependency Map
-- **Imports**: [[AuthContext]], [[types]], [[supabaseClient]], [[security]]
+- **Imports**: [[AuthContext]], [[supabaseClient]], [[security]]
 - **Imported By**: [[App]]

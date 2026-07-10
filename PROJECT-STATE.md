@@ -45,6 +45,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 
 ## 3. Changelog (Reverse-Chronological)
 
+### July 10, 2026
+- **Tool**: Antigravity (Ponytail style)
+- **Files Touched**:
+  - [src/components/VideoLibrary.tsx](file:///c:/onion.so/src/components/VideoLibrary.tsx)
+- **Change**: Refactored the `selectedVideo` layout rendering inside the `VideoLibrary` playlists tab. When a video is selected, it returns the `BiovisedPlayer` early inside a plain full-width container (`w-full min-h-screen`) instead of nesting it within the padded `max-w-7xl mx-auto px-4 py-6` container.
+- **Why**: Prevent container horizontal margins (`px-4`) and vertical padding (`py-6`) from leaking onto the mobile player rendering, matching premium OTT experiences.
+
 ### July 8, 2026
 - **Tool**: Antigravity
 - **Files Touched**:

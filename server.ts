@@ -7,7 +7,16 @@ import { createClient } from '@supabase/supabase-js';
 import youtubeRouter from './src/routes/youtube.js';
 import lectureRouter from './src/routes/lectureRoutes.js';
 import { normalizeYoutubeVideoResource, getDurationInSeconds, isAcademicContent } from './src/utils/youtubeUtils.js';
-import { sanitizeError, securityHeaders, rateLimiter, errorHandler } from './src/middleware/security.js';
+import {
+  sanitizeError,
+  securityHeaders,
+  rateLimiter,
+  errorHandler,
+  isAllowedOrigin,
+  isValidYoutubeVideoId,
+  isValidYoutubeChannelId,
+  isValidYoutubePlaylistId,
+} from './src/middleware/security.js';
 import { applyEndpointLimits } from './src/middleware/rateLimiter.js';
 import { slowQueryLogger } from './src/middleware/slowQueryLog.js';
 
@@ -38,6 +47,9 @@ const supabaseAdmin = createClient(
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+// Trust first proxy hop (Vercel / reverse proxy) so req.ip is accurate for rate limits.
+// Without this, all clients appear as the same edge IP or XFF can be spoofed inconsistently.
+app.set('trust proxy', 1);
 
 async function verifyAuth(req: express.Request, requiredRoles: string[]): Promise<{ authorized: boolean; error?: string; status?: number }> {
   const authHeader = req.headers.authorization;
@@ -70,24 +82,7 @@ import { TEACHER_TO_CHANNEL } from './src/config/constants.js';
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://biovise.vercel.app',
-      'https://www.biovise.vercel.app'
-    ];
-
-    if (
-      origin.includes('vercel.app') || 
-      origin.includes('run.app') || 
-      allowedOrigins.includes(origin) ||
-      origin.startsWith('http://localhost:')
-    ) {
-      return callback(null, true);
-    }
-
+    if (isAllowedOrigin(origin)) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -260,6 +255,9 @@ app.get('/api/youtube/channel-info', async (req, res) => {
   if (!videoId || typeof videoId !== 'string') {
     return res.status(400).json({ error: 'Missing videoId parameter.' });
   }
+  if (!isValidYoutubeVideoId(videoId)) {
+    return res.status(400).json({ error: 'Invalid videoId format.' });
+  }
 
   // 1. Try to fetch from server-side cache if initialized
   try {
@@ -384,6 +382,9 @@ app.get('/api/youtube/playlists', async (req, res) => {
   if (!channelId || typeof channelId !== 'string') {
     return res.status(400).json({ error: 'Missing channelId parameter.' });
   }
+  if (!isValidYoutubeChannelId(channelId)) {
+    return res.status(400).json({ error: 'Invalid channelId format.' });
+  }
 
   // FIRST: Read local database to avoid wasting YouTube API Quotas on standard user visits
   try {
@@ -479,6 +480,9 @@ app.get('/api/youtube/lectures', async (req, res) => {
   const { playlistId } = req.query;
   if (!playlistId || typeof playlistId !== 'string') {
     return res.status(400).json({ error: 'Missing playlistId parameter.' });
+  }
+  if (!isValidYoutubePlaylistId(playlistId)) {
+    return res.status(400).json({ error: 'Invalid playlistId format.' });
   }
 
   // FIRST: Read local database to avoid wasting YouTube API Quotas on standard user visits
@@ -1253,7 +1257,7 @@ app.post('/api/youtube/ingest-reviews', async (req, res) => {
 
   } catch (error: any) {
     console.error('Ingress Handler Error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: sanitizeError(error) });
   }
 });
 
@@ -1360,7 +1364,7 @@ app.get('/api/youtube/admin-channels', async (req, res) => {
 
     return res.json({ status: 'ok', data: channels });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -1483,7 +1487,7 @@ app.post('/api/youtube/channels', async (req, res) => {
     console.log(`[Content Importer] Channel ${channelName} synced successfully. Booting automatic playlist scanner...\n`);
     return res.json({ status: 'ok', data: newChannel });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -1556,7 +1560,7 @@ app.get('/api/youtube/admin-playlists', async (req, res) => {
 
     return res.json({ status: 'ok', data: playlists });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -1686,7 +1690,7 @@ app.post('/api/youtube/playlists/sync', async (req, res) => {
 
     return res.json({ status: 'ok', data: apiPlaylists, count: apiPlaylists.length });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -1724,7 +1728,7 @@ app.get('/api/youtube/admin-videos', async (req, res) => {
     }));
     return res.json({ status: 'ok', data: videos });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -1930,7 +1934,7 @@ app.post('/api/youtube/playlists/import', async (req, res) => {
 
     return res.json({ status: 'ok', data: dbVideos, count: dbVideos.length });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -1960,7 +1964,7 @@ app.get('/api/youtube/admin-logs', async (req, res) => {
     }));
     return res.json({ status: 'ok', data: logs });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -2035,7 +2039,7 @@ app.post('/api/youtube/sync-all', async (req, res) => {
       apiUnitsConsumed: quotaUnitsSum
     });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -2046,6 +2050,9 @@ app.delete('/api/youtube/channels/:channelId', async (req, res) => {
     return res.status(auth.status!).json({ error: auth.error });
   }
   const { channelId } = req.params;
+  if (!channelId || !isValidYoutubeChannelId(channelId)) {
+    return res.status(400).json({ error: 'Invalid channelId format.' });
+  }
   try {
     console.log(`[Admin Catalog] Deleting channel configuration and resources for channel ID: ${channelId}`);
 
@@ -2079,7 +2086,7 @@ app.delete('/api/youtube/channels/:channelId', async (req, res) => {
     return res.json({ status: 'ok', message: 'Channel and all associated playlists/videos deleted successfully.' });
   } catch (err: any) {
     console.error('Failed to delete channel:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 });
 
@@ -2115,7 +2122,7 @@ app.post('/api/moderator/reviews/:reviewId/unflag', async (req, res) => {
     });
   } catch (error: any) {
     console.error('Moderator unflag error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: sanitizeError(error) });
   }
 });
 
@@ -2151,7 +2158,7 @@ app.delete('/api/moderator/reviews/:reviewId', async (req, res) => {
     });
   } catch (error: any) {
     console.error('Moderator delete error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: sanitizeError(error) });
   }
 });
 
@@ -2736,17 +2743,23 @@ async function searchYouTubeVideos(query: string): Promise<any[]> {
 // Auto-suggest Endpoint
 app.get('/api/search/suggestions', (req, res) => {
   const { q, examType } = req.query;
-  if (!q) {
+  if (!q || typeof q !== 'string') {
     return res.json({ suggestions: [] });
   }
-  const sug = searchIndexer.getSuggestions(q as string, examType as string);
+  if (q.length > 200) {
+    return res.status(400).json({ error: 'Query too long (max 200 characters).' });
+  }
+  const sug = searchIndexer.getSuggestions(q, examType as string);
   return res.json({ status: 'ok', suggestions: sug });
 });
 
 // Full Global Multi-Step Search Endpoint (Phase 5.1 compliant)
 app.get('/api/search/global', async (req, res) => {
   const { q, examType, subject, contentType, activeTab } = req.query;
-  const queryStr = (q as string || '').trim();
+  const queryStr = (typeof q === 'string' ? q : '').trim();
+  if (queryStr.length > 200) {
+    return res.status(400).json({ error: 'Query too long (max 200 characters).' });
+  }
 
   const filters = {
     examType: examType as string,
@@ -2809,19 +2822,17 @@ app.get('/api/search/global', async (req, res) => {
 
   } catch (error: any) {
     console.error('Ultimate search error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: sanitizeError(error) });
   }
 });
 
 // ── Health Check & Observability ──────────────────────────────────────────
+// Public health must not leak process memory, NODE_ENV, or uptime details.
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
     version: '2.0.0',
-    environment: process.env.NODE_ENV || 'development',
   });
 });
 

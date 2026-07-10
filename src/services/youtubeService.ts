@@ -5,9 +5,10 @@ import { normalizeYoutubeVideoResource, getDurationInSeconds, isAcademicContent 
 
 dotenv.config();
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || (import.meta as any).env?.VITE_YOUTUBE_API_KEY;
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || (import.meta as any).env?.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || (import.meta as any).env?.VITE_SUPABASE_SERVICE_ROLE_KEY;
+// Server-only secrets — never fall back to VITE_* (those ship to the browser bundle).
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const YOUTUBE_BASE = 'https://www.googleapis.com/youtube/v3';
 let isYoutubeServiceApiKeyValid = true;
 

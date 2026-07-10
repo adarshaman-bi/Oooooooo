@@ -1,7 +1,6 @@
 import { useState, FormEvent, useEffect, MouseEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, GraduationCap, X, RotateCcw, Check, AlertCircle, Eye, EyeOff, LogIn } from 'lucide-react';
-import { UserRole } from '../types';
 import { supabase } from '../utils/supabaseClient';
 import { getAuthRedirectUrl } from '../utils/security';
 
@@ -20,7 +19,6 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [role, setRole] = useState<UserRole>('user');
   const [examType, setExamType] = useState<string>('Both');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -120,7 +118,8 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
       } else if (mode === 'signup') {
         if (!isNameValid) throw new Error('Candidate Name must be between 3 and 50 characters');
         if (!isPasswordValid) throw new Error('Password does not meet high safety standards (Needs 4+ checks passed)');
-        await signUpEmail(email, password, displayName, role, examType);
+        // Role is never client-chosen — always 'user' (students only at signup)
+        await signUpEmail(email, password, displayName, 'user', examType);
         localStorage.setItem('biovised_remember_email', email);
         setSuccess('Profile configured! Security tokens issued successfully.');
         setTimeout(() => onClose(), 1200);
@@ -264,31 +263,17 @@ export default function AuthModal({ isOpen, onClose, isLandingPage = false, onGu
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-300 mb-1.5 uppercase tracking-wider">Join As</label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-white rounded-lg py-2 px-3 text-sm text-white outline-none transition-all"
-                  >
-                    <option className="bg-zinc-950 text-white" value="user">Student</option>
-                    <option className="bg-zinc-950 text-white" value="teacher">Teacher</option>
-                    <option className="bg-zinc-950 text-white" value="institute">Institute Portal</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-300 mb-1.5 uppercase tracking-wider">Exam Goal</label>
-                  <select
-                    value={examType}
-                    onChange={(e) => setExamType(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-white rounded-lg py-2 px-3 text-sm text-white outline-none transition-all"
-                  >
-                    <option className="bg-zinc-950 text-white" value="JEE">JEE</option>
-                    <option className="bg-zinc-950 text-white" value="NEET">NEET</option>
-                    <option className="bg-zinc-950 text-white" value="Both">Both / All Goals</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-300 mb-1.5 uppercase tracking-wider">Exam Goal</label>
+                <select
+                  value={examType}
+                  onChange={(e) => setExamType(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-white rounded-lg py-2 px-3 text-sm text-white outline-none transition-all"
+                >
+                  <option className="bg-zinc-950 text-white" value="JEE">JEE</option>
+                  <option className="bg-zinc-950 text-white" value="NEET">NEET</option>
+                  <option className="bg-zinc-950 text-white" value="Both">Both / All Goals</option>
+                </select>
               </div>
             </>
           )}

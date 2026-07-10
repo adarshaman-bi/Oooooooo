@@ -1,5 +1,6 @@
 import express from 'express';
 import { getLiveTeacherLectures } from '../services/youtubeService.js';
+import { isValidYoutubePlaylistId } from '../middleware/security.js';
 
 const router = express.Router();
 
@@ -11,6 +12,13 @@ router.get('/api/teachers/:playlistId/lectures', async (req, res) => {
         success: false, 
         data: [], 
         error: "Missing playlistId parameter." 
+      });
+    }
+    if (!isValidYoutubePlaylistId(playlistId)) {
+      return res.status(400).json({
+        success: false,
+        data: [],
+        error: "Invalid playlistId format.",
       });
     }
     const lectures = await getLiveTeacherLectures(playlistId);

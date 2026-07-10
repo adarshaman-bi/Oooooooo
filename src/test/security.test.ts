@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { sanitizeHtml, isValidEmail, isValidPassword, isAdminRole, isModeratorRole } from '../utils/security';
+import {
+  isAllowedOrigin,
+  isValidYoutubeVideoId,
+  isValidYoutubeChannelId,
+  isValidYoutubePlaylistId,
+  sanitizeError,
+} from '../middleware/security';
 
 describe('sanitizeHtml', () => {
   it('escapes HTML tags', () => {
@@ -77,5 +84,45 @@ describe('isModeratorRole', () => {
   it('rejects non-moderator roles', () => {
     expect(isModeratorRole('user')).toBe(false);
     expect(isModeratorRole('teacher')).toBe(false);
+  });
+});
+
+describe('isAllowedOrigin', () => {
+  it('allows localhost and biovise production', () => {
+    expect(isAllowedOrigin(undefined)).toBe(true);
+    expect(isAllowedOrigin('http://localhost:3000')).toBe(true);
+    expect(isAllowedOrigin('https://biovise.vercel.app')).toBe(true);
+  });
+
+  it('rejects arbitrary third-party / generic vercel / run.app', () => {
+    expect(isAllowedOrigin('https://evil.com')).toBe(false);
+    expect(isAllowedOrigin('https://attacker.vercel.app')).toBe(false);
+    expect(isAllowedOrigin('https://malicious.run.app')).toBe(false);
+  });
+});
+
+describe('YouTube ID validators', () => {
+  it('accepts well-formed IDs', () => {
+    expect(isValidYoutubeVideoId('dQw4w9WgXcQ')).toBe(true);
+    expect(isValidYoutubeChannelId('UC63V9iYI_vL-P_i36-1WlY9A')).toBe(true);
+    expect(isValidYoutubePlaylistId('PLabcdefghijklmnopqrstuv')).toBe(true);
+  });
+
+  it('rejects SSRF-style or path payloads', () => {
+    expect(isValidYoutubeVideoId('http://evil')).toBe(false);
+    expect(isValidYoutubeChannelId('../etc/passwd')).toBe(false);
+    expect(isValidYoutubePlaylistId('PL/../../admin')).toBe(false);
+    expect(isValidYoutubeVideoId('short')).toBe(false);
+  });
+});
+
+describe('sanitizeError', () => {
+  it('hides secret-related messages', () => {
+    expect(sanitizeError(new Error('Invalid API key'))).toBe('Internal server error');
+    expect(sanitizeError(new Error('password dump'))).toBe('Internal server error');
+  });
+
+  it('passes through generic safe messages', () => {
+    expect(sanitizeError(new Error('Playlist not found'))).toBe('Playlist not found');
   });
 });

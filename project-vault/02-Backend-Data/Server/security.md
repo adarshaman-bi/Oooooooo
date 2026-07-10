@@ -8,13 +8,17 @@
 ---
 
 ## 📋 Purpose
-Source file representing the `security` module.
+Shared CORS allowlist — used by Express cors() and routers.
 
 ---
 
 ## 🔌 Key Exports / Props
 - `rateLimiter`
+- `isAllowedOrigin`
 - `securityHeaders`
+- `isValidYoutubeVideoId`
+- `isValidYoutubeChannelId`
+- `isValidYoutubePlaylistId`
 - `sanitizeError`
 - `errorHandler`
 - `requireRole`
@@ -26,4 +30,4 @@ Source file representing the `security` module.
 
 ## 🔗 Dependency Map
 - **Imports**: None
-- **Imported By**: [[AuthModal]], [[AuthContext]], [[security.test]]
+- **Imported By**: [[AuthModal]], [[AuthContext]], [[security.test]], [[security.test]]

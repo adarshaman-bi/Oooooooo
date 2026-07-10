@@ -637,6 +637,59 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
     return `${watchedInThisPlaylist} of ${playlistVideos.length} videos watched`;
   }, [selectedPlaylist, playlistVideos, watchedVideoIds]);
 
+  if (selectedVideo) {
+    const pseudoLecture: TypesLecture = {
+      id: selectedVideo.videoId,
+      title: selectedVideo.title,
+      description: selectedVideo.description || 'Verified YouTube Academic Video lecture.',
+      videoUrl: `https://www.youtube.com/watch?v=${selectedVideo.videoId}`,
+      thumbnailUrl: `https://img.youtube.com/vi/${selectedVideo.videoId}/hqdefault.jpg`,
+      subject: selectedPlaylist?.subject || 'Academic',
+      examType: selectedPlaylist?.examType || 'JEE',
+      contentType: 'lecture',
+      teacherId: selectedVideo.channelId || 'youtube_channel',
+      teacherName: selectedVideo.channelName || 'YouTube Educator',
+      duration: selectedVideo.duration || '00:00',
+      viewsCount: selectedVideo.viewCount || 0,
+      likesCount: selectedVideo.likeCount || 0,
+      createdAt: selectedVideo.publishedAt || new Date().toISOString(),
+    };
+
+    const playlistLectures = playlistVideos.map(video => ({
+      id: video.videoId,
+      title: video.title,
+      description: video.description || 'Verified YouTube Academic Video lecture.',
+      videoUrl: `https://www.youtube.com/watch?v=${video.videoId}`,
+      thumbnailUrl: `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`,
+      subject: selectedPlaylist?.subject || 'Academic',
+      examType: selectedPlaylist?.examType || 'JEE',
+      contentType: 'lecture',
+      teacherId: video.channelId || 'youtube_channel',
+      teacherName: video.channelName || 'YouTube Educator',
+      duration: video.duration || '00:00',
+      viewsCount: video.viewCount || 0,
+      likesCount: video.likeCount || 0,
+      createdAt: video.publishedAt || new Date().toISOString(),
+    }));
+
+    return (
+      <div className="w-full min-h-screen bg-neutral-950 text-white font-sans selection:bg-white selection:text-black">
+        <BiovisedPlayer
+          lecture={pseudoLecture}
+          onClose={() => {
+            setSelectedVideo(null);
+            setPlayerIsReady(false);
+          }}
+          playlistLectures={playlistLectures}
+          onSelectLecture={(lec) => {
+            const found = playlistVideos.find(v => v.videoId === lec.id);
+            if (found) setSelectedVideo(found);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full min-h-screen bg-[#070708] text-white font-sans selection:bg-white selection:text-black">
       
@@ -1240,56 +1293,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
           </motion.div>
         )}
 
-        {selectedVideo && (() => {
-          const pseudoLecture: TypesLecture = {
-            id: selectedVideo.videoId,
-            title: selectedVideo.title,
-            description: selectedVideo.description || 'Verified YouTube Academic Video lecture.',
-            videoUrl: `https://www.youtube.com/watch?v=${selectedVideo.videoId}`,
-            thumbnailUrl: `https://img.youtube.com/vi/${selectedVideo.videoId}/hqdefault.jpg`,
-            subject: selectedPlaylist?.subject || 'Academic',
-            examType: selectedPlaylist?.examType || 'JEE',
-            contentType: 'lecture',
-            teacherId: selectedVideo.channelId || 'youtube_channel',
-            teacherName: selectedVideo.channelName || 'YouTube Educator',
-            duration: selectedVideo.duration || '00:00',
-            viewsCount: selectedVideo.viewCount || 0,
-            likesCount: selectedVideo.likeCount || 0,
-            createdAt: selectedVideo.publishedAt || new Date().toISOString(),
-          };
-
-          const playlistLectures = playlistVideos.map(video => ({
-            id: video.videoId,
-            title: video.title,
-            description: video.description || 'Verified YouTube Academic Video lecture.',
-            videoUrl: `https://www.youtube.com/watch?v=${video.videoId}`,
-            thumbnailUrl: `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`,
-            subject: selectedPlaylist?.subject || 'Academic',
-            examType: selectedPlaylist?.examType || 'JEE',
-            contentType: 'lecture',
-            teacherId: video.channelId || 'youtube_channel',
-            teacherName: video.channelName || 'YouTube Educator',
-            duration: video.duration || '00:00',
-            viewsCount: video.viewCount || 0,
-            likesCount: video.likeCount || 0,
-            createdAt: video.publishedAt || new Date().toISOString(),
-          }));
-
-          return (
-            <BiovisedPlayer
-              lecture={pseudoLecture}
-              onClose={() => {
-                setSelectedVideo(null);
-                setPlayerIsReady(false);
-              }}
-              playlistLectures={playlistLectures}
-              onSelectLecture={(lec) => {
-                const found = playlistVideos.find(v => v.videoId === lec.id);
-                if (found) setSelectedVideo(found);
-              }}
-            />
-          );
-        })()}
+        {/* selectedVideo rendered as an early return above to prevent container padding leaking */}
 
       </main>
 

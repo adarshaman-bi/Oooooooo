@@ -77,13 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('biovised_is_guest');
 
       let profile = await fetchUserProfile(sUser.id);
-      // NOTE: Admin role is determined by the 'role' column in the profiles table.
-      // Do not hardcode email addresses here. Set role='admin' directly in Supabase.
-      const isAdminByRole = profile?.role === 'admin';
+      // Roles are server/DB-assigned only. Never trust client user_metadata for privilege.
 
       if (!profile) {
         const now = new Date().toISOString();
         const displayName = sUser.user_metadata?.displayName || sUser.user_metadata?.full_name || 'Pupil';
+        // Force role=user on auto-provision — privilege escalation prevention
         await createUserProfile({
           uid: sUser.id,
           email: sUser.email || '',
@@ -96,13 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile = await fetchUserProfile(sUser.id);
       }
 
-      if (isAdminByRole && profile) {
-        profile = { ...profile, role: 'admin' };
-      }
       setUser(profile);
     } else {
       setSupabaseUser(null);
       setUser(null);
+      setSupabaseUser(null);
       setIsGuest(false);
     }
     setLoading(false);
@@ -161,15 +158,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     pw: string,
     name: string,
-    role: UserRole,
+    _role: UserRole,
     exam: 'JEE' | 'NEET' | 'Both' | string
   ) => {
     setLoading(true);
     try {
+      // SECURITY: Never accept client-supplied roles. All signups are students ('user').
+      // Privileged roles (teacher/admin/moderator) must be assigned only via Supabase dashboard/service role.
       const { data, error } = await supabase.auth.signUp({
         email,
         password: pw,
-        options: { data: { displayName: name, role, examType: exam } },
+        options: { data: { displayName: name, examType: exam } },
       });
       if (error) throw error;
 
@@ -179,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           uid: userId,
           email,
           displayName: name,
-          role,
+          role: 'user',
           examType: exam,
           appearingYear: DATA_DEFAULTS.APPEARING_YEAR,
           preferredSubjects: [],
