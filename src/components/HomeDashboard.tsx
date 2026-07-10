@@ -42,8 +42,64 @@ export default function HomeDashboard({
   followedIds = [],
   handleFollowToggle
 }: HomeDashboardProps) {
-  const [channels, setChannels] = useState<any[]>([]);
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [channels, setChannels] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('biovised_cached_teachers');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed.map((ch: any) => ({
+          channelId: ch?.id || '',
+          channelName: ch?.name || 'Verified Educator',
+          channelThumbnail: ch?.avatar || '',
+          subscriberCount: parseInt(ch?.subscribers, 10) || 120000,
+          description: ch?.description || 'Verified JEE & NEET Educator'
+        }));
+      }
+    } catch (e) {
+      console.warn("Failed to load initial cached channels:", e);
+    }
+    return [];
+  });
+
+  const [playlists, setPlaylists] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('biovised_cached_playlists');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed.map((p: any) => {
+          const titleLower = (p?.title || '').toLowerCase();
+          let resolvedContentType = p?.content_type || 'playlist';
+          if (!p?.content_type) {
+            if (titleLower.includes('one shot') || titleLower.includes('oneshot') || titleLower.includes('complete revision')) {
+              resolvedContentType = 'one_shot';
+            } else if (titleLower.includes('allen') || titleLower.includes('pw') || titleLower.includes('unacademy') || titleLower.includes('competishun')) {
+              resolvedContentType = 'institute';
+            }
+          }
+          return {
+            id: p?.id || '',
+            title: p?.title || '',
+            description: p?.description || '',
+            thumbnailUrl: p?.cover_thumbnail_url || p?.thumbnail || '',
+            lecturesCount: p?.lectures_count || 0,
+            subject: p?.category || '',
+            examType: p?.exam_type || 'Both',
+            teacherId: p?.teacher_id || '',
+            teacherName: p?.channel_title || '',
+            channelId: p?.channel_id || '',
+            contentType: resolvedContentType,
+            totalDurationSeconds: p?.total_duration_seconds || 0,
+            createdAt: p?.created_at || new Date().toISOString(),
+            updatedAt: p?.updated_at || p?.created_at || new Date().toISOString()
+          };
+        });
+      }
+    } catch (e) {
+      console.warn("Failed to load initial cached playlists:", e);
+    }
+    return [];
+  });
+
   const [watchHistory, setWatchHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'playlist' | 'one_shot' | 'institute'>('playlist');
   const [institutes, setInstitutes] = useState<any[]>([]);
@@ -99,6 +155,8 @@ export default function HomeDashboard({
   const { data: dbTeachers } = useSWR(SWR_KEYS.TEACHERS, fetchActiveTeachers, swrOptions);
 
   const loading = channelsLoading || playlistsLoading || videosLoading;
+  const hasCache = playlists.length > 0 && channels.length > 0;
+  const showSkeleton = loading && !hasCache;
 
   // Process Channels
   useEffect(() => {
@@ -116,55 +174,52 @@ export default function HomeDashboard({
   // Process Playlists
   useEffect(() => {
     if (playData) {
-      const processPlaylists = async () => {
-        const mapped = playData.map((p: any) => {
-          const titleLower = (p?.title || '').toLowerCase();
-          let resolvedContentType = p?.content_type || 'playlist';
-          if (!p?.content_type) {
-            if (titleLower.includes('one shot') || titleLower.includes('oneshot') || titleLower.includes('complete revision')) {
-              resolvedContentType = 'one_shot';
-            } else if (titleLower.includes('allen') || titleLower.includes('pw') || titleLower.includes('unacademy') || titleLower.includes('competishun')) {
-              resolvedContentType = 'institute';
-            }
+      const mapped = playData.map((p: any) => {
+        const titleLower = (p?.title || '').toLowerCase();
+        let resolvedContentType = p?.content_type || 'playlist';
+        if (!p?.content_type) {
+          if (titleLower.includes('one shot') || titleLower.includes('oneshot') || titleLower.includes('complete revision')) {
+            resolvedContentType = 'one_shot';
+          } else if (titleLower.includes('allen') || titleLower.includes('pw') || titleLower.includes('unacademy') || titleLower.includes('competishun')) {
+            resolvedContentType = 'institute';
           }
-          return {
-            id: p?.id || '',
-            title: p?.title || '',
-            description: p?.description || '',
-            thumbnailUrl: p?.cover_thumbnail_url || p?.thumbnail || '',
-            lecturesCount: p?.lectures_count || 0,
-            subject: p?.category || '',
-            examType: p?.exam_type || 'Both',
-            teacherId: p?.teacher_id || '',
-            teacherName: p?.channel_title || '',
-            channelId: p?.channel_id || '',
-            contentType: resolvedContentType,
-            totalDurationSeconds: p?.total_duration_seconds || 0,
-            createdAt: p?.created_at || new Date().toISOString(),
-            updatedAt: p?.updated_at || p?.created_at || new Date().toISOString()
-          };
-        });
+        }
+        return {
+          id: p?.id || '',
+          title: p?.title || '',
+          description: p?.description || '',
+          thumbnailUrl: p?.cover_thumbnail_url || p?.thumbnail || '',
+          lecturesCount: p?.lectures_count || 0,
+          subject: p?.category || '',
+          examType: p?.exam_type || 'Both',
+          teacherId: p?.teacher_id || '',
+          teacherName: p?.channel_title || '',
+          channelId: p?.channel_id || '',
+          contentType: resolvedContentType,
+          totalDurationSeconds: p?.total_duration_seconds || 0,
+          createdAt: p?.created_at || new Date().toISOString(),
+          updatedAt: p?.updated_at || p?.created_at || new Date().toISOString()
+        };
+      });
 
-        // Resolve teacherName fallback if channel_title is empty
-        const { data: teacherData } = await supabase.from('teachers').select('id, name');
-        const teacherMap = new Map();
-        for (const t of (teacherData || [])) {
+      // Build teacher map synchronously from SWR active teachers cache to eliminate async block
+      const teacherMap = new Map();
+      if (dbTeachers) {
+        for (const t of dbTeachers) {
           teacherMap.set(t.id, t.name);
         }
+      }
 
-        for (const m of mapped) {
-          if (!m.teacherName && m.teacherId) {
-            m.teacherName = teacherMap.get(m.teacherId) || 'Verified Educator';
-          }
+      for (const m of mapped) {
+        if (!m.teacherName && m.teacherId) {
+          m.teacherName = teacherMap.get(m.teacherId) || 'Verified Educator';
         }
+      }
 
-        const sorted = mapped.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-        setPlaylists(sorted);
-      };
-
-      processPlaylists();
+      const sorted = mapped.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      setPlaylists(sorted);
     }
-  }, [playData]);
+  }, [playData, dbTeachers]);
 
   // Load Watch History from localStorage safely
   useEffect(() => {
@@ -336,13 +391,32 @@ export default function HomeDashboard({
       </div>
 
       {/* Loading Skeletal state */}
-      {loading ? (
-        <div className="max-w-7xl mx-auto px-8 py-6 space-y-12">
+      {showSkeleton ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 space-y-12 animate-pulse">
+          {/* Educators Row Skeleton */}
           <div className="space-y-4">
-            <div className="h-6 w-48 bg-zinc-900 rounded animate-pulse" />
+            <div className="h-5 w-40 bg-zinc-900 rounded" />
             <div className="flex gap-4 overflow-hidden">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="w-24 h-24 rounded-full bg-zinc-900 animate-pulse shrink-0" />
+                <div key={i} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-zinc-900 shrink-0" />
+              ))}
+            </div>
+          </div>
+          {/* Playlists Row Skeleton */}
+          <div className="space-y-4">
+            <div className="h-5 w-56 bg-zinc-900 rounded" />
+            <div className="flex gap-5 overflow-hidden">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="w-64 h-36 bg-zinc-900 rounded-2xl shrink-0" />
+              ))}
+            </div>
+          </div>
+          {/* Batches Row Skeleton */}
+          <div className="space-y-4">
+            <div className="h-5 w-48 bg-zinc-900 rounded" />
+            <div className="flex gap-5 overflow-hidden">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="w-80 h-44 bg-zinc-900 rounded-2xl shrink-0" />
               ))}
             </div>
           </div>

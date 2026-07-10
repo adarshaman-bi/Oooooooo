@@ -550,6 +550,7 @@ function AppContent() {
 
   // Control initial loading state to prevent flash layout shifts
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [showHeaderFooter, setShowHeaderFooter] = useState(true);
 
   // Control core view layers
   const [currentView, setCurrentView] = useState<ViewName>('explore');
@@ -1112,7 +1113,7 @@ function AppContent() {
           setCurrentView('explore');
           setActiveExploreTab('home');
         }
-      }, 500); // 500ms snappy response once loaded
+      }, 150); // Snappy 150ms response once loaded
       return () => clearTimeout(timer);
     }
   }, [showSplash, loading]);
@@ -1181,6 +1182,100 @@ function AppContent() {
     localStorage.setItem('biovised_search_history_v2', JSON.stringify(updated));
     setSearchHistory(updated);
   };
+
+  // Performant scroll-direction-based show/hide header and footer tracking (Requirement 1, 6, 7, 8, 10)
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    let touchStartY = 0;
+    const threshold = 8; // Delta threshold in pixels
+
+    const getScrollTop = (target: any) => {
+      if (!target) return 0;
+      if (target === window || target === document || target === document.body || target === document.documentElement) {
+        return window.scrollY || document.documentElement.scrollTop || 0;
+      }
+      return target.scrollTop || 0;
+    };
+
+    const updateScrollDirection = (currentScrollY: number) => {
+      if (window.innerWidth >= 768) {
+        setShowHeaderFooter(true);
+        return;
+      }
+      
+      // Always visible at the top (scrollY at or near 0) (Requirement 4)
+      if (currentScrollY <= 15) {
+        setShowHeaderFooter(true);
+        return;
+      }
+
+      const diff = currentScrollY - lastScrollY;
+      if (Math.abs(diff) >= threshold) {
+        if (diff > 0) {
+          setShowHeaderFooter(false); // Hide on scroll down
+        } else {
+          setShowHeaderFooter(true); // Show on scroll up
+        }
+        lastScrollY = currentScrollY;
+      }
+    };
+
+    const handleScroll = (e: Event) => {
+      if (window.innerWidth >= 768) {
+        setShowHeaderFooter(true);
+        return;
+      }
+      const currentScrollY = getScrollTop(e.target);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateScrollDirection(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (window.innerWidth >= 768) return;
+      if (e.touches && e.touches[0]) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (window.innerWidth >= 768) return;
+      if (!e.touches || !e.touches[0]) return;
+      const touchY = e.touches[0].clientY;
+      const diffY = touchY - touchStartY;
+
+      const currentScrollY = window.scrollY;
+      if (currentScrollY <= 15) {
+        setShowHeaderFooter(true);
+        return;
+      }
+
+      if (Math.abs(diffY) >= threshold) {
+        if (diffY < 0) {
+          setShowHeaderFooter(false); // Hide on swipe up
+        } else {
+          setShowHeaderFooter(true); // Show on swipe down
+        }
+        touchStartY = touchY;
+      }
+    };
+
+    // Passive capturing listeners to capture scrolling inside nested elements and page body alike (Requirement 8 & 10)
+    window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { capture: true, passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { capture: true, passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+      window.removeEventListener('touchstart', handleTouchStart, { capture: true });
+      window.removeEventListener('touchmove', handleTouchMove, { capture: true });
+    };
+  }, []);
 
   // Initial load of directories with automatic background persistence synchronization using SWR cache
   useEffect(() => {
@@ -1719,45 +1814,53 @@ function AppContent() {
         </div>
       )}
 
-      {/* Fixed top Header segment */}
-      <Header
-        onSearchChange={(q) => {
-          setSearchQuery(q);
+      {/* Fixed top Header segment wrapped in transition container */}
+      <div 
+        className="sticky top-0 z-40 w-full transition-all duration-300 ease-out"
+        style={{
+          transform: showHeaderFooter ? 'translateY(0)' : 'translateY(-100%)',
+          opacity: showHeaderFooter ? 1 : 0
         }}
-        onSearchSubmit={() => {}}
-        onViewDashboard={(view) => {
-          setCurrentView(view);
-          if (view === 'explore') {
-            setIsSearchFocused(false);
-          }
-        }}
-        onLogoClick={() => {
-          setSearchQuery('');
-          setCurrentView('explore');
-          setActiveExploreTab('home');
-          setActiveLecture(null);
-          setDetailModal(null);
-        }}
-        currentView={currentView as any}
-        searchVal={searchQuery}
-        activeExploreTab={activeExploreTab}
-        onOpenAuth={() => setAuthModalOpen(true)}
-        notifications={notifications}
-        showFilters={showFilters}
-        onToggleFilters={() => setSpecsModalOpen(true)}
-        isFilterSupported={currentView === 'explore' || currentView === 'search'}
-        onFocus={() => {
-          if (currentView === 'explore') {
-            setIsSearchFocused(true);
-          }
-        }}
-        searchSuggestions={searchSuggestions}
-        currentExamType={examFilter}
-        onVoiceSearchClick={startSpeechRecognition}
-        themeMode={themeMode}
-        onToggleTheme={toggleTheme}
-        onBack={handleBackNavigation}
-      />
+      >
+        <Header
+          onSearchChange={(q) => {
+            setSearchQuery(q);
+          }}
+          onSearchSubmit={() => {}}
+          onViewDashboard={(view) => {
+            setCurrentView(view);
+            if (view === 'explore') {
+              setIsSearchFocused(false);
+            }
+          }}
+          onLogoClick={() => {
+            setSearchQuery('');
+            setCurrentView('explore');
+            setActiveExploreTab('home');
+            setActiveLecture(null);
+            setDetailModal(null);
+          }}
+          currentView={currentView as any}
+          searchVal={searchQuery}
+          activeExploreTab={activeExploreTab}
+          onOpenAuth={() => setAuthModalOpen(true)}
+          notifications={notifications}
+          showFilters={showFilters}
+          onToggleFilters={() => setSpecsModalOpen(true)}
+          isFilterSupported={currentView === 'explore' || currentView === 'search'}
+          onFocus={() => {
+            if (currentView === 'explore') {
+              setIsSearchFocused(true);
+            }
+          }}
+          searchSuggestions={searchSuggestions}
+          currentExamType={examFilter}
+          onVoiceSearchClick={startSpeechRecognition}
+          themeMode={themeMode}
+          onToggleTheme={toggleTheme}
+          onBack={handleBackNavigation}
+        />
+      </div>
 
       {/* Theme Toast Notification */}
       <AnimatePresence>
@@ -2268,18 +2371,26 @@ function AppContent() {
 
               {/* Exact Mock Screenshot Match Footer Navigation Bar (Hidden when activeLecture is playing to block distraction) */}
               {!activeLecture && (
-                <Footer
-                  currentView={currentView}
-                  activeExploreTab={activeExploreTab}
-                  onTabSelect={(tabId) => {
-                    setCurrentView('explore');
-                    setActiveExploreTab(tabId);
-                    setSearchQuery('');
-                    setShowFilters(false);
-                    setIsSearchFocused(false);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                <div
+                  className="md:hidden fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-out"
+                  style={{
+                    transform: showHeaderFooter ? 'translateY(0)' : 'translateY(100%)',
+                    opacity: showHeaderFooter ? 1 : 0
                   }}
-                />
+                >
+                  <Footer
+                    currentView={currentView}
+                    activeExploreTab={activeExploreTab}
+                    onTabSelect={(tabId) => {
+                      setCurrentView('explore');
+                      setActiveExploreTab(tabId);
+                      setSearchQuery('');
+                      setShowFilters(false);
+                      setIsSearchFocused(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  />
+                </div>
               )}
             </>
           )}

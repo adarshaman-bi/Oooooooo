@@ -45,6 +45,14 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 
 ## 3. Changelog (Reverse-Chronological)
 
+### July 11, 2026
+- **Tool**: Antigravity (Ponytail style)
+- **Files Touched**:
+  - [src/App.tsx](file:///c:/onion.so/src/App.tsx)
+  - [src/components/HomeDashboard.tsx](file:///c:/onion.so/src/components/HomeDashboard.tsx)
+- **Change**: (1) Implemented mobile-only scroll-direction-based show/hide behavior for the header and footer (bottom nav). Wrapped `Header` and `Footer` in transition containers linked to a requestAnimationFrame-throttled scroll event listener and client touchmove tracker. (2) Reduced initial splash screen timeout from 500ms to 150ms. (3) Loaded `HomeDashboard` channels and playlists from `localStorage` on initial mount to enable instantaneous rendering. (4) Redesigned the loading skeleton inside `HomeDashboard` to be rich and multi-row (incorporating educators, playlists, and batches skeletons) to eliminate visual layout snapping. (5) Simplified playlist metadata aggregation by resolving teacher names synchronously from SWR's cache rather than launching nested async queries on render.
+- **Why**: Improve perceived speed and eliminate blank loading states, while maximizing mobile reading space via gesture-driven nav slide overlays.
+
 ### July 10, 2026
 - **Tool**: Antigravity (Ponytail style)
 - **Files Touched**:
