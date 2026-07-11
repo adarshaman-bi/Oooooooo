@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 
 export const scrollParentVertically = (element: HTMLElement | null, amount: number) => {
@@ -109,7 +109,6 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
   className = '',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -122,10 +121,7 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
     const el = containerRef.current;
     if (!el) return;
     
-    // Left limit
-    setShowLeftArrow(el.scrollLeft > 5);
-    
-    // Right limit
+    // Right limit only (left button removed)
     const maxScroll = el.scrollWidth - el.clientWidth;
     setShowRightArrow(el.scrollLeft < maxScroll - 5);
   };
@@ -257,18 +253,7 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
 
       {/* Row Body / Scroller Wrapper */}
       <div className="group/row relative w-full overflow-visible">
-        {/* Left Scroll Button (Requirement: z-index increased to z-[60] to prevent disappearing on card hover) */}
-        {showLeftArrow && (
-          <button
-            onClick={() => scrollByAmount(-400)}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-[60] hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-black/80 hover:bg-black border border-zinc-850 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-lg hover:scale-110 active:scale-95"
-            aria-label={`Scroll ${title} left`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-        )}
-
-        {/* Right Scroll Button (Requirement: z-index increased to z-[60] to prevent disappearing on card hover) */}
+        {/* Right Scroll Button */}
         {showRightArrow && (
           <button
             onClick={() => scrollByAmount(400)}
