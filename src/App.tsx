@@ -13,6 +13,7 @@ import { TEST_SERIES_CATALOG } from './data/testSeriesData';
 import HomeDashboard from './components/HomeDashboard';
 import BiovisedPlayer from './components/BiovisedPlayer';
 import DetailsModal from './components/DetailsModal';
+import LectureDetailsSection from './components/LectureDetailsSection';
 import ErrorBoundary from './components/ErrorBoundary';
 import { DynamicRating } from './components/DynamicRating';
 import ProfileDashboard from './components/ProfileDashboard';
@@ -2181,12 +2182,21 @@ function AppContent() {
               {activeLecture ? (
                 /* Dedicated Video Player View (Plays in its own clean page to prevent design collapse) */
                 <ErrorBoundary>
-                  <BiovisedPlayer
-                    lecture={activeLecture}
-                    onClose={handleBackNavigation}
-                    playlistLectures={lectures.filter(l => l.playlistId === activeLecture.playlistId)}
-                    onSelectLecture={setActiveLecture}
-                  />
+                  <div className="w-full min-h-screen bg-neutral-950 flex flex-col overflow-y-auto pb-24">
+                    <div className="w-full flex justify-center bg-neutral-950">
+                      <BiovisedPlayer
+                        lecture={activeLecture}
+                        onClose={handleBackNavigation}
+                        playlistLectures={lectures.filter(l => l.playlistId === activeLecture.playlistId)}
+                        onSelectLecture={setActiveLecture}
+                      />
+                    </div>
+                    <LectureDetailsSection
+                      lecture={activeLecture}
+                      currentUserId={user?.uid ?? null}
+                      onSelectRecommended={setActiveLecture}
+                    />
+                  </div>
                 </ErrorBoundary>
               ) : (
                 <>

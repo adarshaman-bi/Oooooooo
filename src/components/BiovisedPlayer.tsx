@@ -5,6 +5,8 @@ import {
   Rows3, AlertTriangle, Flag, SkipBack, SkipForward, Moon
 } from "lucide-react";
 
+import { supabase } from "../utils/supabaseClient";
+
 /**
  * BiovisedPlayer — the only video player component in this codebase.
  *
@@ -390,13 +392,24 @@ export default function BiovisedPlayer({
     (delta: number, side: string) => {
       const p = playerRef.current;
       if (!p) return;
-      const next = Math.min(Math.max(0, p.getCurrentTime() + delta), duration || Infinity);
+      const currentVal = p.getCurrentTime();
+      const next = Math.min(Math.max(0, currentVal + delta), duration || Infinity);
       p.seekTo(next, true);
       setCurrent(next);
       setSeekFlash({ side, key: Date.now(), amount: Math.abs(delta) });
       wakeControls();
+
+      // Trigger heatmap segment engagement on rewind (delta < 0)
+      if (delta < 0 && lecture?.id) {
+        supabase.rpc('increment_segment_replay', {
+          p_video_id: lecture.id,
+          p_segment_index: Math.floor(currentVal / 15),
+        }).catch((err) => {
+          console.error("Failed to track heatmap segment:", err);
+        });
+      }
     },
-    [duration, wakeControls]
+    [duration, wakeControls, lecture?.id]
   );
 
   const changeSpeed = (s: number) => {
@@ -1032,22 +1045,8 @@ export default function BiovisedPlayer({
     return <div className="w-full flex items-center justify-center bg-neutral-950 p-4">{VideoSurface}</div>;
   }
 
-  // Mobile portrait: video on top, info below
-
-  return (
-    <div className="w-full min-h-[100dvh] bg-neutral-950 flex flex-col">
-      {VideoSurface}
-      <div className="flex-1 overflow-y-auto px-4 py-4 text-white">
-        <h1 className="text-[16px] font-semibold leading-snug">{lecture.title || "Untitled lecture"}</h1>
-        <p className="text-white/50 text-[12px] mt-1">
-          {[lecture.subject, lecture.examType, lecture.teacherName].filter(Boolean).join(" \u2022 ")}
-        </p>
-        {lecture.description && (
-          <p className="text-white/70 text-[13px] mt-3 leading-relaxed">{lecture.description}</p>
-        )}
-      </div>
-    </div>
-  );
+  // Mobile portrait: video surface on top, layout handled by parent scroll container
+  return <div className="w-full flex items-center justify-center bg-neutral-950">{VideoSurface}</div>;
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────

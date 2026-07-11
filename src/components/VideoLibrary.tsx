@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { YouTubeChannel, YouTubeVideo, Playlist, TEACHER_TO_CHANNEL, Lecture as TypesLecture } from '../types';
 import BiovisedPlayer from './BiovisedPlayer';
+import LectureDetailsSection from './LectureDetailsSection';
 import { getPlaylistThumbnail } from '../services/thumbnailHelper';
 import { formatSubscribers, mapVideoRow } from '../utils/youtubeUtils';
 import ChannelHeader from './ChannelHeader';
@@ -673,15 +674,25 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
     }));
 
     return (
-      <div className="w-full min-h-screen bg-neutral-950 text-white font-sans selection:bg-white selection:text-black">
-        <BiovisedPlayer
+      <div className="w-full min-h-screen bg-neutral-950 text-white font-sans selection:bg-white selection:text-black flex flex-col overflow-y-auto pb-24">
+        <div className="w-full flex justify-center bg-neutral-950">
+          <BiovisedPlayer
+            lecture={pseudoLecture}
+            onClose={() => {
+              setSelectedVideo(null);
+              setPlayerIsReady(false);
+            }}
+            playlistLectures={playlistLectures}
+            onSelectLecture={(lec) => {
+              const found = playlistVideos.find(v => v.videoId === lec.id);
+              if (found) setSelectedVideo(found);
+            }}
+          />
+        </div>
+        <LectureDetailsSection
           lecture={pseudoLecture}
-          onClose={() => {
-            setSelectedVideo(null);
-            setPlayerIsReady(false);
-          }}
-          playlistLectures={playlistLectures}
-          onSelectLecture={(lec) => {
+          currentUserId={user?.uid ?? null}
+          onSelectRecommended={(lec) => {
             const found = playlistVideos.find(v => v.videoId === lec.id);
             if (found) setSelectedVideo(found);
           }}

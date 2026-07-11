@@ -19,5 +19,5 @@ BiovisedPlayer — the only video player component in this codebase.
 ---
 
 ## 🔗 Dependency Map
-- **Imports**: None
+- **Imports**: [[supabaseClient]]
 - **Imported By**: [[App]], [[LecturesGrid]], [[VideoLibrary]], [[TeacherPage]]

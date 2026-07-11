@@ -19,4 +19,4 @@ Maximum Supabase Realtime events per second per channel.
 
 ## 🔗 Dependency Map
 - **Imports**: None
-- **Imported By**: [[App]], [[AdminEducators]], [[AuthModal]], [[ChannelProfile]], [[ContentManagerTab]], [[HomeDashboard]], [[TeacherProfileDetail]], [[VideoLibrary]], [[AuditLogsView]], [[BatchManager]], [[BlockBuilder]], [[InstituteManager]], [[ReviewModerator]], [[TeacherManager]], [[TestSeriesConsole]], [[AuthContext]], [[AuthCallback]], [[adminService]], [[dbService]], [[thumbnailHelper]], [[swrConfig]]
+- **Imported By**: [[App]], [[AdminEducators]], [[AuthModal]], [[BiovisedPlayer]], [[ChannelProfile]], [[ContentManagerTab]], [[HomeDashboard]], [[TeacherProfileDetail]], [[VideoLibrary]], [[AuditLogsView]], [[BatchManager]], [[BlockBuilder]], [[InstituteManager]], [[ReviewModerator]], [[TeacherManager]], [[TestSeriesConsole]], [[AuthContext]], [[AuthCallback]], [[adminService]], [[dbService]], [[thumbnailHelper]], [[swrConfig]]
