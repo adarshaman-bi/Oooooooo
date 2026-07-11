@@ -236,10 +236,10 @@ export default function ProfileDashboard({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="p-3 bg-brand-black border border-brand-border rounded-xl h-[74px] flex gap-3 items-center">
-                    <div className="w-20 h-12 bg-zinc-905 rounded-lg shrink-0" />
+                    <div className="w-20 h-12 bg-zinc-800 rounded-lg shrink-0" />
                     <div className="flex-grow space-y-2">
-                      <div className="h-3 w-3/4 bg-zinc-905 rounded" />
-                      <div className="h-2.5 w-1/2 bg-zinc-905 rounded" />
+                      <div className="h-3 w-3/4 bg-zinc-800 rounded" />
+                      <div className="h-2.5 w-1/2 bg-zinc-800 rounded" />
                     </div>
                   </div>
                 ))}
@@ -249,11 +249,11 @@ export default function ProfileDashboard({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="bg-brand-black border border-brand-border rounded-xl p-3 flex flex-col justify-between h-[220px]">
-                    <div className="aspect-video w-full bg-zinc-905 rounded-lg mb-3" />
+                    <div className="aspect-video w-full bg-zinc-800 rounded-lg mb-3" />
                     <div className="space-y-2 flex-1">
-                      <div className="h-3 w-1/4 bg-zinc-905 rounded" />
-                      <div className="h-3.5 w-full bg-zinc-905 rounded mt-2" />
-                      <div className="h-2.5 w-1/2 bg-zinc-905 rounded mt-1" />
+                      <div className="h-3 w-1/4 bg-zinc-800 rounded" />
+                      <div className="h-3.5 w-full bg-zinc-800 rounded mt-2" />
+                      <div className="h-2.5 w-1/2 bg-zinc-800 rounded mt-1" />
                     </div>
                   </div>
                 ))}
@@ -263,9 +263,9 @@ export default function ProfileDashboard({
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="p-4 bg-brand-black border border-brand-border rounded-xl flex flex-col items-center text-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-zinc-905" />
-                    <div className="h-3 w-20 bg-zinc-905 rounded" />
-                    <div className="h-2.5 w-16 bg-zinc-905 rounded" />
+                    <div className="w-12 h-12 rounded-full bg-zinc-800" />
+                    <div className="h-3 w-20 bg-zinc-800 rounded" />
+                    <div className="h-2.5 w-16 bg-zinc-800 rounded" />
                   </div>
                 ))}
               </div>
