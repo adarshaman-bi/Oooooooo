@@ -45,6 +45,13 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 
 ## 3. Changelog (Reverse-Chronological)
 
+### July 11, 2026 (Part 2)
+- **Tool**: Antigravity (Ponytail style)
+- **Files Touched**:
+  - [src/components/HorizontalRow.tsx](file:///c:/onion.so/src/components/HorizontalRow.tsx)
+- **Change**: (1) Added a global keyboard event listener triggered when a row is hovered, allowing users to scroll horizontal rows left/right using arrow keys instantly on PC without needing to focus them. (2) Increased the z-index of left/right navigation arrow buttons from `z-50` to `z-[60]`.
+- **Why**: Resolve arrow key horizontal navigation not working on desktop/PC layout, and prevent the scroll arrow buttons from disappearing underneath cards during hover transitions (since hovered cards have `zIndex: 50`).
+
 ### July 11, 2026
 - **Tool**: Antigravity (Ponytail style)
 - **Files Touched**:
