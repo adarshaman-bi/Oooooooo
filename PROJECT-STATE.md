@@ -45,6 +45,14 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 
 ## 3. Changelog (Reverse-Chronological)
 
+### July 11, 2026 (Part 3)
+- **Tool**: Antigravity (Ponytail style)
+- **Files Touched**:
+  - [src/App.tsx](file:///c:/onion.so/src/App.tsx)
+  - [src/components/ProfileDashboard.tsx](file:///c:/onion.so/src/components/ProfileDashboard.tsx)
+- **Change**: (1) Wrapped App.tsx core filters (`filteredTeachers`, `filteredLectures`, `filteredPlaylists`, `filteredBatches`, `filteredInstitutes`, `filteredTestSeries`) in React `useMemo` hooks. (2) Memoized static teachers filter `filteredStaticTeachers` and optimized the $O(N)$ lookup (`teachers.find()`) inside the mapping loop into an $O(1)$ Map lookup to resolve $O(N^2)$ computations on scroll/render updates. (3) Wrapped `TeacherCard` in `React.memo` and memoized the card-level `videos` filter. (4) Introduced `isLoading` state tracker in `ProfileDashboard` with a concurrent fetch promise tracker, rendering custom card/avatar skeletons during database load to prevent layout snap. (5) Fixed layout shifts (CLS) on Profile page watchlist by wrapping raw `<img>` cards in aspect-video fixed height containers.
+- **Why**: EliminateDropped scroll frames, layout blocking tasks, and Cumulative Layout Shift during main thread rendering cycles.
+
 ### July 11, 2026 (Part 2)
 - **Tool**: Antigravity (Ponytail style)
 - **Files Touched**:

@@ -48,25 +48,35 @@ export default function ProfileDashboard({
   const [history, setHistory] = useState<WatchHistoryItem[]>([]);
   const [watchlist, setWatchlist] = useState<Lecture[]>([]);
   const [followingTeachers, setFollowingTeachers] = useState<TeacherProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
 
-    // Load History
-    fetchWatchHistory().then(data => setHistory(data));
+    setIsLoading(true);
 
-    // Load Watch Later bookmarks
-    fetchWatchLaterLectures().then(data => setWatchlist(data));
+    const loadHistory = fetchWatchHistory()
+      .then(data => setHistory(data))
+      .catch(err => console.warn('Error loading history in ProfileDashboard:', err));
 
-    // Load followed educators
-    fetchFollowingList().then(async (followingIds) => {
-      if (followingIds.length > 0) {
-        const allTeachers = await fetchTeachers();
-        const followed = allTeachers.filter(t => followingIds.includes(t.id));
-        setFollowingTeachers(followed);
-      } else {
-        setFollowingTeachers([]);
-      }
+    const loadWatchlist = fetchWatchLaterLectures()
+      .then(data => setWatchlist(data))
+      .catch(err => console.warn('Error loading watchlist in ProfileDashboard:', err));
+
+    const loadFollowing = fetchFollowingList()
+      .then(async (followingIds) => {
+        if (followingIds.length > 0) {
+          const allTeachers = await fetchTeachers();
+          const followed = allTeachers.filter(t => followingIds.includes(t.id));
+          setFollowingTeachers(followed);
+        } else {
+          setFollowingTeachers([]);
+        }
+      })
+      .catch(err => console.warn('Error loading following list in ProfileDashboard:', err));
+
+    Promise.all([loadHistory, loadWatchlist, loadFollowing]).finally(() => {
+      setIsLoading(false);
     });
 
   }, [user, activeTab]);
@@ -219,100 +229,153 @@ export default function ProfileDashboard({
       {/* Active Tab contents */}
       <div className="min-h-[250px]">
 
-        {activeTab === 'history' && (
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono text-brand-gray uppercase tracking-wider">Watch Log history</h4>
-            {history.length === 0 ? (
-              <p className="text-xs text-brand-gray py-8 text-center bg-brand-dark/30 rounded-xl border border-brand-border">
-                No watch logs generated yet. Core lectures streamed automatically log progress here.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-                {history.map((h) => (
-                  <div
-                    key={h.id}
-                    className="p-3 bg-brand-black border border-brand-border rounded-xl flex gap-3 items-center"
-                  >
-                    <img 
-                      src={getLectureThumbnail({ id: h.lectureId, title: h.lectureTitle, thumbnailUrl: h.thumbnailUrl } as any)} 
-                      alt={h.lectureTitle} 
-                      className="w-20 h-12 object-cover rounded-lg border border-brand-border flex-shrink-0 bg-zinc-900" 
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://img.youtube.com/vi/9Bv_M6e8858/hqdefault.jpg';
-                      }}
-                    />
-                    <div className="flex-grow min-w-0">
-                      <p className="text-xs font-medium text-brand-accent truncate leading-tight">{h.lectureTitle}</p>
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-brand-gray mt-1 flex-wrap">
-                        <span>Duration: {h.durationString}</span>
-                        <span>•</span>
-                        <span className="text-emerald-400">Streamed: {h.progressSeconds}s</span>
+        {isLoading ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-4 w-48 bg-zinc-900 rounded" />
+            {activeTab === 'history' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-3 bg-brand-black border border-brand-border rounded-xl h-[74px] flex gap-3 items-center">
+                    <div className="w-20 h-12 bg-zinc-905 rounded-lg shrink-0" />
+                    <div className="flex-grow space-y-2">
+                      <div className="h-3 w-3/4 bg-zinc-905 rounded" />
+                      <div className="h-2.5 w-1/2 bg-zinc-905 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'watchlist' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="bg-brand-black border border-brand-border rounded-xl p-3 flex flex-col justify-between h-[220px]">
+                    <div className="aspect-video w-full bg-zinc-905 rounded-lg mb-3" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-3 w-1/4 bg-zinc-905 rounded" />
+                      <div className="h-3.5 w-full bg-zinc-905 rounded mt-2" />
+                      <div className="h-2.5 w-1/2 bg-zinc-905 rounded mt-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'following' && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-4 bg-brand-black border border-brand-border rounded-xl flex flex-col items-center text-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-zinc-905" />
+                    <div className="h-3 w-20 bg-zinc-905 rounded" />
+                    <div className="h-2.5 w-16 bg-zinc-905 rounded" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {activeTab === 'history' && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-mono text-brand-gray uppercase tracking-wider">Watch Log history</h4>
+                {history.length === 0 ? (
+                  <p className="text-xs text-brand-gray py-8 text-center bg-brand-dark/30 rounded-xl border border-brand-border">
+                    No watch logs generated yet. Core lectures streamed automatically log progress here.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+                    {history.map((h) => (
+                      <div
+                        key={h.id}
+                        className="p-3 bg-brand-black border border-brand-border rounded-xl flex gap-3 items-center"
+                      >
+                        <img 
+                          src={getLectureThumbnail({ id: h.lectureId, title: h.lectureTitle, thumbnailUrl: h.thumbnailUrl } as any)} 
+                          alt={h.lectureTitle} 
+                          className="w-20 h-12 object-cover rounded-lg border border-brand-border flex-shrink-0 bg-zinc-900" 
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://img.youtube.com/vi/9Bv_M6e8858/hqdefault.jpg';
+                          }}
+                        />
+                        <div className="flex-grow min-w-0">
+                          <p className="text-xs font-medium text-brand-accent truncate leading-tight">{h.lectureTitle}</p>
+                          <div className="flex items-center gap-2 text-[10px] font-mono text-brand-gray mt-1 flex-wrap">
+                            <span>Duration: {h.durationString}</span>
+                            <span>•</span>
+                            <span className="text-emerald-400">Streamed: {h.progressSeconds}s</span>
+                          </div>
+                        </div>
+                        {h.completed && (
+                          <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                        )}
                       </div>
-                    </div>
-                    {h.completed && (
-                      <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    )}
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {activeTab === 'watchlist' && (
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono text-brand-gray uppercase tracking-wider">Personal Watch Later playlist</h4>
-            {watchlist.length === 0 ? (
-              <p className="text-xs text-brand-gray py-8 text-center bg-brand-dark/30 rounded-xl border border-brand-border">
-                Your bookmarks folder is empty. Click Save on any video player to watch bookmarks later.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                {watchlist.map((lec) => (
-                  <div
-                    key={lec.id}
-                    onClick={() => onSelectLecture(lec)}
-                    className="bg-brand-black border border-brand-border rounded-xl p-3 flex flex-col justify-between hover:border-neutral-500 cursor-pointer"
-                  >
-                    <img src={getLectureThumbnail(lec)} alt={lec.title} className="aspect-video w-full object-cover rounded-lg border border-brand-border mb-3" />
-                    <div>
-                      <span className="text-[9px] font-mono uppercase bg-neutral-800 text-brand-gray px-2 py-0.5 rounded">
-                        {lec.subject}
-                      </span>
-                      <h4 className="text-xs font-medium text-brand-accent mt-2 leading-tight line-clamp-2">{lec.title}</h4>
-                      <p className="text-[10px] font-mono text-brand-gray mt-1 block">Teacher: {lec.teacherName}</p>
-                    </div>
+            {activeTab === 'watchlist' && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-mono text-brand-gray uppercase tracking-wider">Personal Watch Later playlist</h4>
+                {watchlist.length === 0 ? (
+                  <p className="text-xs text-brand-gray py-8 text-center bg-brand-dark/30 rounded-xl border border-brand-border">
+                    Your bookmarks folder is empty. Click Save on any video player to watch bookmarks later.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                    {watchlist.map((lec) => (
+                      <div
+                        key={lec.id}
+                        onClick={() => onSelectLecture(lec)}
+                        className="bg-brand-black border border-brand-border rounded-xl p-3 flex flex-col justify-between hover:border-neutral-500 cursor-pointer"
+                      >
+                        <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-brand-border mb-3 bg-zinc-900">
+                          <img 
+                            src={getLectureThumbnail(lec)} 
+                            alt={lec.title} 
+                            className="absolute inset-0 w-full h-full object-cover" 
+                            loading="lazy"
+                          />
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-mono uppercase bg-neutral-800 text-brand-gray px-2 py-0.5 rounded">
+                            {lec.subject}
+                          </span>
+                          <h4 className="text-xs font-medium text-brand-accent mt-2 leading-tight line-clamp-2">{lec.title}</h4>
+                          <p className="text-[10px] font-mono text-brand-gray mt-1 block">Teacher: {lec.teacherName}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {activeTab === 'following' && (
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono text-brand-gray uppercase tracking-wider">Educators you follow</h4>
-            {followingTeachers.length === 0 ? (
-              <p className="text-xs text-brand-gray py-8 text-center bg-brand-dark/30 rounded-xl border border-brand-border">
-                You are not currently subscribed to any educator updates. Click Follow on profiles to load directories.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
-                {followingTeachers.map((t) => (
-                  <div
-                    key={t.id}
-                    onClick={() => onOpenTeacher(t.id)}
-                    className="p-4 bg-brand-black border border-brand-border rounded-xl flex flex-col items-center text-center cursor-pointer hover:border-neutral-500"
-                  >
-                    <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover border border-brand-border" />
-                    <h5 className="text-xs font-semibold text-brand-accent mt-2">{t.name}</h5>
-                    <span className="text-[10px] text-brand-gray font-mono block mt-1">{t.subject} Expert</span>
+            {activeTab === 'following' && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-mono text-brand-gray uppercase tracking-wider">Educators you follow</h4>
+                {followingTeachers.length === 0 ? (
+                  <p className="text-xs text-brand-gray py-8 text-center bg-brand-dark/30 rounded-xl border border-brand-border">
+                    You are not currently subscribed to any educator updates. Click Follow on profiles to load directories.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
+                    {followingTeachers.map((t) => (
+                      <div
+                        key={t.id}
+                        onClick={() => onOpenTeacher(t.id)}
+                        className="p-4 bg-brand-black border border-brand-border rounded-xl flex flex-col items-center text-center cursor-pointer hover:border-neutral-500"
+                      >
+                        <img src={t.avatar} alt={t.name} className="w-12 h-12 rounded-full object-cover border border-brand-border" />
+                        <h5 className="text-xs font-semibold text-brand-accent mt-2">{t.name}</h5>
+                        <span className="text-[10px] text-brand-gray font-mono block mt-1">{t.subject} Expert</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
 
         {(user.role === 'admin' || user.role === 'moderator' || user.role === 'super_admin') && activeTab === 'admin' && (

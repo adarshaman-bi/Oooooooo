@@ -296,7 +296,7 @@ interface TeacherCardProps {
   onSelect: (id: string) => void;
 }
 
-const TeacherCard = ({ t, dbTeacher, videos, followedIds, handleFollowToggle, setDetailModal, onSelect }: TeacherCardProps) => {
+const TeacherCard = React.memo(({ t, dbTeacher, videos, followedIds, handleFollowToggle, setDetailModal, onSelect }: TeacherCardProps) => {
   const [followerCount, setFollowerCount] = useState<number>(0);
   const [reviewStats, setReviewStats] = useState<{ rating: number; trustScore: number; count: number } | null>(null);
   const [loadingFollowers, setLoadingFollowers] = useState(true);
@@ -305,8 +305,11 @@ const TeacherCard = ({ t, dbTeacher, videos, followedIds, handleFollowToggle, se
   const avatarUrl = dbTeacher?.avatar || t.profile_photo_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150';
   const isFollowing = followedIds.includes(t.id);
   
-  // 1. Live video count from current media nodes
-  const teacherVideos = videos.filter(v => v.teacherId === t.id || v.teacherName === t.full_name || (dbTeacher?.name && v.teacherName === dbTeacher.name));
+  // 1. Live video count from current media nodes - optimized with useMemo
+  const teacherVideos = useMemo(() => {
+    return videos.filter(v => v.teacherId === t.id || v.teacherName === t.full_name || (dbTeacher?.name && v.teacherName === dbTeacher.name));
+  }, [videos, t.id, t.full_name, dbTeacher?.name]);
+
   const videoCount = teacherVideos.length;
   const videoCountStr = videoCount >= 1000 ? `${(videoCount / 1000).toFixed(1)}K` : `${videoCount}`;
 
@@ -334,7 +337,7 @@ const TeacherCard = ({ t, dbTeacher, videos, followedIds, handleFollowToggle, se
     };
     loadStats();
     return () => { active = false; };
-  }, [t.id, videos, followedIds]);
+  }, [t.id, teacherVideos, followedIds]);
 
   const handleFollowClick = () => {
     const teacherObj = dbTeacher || {
@@ -478,7 +481,7 @@ const TeacherCard = ({ t, dbTeacher, videos, followedIds, handleFollowToggle, se
       </div>
     </div>
   );
-};
+});
 
 const CustomCheckIcon = ({ size = 18, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -1509,22 +1512,25 @@ function AppContent() {
   // Filter application arrays through server search hits or local fallbacks
   const searchActive = currentView === 'search' && searchQuery.trim() !== '';
 
-  const filteredTeachers = personalizeTeachers(
-    searchActive
-      ? (serverSearchResults.filter(r => r.type === 'teacher') as any[])
-      : teachers.filter(t => {
-          const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.subject.toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesSubject = subjectFilter === 'All' || t.subject === subjectFilter;
-          const matchesExam = examFilter === 'All' || t.exams?.includes(examFilter as any);
-          return matchesSearch && matchesSubject && matchesExam;
-        }),
-    user,
-    examFilter,
-    subjectFilter
-  ).sort((a, b) => {
-    if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'trustScore') return (b.trustScore ?? 0) - (a.trustScore ?? 0);
-  }).filter(t => !verifiedOnly || (t.isVerified !== false && t.verificationStatus !== 'pending'));
+  const filteredTeachers = useMemo(() => {
+    return personalizeTeachers(
+      searchActive
+        ? (serverSearchResults.filter(r => r.type === 'teacher') as any[])
+        : teachers.filter(t => {
+            const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.subject.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesSubject = subjectFilter === 'All' || t.subject === subjectFilter;
+            const matchesExam = examFilter === 'All' || t.exams?.includes(examFilter as any);
+            return matchesSearch && matchesSubject && matchesExam;
+          }),
+      user,
+      examFilter,
+      subjectFilter
+    ).sort((a, b) => {
+      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'trustScore') return (b.trustScore ?? 0) - (a.trustScore ?? 0);
+      return 0;
+    }).filter(t => !verifiedOnly || (t.isVerified !== false && t.verificationStatus !== 'pending'));
+  }, [searchActive, serverSearchResults, teachers, searchQuery, subjectFilter, examFilter, user, sortBy, verifiedOnly]);
 
   const getOneShotLecturesPerChapter = (list: Lecture[]): Lecture[] => {
     // 1. Filter out lectures that don't have thumbnails or are short < 30m or strategy/clickbait
@@ -1633,67 +1639,96 @@ function AppContent() {
     return bestLectures;
   };
 
-  const rawFilteredLectures = (searchActive
-    ? (serverSearchResults.filter(r => r.type === 'lecture') as any[])
-    : lectures.filter(l => {
-        // Simple filter of content type before personalization sorting
-        const matchesContent = contentTypeFilter === 'All' || 
-          l.contentType === contentTypeFilter || 
-          (contentTypeFilter === 'lecture' && l.contentType === 'playlist');
-        return matchesContent;
-      })).filter(l => l.verified === true || l.verificationStatus === 'verified');
+  const filteredLectures = useMemo(() => {
+    const rawFilteredLectures = (searchActive
+      ? (serverSearchResults.filter(r => r.type === 'lecture') as any[])
+      : lectures.filter(l => {
+          const matchesContent = contentTypeFilter === 'All' || 
+            l.contentType === contentTypeFilter || 
+            (contentTypeFilter === 'lecture' && l.contentType === 'playlist');
+          return matchesContent;
+        })).filter(l => l.verified === true || l.verificationStatus === 'verified');
 
-  const personalizedRawLectures = personalizeLectures(
-    rawFilteredLectures,
-    user,
-    examFilter,
-    subjectFilter,
-    searchQuery
-  );
+    const personalizedRawLectures = personalizeLectures(
+      rawFilteredLectures,
+      user,
+      examFilter,
+      subjectFilter,
+      searchQuery
+    );
 
-  const filteredLectures = getOneShotLecturesPerChapter(personalizedRawLectures);
+    return getOneShotLecturesPerChapter(personalizedRawLectures);
+  }, [searchActive, serverSearchResults, lectures, contentTypeFilter, user, examFilter, subjectFilter, searchQuery]);
 
-  const filteredInstitutes = (searchActive
-    ? serverSearchResults.filter(r => r.type === 'institute')
-    : institutes.filter(inst => {
-        const matchesSearch = inst.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesExam = examFilter === 'All' || inst.exams?.includes(examFilter as any);
-        return matchesSearch && matchesExam;
-      })).filter(inst => !verifiedOnly || (inst.isVerified !== false && inst.verified !== false));
+  const filteredInstitutes = useMemo(() => {
+    return (searchActive
+      ? serverSearchResults.filter(r => r.type === 'institute')
+      : institutes.filter(inst => {
+          const matchesSearch = inst.name.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesExam = examFilter === 'All' || inst.exams?.includes(examFilter as any);
+          return matchesSearch && matchesExam;
+        })).filter(inst => !verifiedOnly || (inst.isVerified !== false && inst.verified !== false));
+  }, [searchActive, serverSearchResults, institutes, searchQuery, examFilter, verifiedOnly]);
 
-  const filteredPlaylists = personalizePlaylists(
-    searchActive
-      ? (serverSearchResults.filter(r => r.type === 'playlist') as any[])
-      : playlists,
-    user,
-    examFilter,
-    subjectFilter,
-    searchQuery
-  );
+  const filteredPlaylists = useMemo(() => {
+    return personalizePlaylists(
+      searchActive
+        ? (serverSearchResults.filter(r => r.type === 'playlist') as any[])
+        : playlists,
+      user,
+      examFilter,
+      subjectFilter,
+      searchQuery
+    );
+  }, [searchActive, serverSearchResults, playlists, user, examFilter, subjectFilter, searchQuery]);
 
-  const filteredBatches = (searchActive
-    ? serverSearchResults.filter(r => r.type === 'batch')
-    : batches.filter(b => {
-        const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.description.toLowerCase().includes(searchQuery.toLowerCase());
-        const currentExam = examFilter !== 'All' ? examFilter : (user?.examType || 'Both');
-        if (currentExam !== 'Both' && currentExam !== 'All' && b.examType && b.examType !== 'Both' && b.examType !== 'All' && b.examType !== currentExam) {
-          return false;
-        }
-        const matchesExam = examFilter === 'All' || b.examType === examFilter || b.examType === 'Both';
-        const matchesSubject = subjectFilter === 'All' || b.subject === subjectFilter;
-        return matchesSearch && matchesExam && matchesSubject;
-      })).filter(b => !verifiedOnly || (b.verified !== false));
+  const filteredBatches = useMemo(() => {
+    return (searchActive
+      ? serverSearchResults.filter(r => r.type === 'batch')
+      : batches.filter(b => {
+          const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.description.toLowerCase().includes(searchQuery.toLowerCase());
+          const currentExam = examFilter !== 'All' ? examFilter : (user?.examType || 'Both');
+          if (currentExam !== 'Both' && currentExam !== 'All' && b.examType && b.examType !== 'Both' && b.examType !== 'All' && b.examType !== currentExam) {
+            return false;
+          }
+          const matchesExam = examFilter === 'All' || b.examType === examFilter || b.examType === 'Both';
+          const matchesSubject = subjectFilter === 'All' || b.subject === subjectFilter;
+          return matchesSearch && matchesExam && matchesSubject;
+        })).filter(b => !verifiedOnly || (b.verified !== false));
+  }, [searchActive, serverSearchResults, batches, searchQuery, examFilter, user, subjectFilter, verifiedOnly]);
 
-  const filteredTestSeries = (TEST_SERIES_CATALOG || []).filter(ts => {
-    const matchesSearch = ts.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          ts.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (ts.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const currentExam = examFilter !== 'All' ? examFilter : (user?.examType || 'Both');
-    if (currentExam !== 'Both' && currentExam !== 'All' && ts.examType && ts.examType !== 'Both' && ts.examType !== 'All' && ts.examType !== currentExam) {
-      return false;
-    }
-    return matchesSearch;
-  });
+  const filteredTestSeries = useMemo(() => {
+    return (TEST_SERIES_CATALOG || []).filter(ts => {
+      const matchesSearch = ts.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            ts.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (ts.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const currentExam = examFilter !== 'All' ? examFilter : (user?.examType || 'Both');
+      if (currentExam !== 'Both' && currentExam !== 'All' && ts.examType && ts.examType !== 'Both' && ts.examType !== 'All' && ts.examType !== currentExam) {
+        return false;
+      }
+      return matchesSearch;
+    });
+  }, [searchQuery, examFilter, user]);
+
+  const teachersMap = useMemo(() => {
+    const map = new Map();
+    teachers.forEach(t => map.set(t.id, t));
+    return map;
+  }, [teachers]);
+
+  const filteredStaticTeachers = useMemo(() => {
+    return teachersData.filter(t => {
+      const matchesSearch = t.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           t.institute_name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSubject = subjectFilter === 'All' || t.subject === subjectFilter;
+      
+      const dbTeacher = teachersMap.get(t.id);
+      const matchesExam = examFilter === 'All' || !dbTeacher || dbTeacher.exams?.includes(examFilter as any);
+      
+      return matchesSearch && matchesSubject && matchesExam;
+    });
+  }, [teachersMap, searchQuery, subjectFilter, examFilter]);
 
   if (showSplash) {
     return (
@@ -2237,18 +2272,6 @@ function AppContent() {
                       ))}
                     </div>
                   ) : (() => {
-                    const filteredStaticTeachers = teachersData.filter(t => {
-                      const matchesSearch = t.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                           t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                           t.institute_name.toLowerCase().includes(searchQuery.toLowerCase());
-                      const matchesSubject = subjectFilter === 'All' || t.subject === subjectFilter;
-                      
-                      const dbTeacher = teachers.find(dbT => dbT.id === t.id);
-                      const matchesExam = examFilter === 'All' || !dbTeacher || dbTeacher.exams?.includes(examFilter as any);
-                      
-                      return matchesSearch && matchesSubject && matchesExam;
-                    });
-                    
                     if (filteredStaticTeachers.length === 0) {
                       return (
                         <div className="max-w-7xl mx-auto px-4">
@@ -2260,7 +2283,7 @@ function AppContent() {
                     return (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-4 sm:gap-4">
                         {filteredStaticTeachers.map((t) => {
-                          const dbTeacher = teachers.find(dbT => dbT.id === t.id);
+                          const dbTeacher = teachersMap.get(t.id);
                           return (
                             <TeacherCard
                               key={t.id}
