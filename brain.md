@@ -319,6 +319,7 @@ Client data utilizes SWR caching with custom options (TTL: 5 mins, deduplication
 * Use local-DB-first caching checks inside route controllers before initiating upstream YouTube API queries.
 * Validate all catalog updates by executing the database integrity check:
   `npx tsx scripts/clean_and_validate.ts`
+* **"I'll remember this" rule**: "I'll remember this" is never a valid response on its own. Any claim to remember, save, or persist information MUST be accompanied by an actual file write in the same turn (`/memory/*.md` for session state, `ui-registry.md` for component patterns). If a file wasn't created or updated, say so explicitly instead of implying it was.
 
 ---
 
