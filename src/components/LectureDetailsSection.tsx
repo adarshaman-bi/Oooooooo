@@ -39,7 +39,11 @@ export interface LectureLike {
   title: string;
   subject?: string;
   exam_type?: string;
+  examType?: string;
   teacher_id?: string;
+  teacherId?: string;
+  teacher_name?: string;
+  teacherName?: string;
   description?: string;
 }
 
@@ -101,13 +105,48 @@ function useChannel(teacherId: string | undefined) {
     }
     setLoading(true);
     (async () => {
+      // Inverted mapping of YouTube channel IDs to teacher slugs in the public.teachers table
+      const channelToSlug: Record<string, string> = {
+        'UCD16eo98AXl-9T61Xd711kQ': 'alakh_pandey',
+        'UCxypqdjw-S400n162TY5cgQ': 'mohit_tyagi',
+        'UCMBqObTSqW4kMFsB8Nqhpkg': 'seep_pahuja',
+        'UC8Q46TByEJhMsY9V3wqIOZw': 'sachin_rana',
+        'UC3b3c5UhtPcNB45Smr_BeEQ': 'ashish_arora',
+        'UCf_ky0zxHBqMRFnpNEZRHHQ': 'pranav_pundarik',
+        'UCd3fHkl7FbH1EZ85TbAGVRw': 'dr_amit_gupta',
+        'UCWjpBuL4U7VBidbQlFB1hnA': 'dr_rakshita_singh',
+        'UCkDb4531sPuHocFFSQE3qOQ': 'rohit_aggarwal_pw',
+        'UCgBmfNILAlXmGv3CsJ8oFJA': 'ashish_arora',
+        'UCUFcLKXPfS7ijJ_WSC20oeQ': 'mohit_tyagi',
+        'UCvQSK6a7gfYbNL11KalRfOw': 'komal-yadav-unacademy',
+        'UCdQwYksctqqiRwqp3PiJMWA': 'komal-yadav-unacademy',
+        'UCWFXoexcMI1jQrHH2N-SJzQ': 'tarun-singh-vedantu-bio-360',
+        'UCcxP3vMEVVFafLBasCHcjCg': 'seep_pahuja',
+      };
+      
+      const resolvedId = channelToSlug[teacherId] || teacherId;
+
       const { data, error } = await supabase
         .from("teachers")
-        .select("id, name, avatar_url, verified, followers_count, trust_score")
-        .eq("id", teacherId)
+        .select("id, name, avatar, is_verified, followers_count, accuracy")
+        .eq("id", resolvedId)
         .single();
       if (cancelled) return;
-      setChannel(!error && data ? (data as Channel) : null);
+      if (error) {
+        console.warn("useChannel query error for teacherId:", teacherId, "resolvedId:", resolvedId, error);
+        setChannel(null);
+      } else if (data) {
+        setChannel({
+          id: data.id,
+          name: data.name,
+          avatar_url: data.avatar,
+          verified: data.is_verified,
+          followers_count: data.followers_count || 0,
+          trust_score: data.accuracy || 0
+        });
+      } else {
+        setChannel(null);
+      }
       setLoading(false);
     })();
     return () => {
@@ -122,9 +161,30 @@ function useFollowState(currentUserId: string | null, teacherId: string | undefi
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Inverted mapping of YouTube channel IDs to teacher slugs in the public.teachers table
+  const channelToSlug: Record<string, string> = {
+    'UCD16eo98AXl-9T61Xd711kQ': 'alakh_pandey',
+    'UCxypqdjw-S400n162TY5cgQ': 'mohit_tyagi',
+    'UCMBqObTSqW4kMFsB8Nqhpkg': 'seep_pahuja',
+    'UC8Q46TByEJhMsY9V3wqIOZw': 'sachin_rana',
+    'UC3b3c5UhtPcNB45Smr_BeEQ': 'ashish_arora',
+    'UCf_ky0zxHBqMRFnpNEZRHHQ': 'pranav_pundarik',
+    'UCd3fHkl7FbH1EZ85TbAGVRw': 'dr_amit_gupta',
+    'UCWjpBuL4U7VBidbQlFB1hnA': 'dr_rakshita_singh',
+    'UCkDb4531sPuHocFFSQE3qOQ': 'rohit_aggarwal_pw',
+    'UCgBmfNILAlXmGv3CsJ8oFJA': 'ashish_arora',
+    'UCUFcLKXPfS7ijJ_WSC20oeQ': 'mohit_tyagi',
+    'UCvQSK6a7gfYbNL11KalRfOw': 'komal-yadav-unacademy',
+    'UCdQwYksctqqiRwqp3PiJMWA': 'komal-yadav-unacademy',
+    'UCWFXoexcMI1jQrHH2N-SJzQ': 'tarun-singh-vedantu-bio-360',
+    'UCcxP3vMEVVFafLBasCHcjCg': 'seep_pahuja',
+  };
+  
+  const resolvedTeacherId = teacherId ? (channelToSlug[teacherId] || teacherId) : undefined;
+
   useEffect(() => {
     let cancelled = false;
-    if (!currentUserId || !teacherId) {
+    if (!currentUserId || !resolvedTeacherId) {
       setFollowing(false);
       setLoading(false);
       return;
@@ -135,7 +195,7 @@ function useFollowState(currentUserId: string | null, teacherId: string | undefi
         .from("follows")
         .select("created_at")
         .eq("user_id", currentUserId)
-        .eq("teacher_id", teacherId)
+        .eq("teacher_id", resolvedTeacherId)
         .maybeSingle();
 
       if (cancelled) return;
@@ -152,24 +212,24 @@ function useFollowState(currentUserId: string | null, teacherId: string | undefi
           .single();
         if (cancelled) return;
         const list: string[] = profileData?.following_teachers || [];
-        setFollowing(list.includes(teacherId));
+        setFollowing(list.includes(resolvedTeacherId));
         setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [currentUserId, teacherId]);
+  }, [currentUserId, resolvedTeacherId]);
 
   const toggleFollow = useCallback(async () => {
-    if (!currentUserId || !teacherId) return { ok: false, reason: "signed_out" as const };
+    if (!currentUserId || !resolvedTeacherId) return { ok: false, reason: "signed_out" as const };
     const next = !following;
     setFollowing(next); // optimistic
 
     // Try follows table first
     const { error: insertError } = next
-      ? await supabase.from("follows").insert({ user_id: currentUserId, teacher_id: teacherId })
-      : await supabase.from("follows").delete().eq("user_id", currentUserId).eq("teacher_id", teacherId);
+      ? await supabase.from("follows").insert({ user_id: currentUserId, teacher_id: resolvedTeacherId })
+      : await supabase.from("follows").delete().eq("user_id", currentUserId).eq("teacher_id", resolvedTeacherId);
 
     if (insertError) {
       // If follows table is missing or write fails, fall back to updating profiles.following_teachers
@@ -180,8 +240,8 @@ function useFollowState(currentUserId: string | null, teacherId: string | undefi
         .single();
       const current: string[] = data?.following_teachers || [];
       const updated = next
-        ? Array.from(new Set([...current, teacherId]))
-        : current.filter((id) => id !== teacherId);
+        ? Array.from(new Set([...current, resolvedTeacherId]))
+        : current.filter((id) => id !== resolvedTeacherId);
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ following_teachers: updated })
@@ -193,7 +253,7 @@ function useFollowState(currentUserId: string | null, teacherId: string | undefi
       }
     }
     return { ok: true as const };
-  }, [currentUserId, teacherId, following]);
+  }, [currentUserId, resolvedTeacherId, following]);
 
   return { following, loading, toggleFollow };
 }
@@ -386,18 +446,26 @@ function useRecommended(lecture: LectureLike, currentUserId: string | null) {
     let cancelled = false;
     setLoading(true);
     (async () => {
+      const subjectParam = lecture.subject;
+      if (!subjectParam) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
+
       const { data: videos, error } = await supabase
         .from("videos")
         .select(
-          "id, title, subject, exam_type, thumbnail_url, duration, duration_seconds, teacher_id, teachers(name)"
+          "id, title, subject, exam_type, thumbnail_url, duration, duration_seconds, teacher_id, teacher_name"
         )
-        .eq("subject", lecture.subject)
+        .eq("subject", subjectParam)
         .neq("id", lecture.id)
         .eq("is_active", true)
         .limit(12);
 
       if (cancelled) return;
       if (error || !videos) {
+        console.warn("useRecommended videos fetch error or empty:", error);
         setItems([]);
         setLoading(false);
         return;
@@ -423,7 +491,7 @@ function useRecommended(lecture: LectureLike, currentUserId: string | null) {
           return {
             id: v.id,
             title: v.title,
-            teacher_name: v.teachers?.name ?? null,
+            teacher_name: v.teacher_name ?? null,
             subject: v.subject,
             exam_type: v.exam_type,
             thumbnail_url: v.thumbnail_url,
@@ -456,8 +524,9 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
 
   const handleSelect = onSelectRecommended || onSelectLecture || (() => {});
 
-  const { channel, loading: channelLoading } = useChannel(lecture.teacher_id);
-  const { following, toggleFollow } = useFollowState(currentUserId, lecture.teacher_id);
+  const teacherId = lecture.teacherId || lecture.teacher_id;
+  const { channel, loading: channelLoading } = useChannel(teacherId);
+  const { following, toggleFollow } = useFollowState(currentUserId, teacherId);
   const { liked, saved, watchLater, toggleLiked, toggleSaved, toggleWatchLater } =
     useLectureUserState(currentUserId, lecture.id);
   const playlists = useLecturePlaylists(lecture.id);
