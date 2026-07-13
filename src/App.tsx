@@ -2192,6 +2192,7 @@ function AppContent() {
                       />
                     </div>
                     <LectureDetailsSection
+                      key={activeLecture.id}
                       lecture={activeLecture}
                       currentUserId={user?.uid ?? null}
                       onSelectRecommended={setActiveLecture}

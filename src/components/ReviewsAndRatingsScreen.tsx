@@ -87,9 +87,7 @@ function formatProfileAge(dateString: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-component: Staggered load-in stars for Average Rating
-// ---------------------------------------------------------------------------
-export function StaggeredStars({ value, size = 18, className = "" }: { value: number; size?: number; className?: string }) {
+export function StaggeredStars({ value, size = 22, className = "" }: { value: number; size?: number; className?: string }) {
   const rounded = Math.round(value);
   return (
     <div className={`flex items-center gap-0.5 ${className}`}>
@@ -103,8 +101,8 @@ export function StaggeredStars({ value, size = 18, className = "" }: { value: nu
           <Star
             size={size}
             fill={n <= rounded ? TURMERIC : "transparent"}
-            color={TURMERIC}
-            strokeWidth={1.5}
+            color={n <= rounded ? TURMERIC : "rgba(255, 255, 255, 0.2)"}
+            strokeWidth={2.2}
           />
         </motion.div>
       ))}
@@ -146,14 +144,15 @@ export function InteractiveStars({
           <Star
             size={size}
             fill={activeVal >= n ? TURMERIC : "transparent"}
-            color={activeVal >= n ? TURMERIC : "rgba(255, 255, 255, 0.25)"}
-            strokeWidth={1.5}
+            color={activeVal >= n ? TURMERIC : "rgba(255, 255, 255, 0.2)"}
+            strokeWidth={2.2}
           />
         </motion.button>
       ))}
     </div>
   );
 }
+
 
 export default function ReviewsAndRatingsScreen({
   lectureId,
@@ -615,7 +614,7 @@ export default function ReviewsAndRatingsScreen({
             if (!currentUserId) flashToast("Sign in to review");
             else setShowComposer(true);
           }}
-          className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer animate-none"
+          className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors cursor-pointer animate-none"
         >
           Write a Review
         </button>
@@ -749,8 +748,16 @@ function OverviewAndList({
             <div className="w-px h-10 bg-white/10" />
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-extrabold">{averageRating ? averageRating.toFixed(1) : "—"}</span>
-                <Star size={18} fill={TURMERIC} color={TURMERIC} className="mb-1" />
+                <span className="text-3xl font-extrabold">{averageRating ? averageRating.toFixed(1) : "0.0"}</span>
+                {averageRating ? (
+                  <Star size={18} fill={TURMERIC} color={TURMERIC} className="mb-1" />
+                ) : (
+                  <div className="flex gap-0.5 ml-1 mb-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star key={n} size={12} fill="transparent" color="rgba(255, 255, 255, 0.25)" strokeWidth={2.2} />
+                    ))}
+                  </div>
+                )}
               </div>
               <span className="text-white/40 text-[10px] mt-0.5">{allRootReviewsCount} ratings</span>
             </div>
@@ -851,6 +858,23 @@ function OverviewAndList({
               {[1, 2, 3].map((n) => (
                 <div key={n} className="p-4 bg-white/[0.01] border border-white/5 rounded-xl h-28" />
               ))}
+            </div>
+          ) : reviewsList.length === 0 ? (
+            <div className="py-16 px-4 text-center border border-white/5 bg-white/[0.01] rounded-2xl flex flex-col items-center justify-center">
+              <MessageSquare size={28} className="text-white/20 mb-3" />
+              <p className="font-bold text-sm text-white/80">No reviews yet</p>
+              <p className="text-white/40 text-xs mt-1 max-w-[260px] mx-auto leading-relaxed">
+                Be the first to share your thoughts and rate this lecture!
+              </p>
+              <button
+                onClick={() => {
+                  if (!currentUserId) flashToast("Sign in to review");
+                  else setShowComposer(true);
+                }}
+                className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors cursor-pointer"
+              >
+                Write a Review
+              </button>
             </div>
           ) : rootReviews.length === 0 ? (
             <div className="py-12 text-center">
@@ -967,16 +991,8 @@ function ReviewCard({
       {/* Review Content */}
       <div className="mt-3">
         {review.rating !== null && (
-          <div className="flex items-center gap-0.5 mb-1.5">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Star
-                key={n}
-                size={12}
-                fill={review.rating && n <= Math.round(review.rating) ? TURMERIC : "transparent"}
-                color={TURMERIC}
-                strokeWidth={1.5}
-              />
-            ))}
+          <div className="mb-1.5">
+            <StaggeredStars value={review.rating || 0} size={13} />
           </div>
         )}
         <p className="text-white/80 text-[13px] leading-relaxed whitespace-pre-wrap">{review.comment}</p>
@@ -1354,7 +1370,7 @@ function WriteReviewComposer({
         <button
           onClick={handlePost}
           disabled={submitting || !text.trim()}
-          className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 transition-colors cursor-pointer"
+          className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-40 transition-colors cursor-pointer"
         >
           {submitting ? "Posting..." : "Post Review"}
         </button>
@@ -1387,7 +1403,7 @@ function WriteReviewComposer({
             type="button"
             onClick={() => setHelpfulToggle(!helpfulToggle)}
             className={`w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer focus:outline-none flex items-center ${
-              helpfulToggle ? "bg-blue-600 justify-end" : "bg-zinc-800 justify-start"
+              helpfulToggle ? "bg-[#3B82F6] justify-end" : "bg-zinc-800 justify-start"
             }`}
           >
             <motion.div layout className="w-5 h-5 rounded-full bg-white shadow" />

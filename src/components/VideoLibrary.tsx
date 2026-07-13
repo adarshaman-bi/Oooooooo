@@ -690,11 +690,41 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
           />
         </div>
         <LectureDetailsSection
+          key={pseudoLecture.id}
           lecture={pseudoLecture}
           currentUserId={user?.uid ?? null}
           onSelectRecommended={(lec) => {
             const found = playlistVideos.find(v => v.videoId === lec.id);
-            if (found) setSelectedVideo(found);
+            if (found) {
+              setSelectedVideo(found);
+            } else {
+              const mappedVideo: YouTubeVideo = {
+                id: lec.id,
+                videoId: lec.id,
+                playlistId: (lec as any).playlistId || (lec as any).playlist_id || '',
+                channelId: lec.teacherId || lec.teacher_id || '',
+                channelName: lec.teacherName || lec.teacher_name || 'YouTube Educator',
+                title: lec.title,
+                description: lec.description || '',
+                thumbnail: (lec as any).thumbnailUrl || '',
+                duration: (lec as any).duration || '00:00',
+                durationSeconds: (lec as any).durationSeconds || 0,
+                publishedAt: (lec as any).createdAt || new Date().toISOString(),
+                importedAt: new Date().toISOString(),
+                subject: lec.subject || '',
+                topic: '',
+                examTags: lec.examType ? [lec.examType] : [],
+                isActive: true,
+                position: 0,
+                viewCount: (lec as any).viewsCount || 0,
+                likeCount: (lec as any).likesCount || 0,
+                viewsCount: (lec as any).viewsCount || 0,
+                likesCount: (lec as any).likesCount || 0,
+                examType: lec.examType || 'Both',
+                verified: true
+              };
+              setSelectedVideo(mappedVideo);
+            }
           }}
         />
       </div>

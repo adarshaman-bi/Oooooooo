@@ -822,7 +822,7 @@ function ChannelCard({
           className={`px-4 py-1.5 rounded-full text-[12px] font-bold cursor-pointer transition-colors ${
             following 
               ? "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white" 
-              : "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-[#3B82F6] hover:bg-[#2563EB] text-white"
           }`}
         >
           {following ? "Following" : "Follow"}
