@@ -127,8 +127,8 @@ export function mapVideoRow(v: any): YouTubeVideo {
     id: v.id,
     videoId: v.id,
     playlistId: v.playlist_id || '',
-    channelId: v.channel_id || '',
-    channelName: v.channel_name || '',
+    channelId: v.teacher_id || v.channel_id || '',
+    channelName: v.teacher_name || v.channel_name || '',
     title: v.title || '',
     description: v.description || '',
     thumbnail: v.thumbnail_url || '',
@@ -146,7 +146,9 @@ export function mapVideoRow(v: any): YouTubeVideo {
     viewsCount: v.views || 0,
     likesCount: v.likes_count || 0,
     examType: v.exam_type || 'Both',
-    verified: v.verified || false
+    verified: v.verified || false,
+    teacherId: v.teacher_id || '',
+    teacherName: v.teacher_name || ''
   } as unknown as YouTubeVideo;
 }
 
