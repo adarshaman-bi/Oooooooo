@@ -89,6 +89,40 @@ The final screen should feel compact, premium, and intentionally designed. The e
 The title block, metadata, channel row, action toolbar, review card, description, and recommended lessons heading must all align to the same left grid and share the same visual language. No secondary element should compete with the title. The trust score must remain secondary. The review card must stay slim. The buttons must feel unified and compact. The verified badge must sit naturally beside the channel name. The description must only appear when real content exists and must reserve no space when empty.
 Visual parity is the priority. If something looks closer to the reference even when it deviates slightly from a listed value, choose the version that looks better. The implementation is complete only when the final rendered UI feels nearly indistinguishable from the reference in spacing, proportions, hierarchy, and overall polish while preserving the app’s branding and functionality.
 
+## Regression Guard (Mandatory)
+During implementation, preserve every improvement that has already been achieved.
+Do not regress previously refined areas while improving another section.
+Each iteration should be cumulative.
+Before modifying any component:
+* Verify that the change does not negatively affect spacing elsewhere.
+* Preserve typography hierarchy.
+* Preserve horizontal alignment.
+* Preserve vertical rhythm.
+* Preserve interaction behavior.
+* Preserve responsiveness.
+* Preserve accessibility.
+* Preserve existing animations unless they directly conflict with the reference.
+
+If a refinement introduces a new visual inconsistency, continue iterating until both the old and new sections satisfy the acceptance criteria simultaneously.
+The implementation is complete only when all sections meet the target together—not when individual sections look correct in isolation.
+
+### Continuous Refinement Loop
+For every visual change:
+1. Implement the refinement.
+2. Compare against the reference.
+3. Compare against the previous implementation.
+4. Check that no regressions have appeared.
+5. Repeat until no obvious differences remain.
+
+Never stop after the first visually acceptable result. The goal is visual convergence, not simply completing the checklist.
+
+### Definition of Done
+The redesign is complete only when:
+* The UI feels immediately familiar to someone accustomed to the Unacademy interface.
+* The overall layout, spacing, proportions, density, hierarchy, and polish closely match the reference.
+* No component draws unnecessary attention because of inconsistent spacing, sizing, alignment, or visual weight.
+* A side-by-side comparison reveals only minor branding differences rather than structural or compositional differences.
+
 ## Verification Plan
 
 ### Automated Tests
