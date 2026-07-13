@@ -689,12 +689,6 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
             }}
           />
         </div>
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-8 mt-4 text-left">
-          <h1 className="text-xl md:text-2xl font-bold text-white leading-snug">{pseudoLecture.title || "Untitled lecture"}</h1>
-          <p className="text-white/50 text-[12px] md:text-[13px] mt-1.5 flex items-center gap-2">
-            {[pseudoLecture.subject, pseudoLecture.examType, pseudoLecture.teacherName].filter(Boolean).join(" \u2022 ")}
-          </p>
-        </div>
         <LectureDetailsSection
           lecture={pseudoLecture}
           currentUserId={user?.uid ?? null}

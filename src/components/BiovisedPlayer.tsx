@@ -401,12 +401,16 @@ export default function BiovisedPlayer({
 
       // Trigger heatmap segment engagement on rewind (delta < 0)
       if (delta < 0 && lecture?.id) {
-        supabase.rpc('increment_segment_replay', {
-          p_video_id: lecture.id,
-          p_segment_index: Math.floor(currentVal / 15),
-        }).catch((err) => {
-          console.error("Failed to track heatmap segment:", err);
-        });
+        (async () => {
+          try {
+            await supabase.rpc('increment_segment_replay', {
+              p_video_id: lecture.id,
+              p_segment_index: Math.floor(currentVal / 15),
+            });
+          } catch (err) {
+            console.error("Failed to track heatmap segment:", err);
+          }
+        })();
       }
     },
     [duration, wakeControls, lecture?.id]

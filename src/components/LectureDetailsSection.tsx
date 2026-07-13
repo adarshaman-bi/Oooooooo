@@ -4,6 +4,8 @@ import {
   BadgeCheck, X, Send, CheckCircle2,
 } from "lucide-react";
 import { supabase } from "../utils/supabaseClient";
+import { motion } from "motion/react";
+import ReviewsAndRatingsScreen from "./ReviewsAndRatingsScreen";
 
 // ============================================================================
 // SCHEMA ASSUMPTIONS — VERIFY AGAINST LIVE DB BEFORE SHIPPING
@@ -226,33 +228,37 @@ function useFollowState(currentUserId: string | null, teacherId: string | undefi
     const next = !following;
     setFollowing(next); // optimistic
 
-    // Try follows table first
-    const { error: insertError } = next
-      ? await supabase.from("follows").insert({ user_id: currentUserId, teacher_id: resolvedTeacherId })
-      : await supabase.from("follows").delete().eq("user_id", currentUserId).eq("teacher_id", resolvedTeacherId);
+    try {
+      // Try follows table first
+      const { error: insertError } = next
+        ? await supabase.from("follows").insert({ user_id: currentUserId, teacher_id: resolvedTeacherId })
+        : await supabase.from("follows").delete().eq("user_id", currentUserId).eq("teacher_id", resolvedTeacherId);
 
-    if (insertError) {
-      // If follows table is missing or write fails, fall back to updating profiles.following_teachers
-      const { data } = await supabase
-        .from("profiles")
-        .select("following_teachers")
-        .eq("uid", currentUserId)
-        .single();
-      const current: string[] = data?.following_teachers || [];
-      const updated = next
-        ? Array.from(new Set([...current, resolvedTeacherId]))
-        : current.filter((id) => id !== resolvedTeacherId);
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ following_teachers: updated })
-        .eq("uid", currentUserId);
+      if (insertError) {
+        // If follows table is missing or write fails, fall back to updating profiles.following_teachers
+        const { data, error: selectErr } = await supabase
+          .from("profiles")
+          .select("following_teachers")
+          .eq("uid", currentUserId)
+          .single();
+        if (selectErr) throw selectErr;
+        const current: string[] = data?.following_teachers || [];
+        const updated = next
+          ? Array.from(new Set([...current, resolvedTeacherId]))
+          : current.filter((id) => id !== resolvedTeacherId);
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ following_teachers: updated })
+          .eq("uid", currentUserId);
 
-      if (profileError) {
-        setFollowing(!next); // revert
-        return { ok: false, reason: "write_failed" as const };
+        if (profileError) throw profileError;
       }
+      return { ok: true as const };
+    } catch (err) {
+      console.error("Error in toggleFollow database sync:", err);
+      setFollowing(!next); // revert
+      return { ok: false, reason: "write_failed" as const };
     }
-    return { ok: true as const };
   }, [currentUserId, resolvedTeacherId, following]);
 
   return { following, loading, toggleFollow };
@@ -290,42 +296,53 @@ function useLectureUserState(currentUserId: string | null, lectureId: string) {
   const toggleArrayColumn = useCallback(
     async (column: "liked_content" | "saved_content" | "watch_later_content", nowOn: boolean) => {
       if (!currentUserId) return { ok: false, reason: "signed_out" as const };
-      const { data } = await supabase
-        .from("profiles")
-        .select(column)
-        .eq("uid", currentUserId)
-        .single();
-      const current: string[] = (data?.[column] as string[]) || [];
-      const next = nowOn
-        ? Array.from(new Set([...current, lectureId]))
-        : current.filter((id) => id !== lectureId);
-      
-      // Fallback for watch_later_content to saved_content if columns do not exist
-      const { error } = await supabase
-        .from("profiles")
-        .update({ [column]: next })
-        .eq("uid", currentUserId);
-
-      if (error && column === "watch_later_content") {
-        // Fallback write to saved_content with a warning logged in console
-        console.warn("watch_later_content column missing, falling back to saved_content");
-        const { data: fallbackData } = await supabase
+      try {
+        const { data, error: selectErr } = await supabase
           .from("profiles")
-          .select("saved_content")
+          .select(column)
           .eq("uid", currentUserId)
           .single();
-        const fallbackCurrent: string[] = fallbackData?.saved_content || [];
-        const fallbackNext = nowOn
-          ? Array.from(new Set([...fallbackCurrent, lectureId]))
-          : fallbackCurrent.filter((id) => id !== lectureId);
-        const { error: fallbackError } = await supabase
+        if (selectErr) throw selectErr;
+        const current: string[] = (data?.[column] as string[]) || [];
+        const next = nowOn
+          ? Array.from(new Set([...current, lectureId]))
+          : current.filter((id) => id !== lectureId);
+        
+        // Fallback for watch_later_content to saved_content if columns do not exist
+        const { error: updateErr } = await supabase
           .from("profiles")
-          .update({ saved_content: fallbackNext })
+          .update({ [column]: next })
           .eq("uid", currentUserId);
-        return fallbackError ? { ok: false, reason: "write_failed" as const } : { ok: true as const, fallback: true };
-      }
 
-      return error ? { ok: false, reason: "write_failed" as const } : { ok: true as const };
+        if (updateErr) {
+          if (column === "watch_later_content") {
+            // Fallback write to saved_content with a warning logged in console
+            console.warn("watch_later_content column missing, falling back to saved_content");
+            const { data: fallbackData, error: fallbackSelectErr } = await supabase
+              .from("profiles")
+              .select("saved_content")
+              .eq("uid", currentUserId)
+              .single();
+            if (fallbackSelectErr) throw fallbackSelectErr;
+            const fallbackCurrent: string[] = fallbackData?.saved_content || [];
+            const fallbackNext = nowOn
+              ? Array.from(new Set([...fallbackCurrent, lectureId]))
+              : fallbackCurrent.filter((id) => id !== lectureId);
+            const { error: fallbackError } = await supabase
+              .from("profiles")
+              .update({ saved_content: fallbackNext })
+              .eq("uid", currentUserId);
+            if (fallbackError) throw fallbackError;
+            return { ok: true as const, fallback: true };
+          }
+          throw updateErr;
+        }
+
+        return { ok: true as const };
+      } catch (err) {
+        console.error("Database update error on toggleArrayColumn:", err);
+        return { ok: false, reason: "write_failed" as const };
+      }
     },
     [currentUserId, lectureId]
   );
@@ -435,7 +452,7 @@ function useReviews(lectureId: string) {
     [lectureId, refetch]
   );
 
-  return { reviews, avgRating, loading, submitReview };
+  return { reviews, avgRating, loading, submitReview, refetch };
 }
 
 function useRecommended(lecture: LectureLike, currentUserId: string | null) {
@@ -530,11 +547,17 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
   const { liked, saved, watchLater, toggleLiked, toggleSaved, toggleWatchLater } =
     useLectureUserState(currentUserId, lecture.id);
   const playlists = useLecturePlaylists(lecture.id);
-  const { reviews, avgRating, submitReview } = useReviews(lecture.id);
+  const { reviews, avgRating, refetch } = useReviews(lecture.id);
   const { items: recommended, loading: recommendedLoading } = useRecommended(lecture, currentUserId);
 
-  const [reviewsOpen, setReviewsOpen] = useState(false);
+  const [showReviewsScreen, setShowReviewsScreen] = useState(false);
+  const [titleExpanded, setTitleExpanded] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+
+  const needsTruncation = (lecture.title || "").length > 50;
+  const displayedTitle = needsTruncation && !titleExpanded
+    ? `${lecture.title.slice(0, 50)}...`
+    : lecture.title;
 
   const requireAuth = (action: () => Promise<{ ok: boolean; reason?: string; fallback?: boolean }>) => async () => {
     const res = await action();
@@ -561,6 +584,21 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
     }
   };
 
+  if (showReviewsScreen) {
+    return (
+      <ReviewsAndRatingsScreen
+        lectureId={lecture.id}
+        lectureTitle={lecture.title}
+        currentUserId={currentUserId}
+        currentUserProfile={null}
+        onClose={() => {
+          setShowReviewsScreen(false);
+          refetch();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="w-full bg-neutral-950 text-white pb-10 max-w-7xl mx-auto px-4 md:px-8 mt-4">
       {toast && (
@@ -568,6 +606,31 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
           <CheckCircle2 size={14} className="text-emerald-500" /> {toast}
         </div>
       )}
+
+      {/* ---- Section 0: Title Block ---- */}
+      <motion.div 
+        layout
+        className="cursor-pointer text-left"
+        onClick={() => needsTruncation && setTitleExpanded(!titleExpanded)}
+      >
+        <motion.h1 
+          layout="position"
+          className="text-xl md:text-2xl font-bold text-white leading-snug select-none flex flex-wrap items-center gap-1.5"
+        >
+          {displayedTitle}
+          {needsTruncation && (
+            <span className="text-xs font-semibold text-blue-500 hover:text-blue-400 select-none ml-2">
+              {titleExpanded ? "show less" : "show more"}
+            </span>
+          )}
+        </motion.h1>
+        <p className="text-white/50 text-[12px] md:text-[13px] mt-1.5 flex items-center gap-2">
+          {[lecture.subject, lecture.examType || lecture.exam_type, lecture.teacherName || lecture.teacher_name].filter(Boolean).join(" \u2022 ")}
+        </p>
+      </motion.div>
+
+      {/* Spacing: clearly widened gap (double the standard spacing) */}
+      <div className="h-8 md:h-10" />
 
       {/* ---- Section 1: Channel Card ---- */}
       <ChannelCard
@@ -591,30 +654,31 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       <div className="border-t border-white/10 mt-4" />
 
       {/* ---- Section 3: Ratings & Reviews ---- */}
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-        <div className="flex items-stretch gap-4">
-          <div className="flex flex-col items-start shrink-0">
-            <span className="text-[28px] font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
-            <Stars value={avgRating || 0} size={18} className="mt-1.5" />
-            <span className="text-white/40 text-[12px] mt-1">
-              {reviews.length ? `(${reviews.length.toLocaleString()} reviews)` : "No reviews yet"}
-            </span>
-          </div>
-          <div className="w-px bg-white/10" />
-          <button onClick={() => setReviewsOpen(true)} className="flex-1 text-left group">
-            <span className="text-[13px] text-white/70 group-hover:text-white flex items-center gap-1">
-              Add review
-              <ChevronDown size={14} className="-rotate-90 text-zinc-400" />
-            </span>
-            <div className="mt-2 flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <Star key={n} size={20} fill="transparent" color={TURMERIC} strokeWidth={1.5} />
-              ))}
-            </div>
-            <p className="text-white/40 text-[12px] mt-2 truncate">Share your thoughts about this video…</p>
-          </button>
+      <button 
+        onClick={() => setShowReviewsScreen(true)} 
+        className="w-full text-left mt-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 flex items-stretch gap-4 hover:bg-white/[0.04] transition-colors cursor-pointer"
+      >
+        <div className="flex flex-col items-start shrink-0">
+          <span className="text-[28px] font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
+          <Stars value={avgRating || 0} size={18} className="mt-1.5" />
+          <span className="text-white/40 text-[12px] mt-1">
+            {reviews.length ? `(${reviews.length.toLocaleString()} reviews)` : "No reviews yet"}
+          </span>
         </div>
-      </div>
+        <div className="w-px bg-white/10" />
+        <div className="flex-1">
+          <span className="text-[13px] text-white/70 flex items-center gap-1">
+            Add review / View reviews
+            <ChevronDown size={14} className="-rotate-90 text-zinc-400" />
+          </span>
+          <div className="mt-2 flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star key={n} size={20} fill={avgRating && n <= Math.round(avgRating) ? TURMERIC : "transparent"} color={TURMERIC} strokeWidth={1.5} />
+            ))}
+          </div>
+          <p className="text-white/40 text-[12px] mt-2">Tap to view comments, rating distribution, or write a review</p>
+        </div>
+      </button>
 
       {/* ---- Section 4: Description ---- */}
       {lecture.description && (
@@ -640,22 +704,6 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
           onSelect={handleSelect}
         />
       </div>
-
-      {/* ---- reviews / write-review bottom sheet ---- */}
-      {reviewsOpen && (
-        <ReviewsSheet
-          reviews={reviews}
-          currentUserId={currentUserId}
-          onClose={() => setReviewsOpen(false)}
-          onSubmit={async (stars, comment) => {
-            const res = await submitReview(currentUserId, stars, comment);
-            if (res.ok) flashToast("Review posted");
-            else if (res.reason === "signed_out") flashToast("Sign in to leave a review");
-            else flashToast("Couldn't post your review");
-            return res;
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -769,10 +817,24 @@ function ActionPill({
 }
 
 function Stars({ value, size = 13, className = "" }: { value: number; size?: number; className?: string }) {
+  const rounded = Math.round(value);
   return (
     <span className={`flex items-center gap-0.5 ${className}`}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} size={size} fill={n <= Math.round(value) ? TURMERIC : "transparent"} color={TURMERIC} strokeWidth={1.5} />
+        <motion.div
+          key={n}
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: (n - 1) * 0.08, duration: 0.2, type: "spring", stiffness: 200 }}
+          className="relative inline-block"
+        >
+          <Star
+            size={size}
+            fill={n <= rounded ? TURMERIC : "transparent"}
+            color={TURMERIC}
+            strokeWidth={1.5}
+          />
+        </motion.div>
       ))}
     </span>
   );
