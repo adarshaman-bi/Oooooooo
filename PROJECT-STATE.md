@@ -45,6 +45,21 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 
 ## 3. Changelog (Reverse-Chronological)
 
+### July 13, 2026
+- **Tool**: Antigravity (Ponytail style)
+- **Files Touched**:
+  - [src/components/LectureDetailsSection.tsx](file:///c:/onion.so/src/components/LectureDetailsSection.tsx)
+  - [project-vault/01-Frontend/Components/LectureDetailsSection.md](file:///c:/onion.so/project-vault/01-Frontend/Components/LectureDetailsSection.md)
+- **Change**: Replaced the Watch Details layout block to establish strict Unacademy visual parity (v2 spec):
+  1. Permanent removal of the Title "Show More" / "Show Less" toggle block, clamping title to 2 lines (`text-[20px] font-bold leading-[1.2]`).
+  2. Spacing alignment: player to title (12px), title to metadata (8px), metadata to channel (14px), channel to actions (12px), actions to review card (14px), review card to description (12px), description to recommendations (16px).
+  3. Relocated description paragraph + "See more" toggle to sit below the review card, with zero space occupied when empty.
+  4. Redesigned action pills row containing 5 inline horizontally aligned pills (Like, Save, Add to playlist, Watch later, Share) with height 36px, fully rounded, and 8px gaps.
+  5. Overhauled Review Card featuring a 1px blue border, Left column rating (28px) + reviews count, vertical divider, Right column "Add review" + Pencil icon, interactive stars, and comment input.
+  6. Rebuilt Channel Row: avatar 44px, verified badge 4px next to name, subscribers below name (2px gap), trust score ring 48px with centered percentage + overlapping tick check badge.
+  7. Deleted all horizontal dividing lines except the one directly above Recommended Lessons.
+- **Why**: Replicate the exact visual hierarchy, proportions, and density of the Unacademy reference mock.
+
 ### July 11, 2026 (Part 3)
 - **Tool**: Antigravity (Ponytail style)
 - **Files Touched**:
