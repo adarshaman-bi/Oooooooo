@@ -607,7 +607,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
   }
 
   return (
-    <div className="w-full bg-neutral-950 text-white pb-4 max-w-7xl mx-auto px-4 mt-2">
+    <div className="w-full bg-neutral-950 text-white pb-4 max-w-7xl mx-auto px-4 mt-3">
       {toast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] bg-white text-black text-[13px] font-medium px-4 py-2 rounded-full shadow-xl flex items-center gap-2">
           <CheckCircle2 size={14} className="text-emerald-500" /> {toast}
@@ -621,7 +621,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       >
         <motion.h1 
           layout="position"
-          className="text-lg md:text-xl font-bold text-white leading-snug select-none cursor-pointer"
+          className="text-2xl md:text-3xl font-bold text-white leading-[1.2] line-clamp-2 select-none cursor-pointer"
           onClick={() => needsTruncation && setTitleExpanded(!titleExpanded)}
         >
           {displayedTitle}
@@ -635,13 +635,13 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
             {titleExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
         )}
-        <p className="text-white/40 text-[11px] mt-1.5 flex items-center gap-1.5 font-medium">
-          {[lecture.subject, lecture.examType || lecture.exam_type, lecture.teacherName || lecture.teacher_name].filter(Boolean).join(" \u2022 ")}
+        <p className="text-white/40 text-[13px] mt-1.5 flex items-center gap-1.5 font-medium">
+          {[lecture.subject, lecture.examType || lecture.exam_type].filter(Boolean).join(" \u2022 ")}
         </p>
       </motion.div>
 
       {/* Spacing: clean segment gap */}
-      <div className="h-4 md:h-5" />
+      <div className="h-2.5" />
 
       {/* ---- Section 1: Channel Card ---- */}
       <ChannelCard
@@ -652,7 +652,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       />
 
       {/* ---- Section 2: Action Bar ---- */}
-      <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar py-2">
+      <div className="flex items-center gap-2 mt-4 overflow-x-auto no-scrollbar py-2">
         <ActionPill icon={<ThumbsUp size={15} />} label="Like" active={liked} onClick={requireAuth(toggleLiked)} />
         <ActionPill icon={<Bookmark size={15} />} label="Save" active={saved} onClick={requireAuth(toggleSaved)} />
         {playlists.map((p) => (
@@ -662,7 +662,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
         <ActionPill icon={<Share2 size={15} />} label="Share" onClick={shareLecture} />
       </div>
 
-      <div className="border-t border-white/10 mt-4" />
+      <div className="border-t border-white/5 mt-4 mb-4" />
 
       {/* ---- Section 3: Ratings & Reviews ---- */}
       <div 
@@ -670,22 +670,21 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
           setComposerInitialRating(null);
           setShowReviewsScreen(true);
         }} 
-        className="w-full text-left mt-3.5 rounded-xl border border-white/10 bg-zinc-900/30 p-3.5 flex items-center gap-4 hover:bg-zinc-900/50 transition-colors cursor-pointer"
+        className="w-full text-left mt-3.5 rounded-xl border border-white/10 bg-zinc-900/30 py-2.5 px-3.5 flex items-center gap-4 hover:bg-zinc-900/50 transition-colors cursor-pointer"
       >
-        <div className="flex flex-col items-start shrink-0">
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
-            <span className="text-[10px] text-white/40 font-mono">/ 5</span>
+        <div className="flex flex-col justify-center shrink-0">
+          <div className="flex items-center gap-1">
+            <span className="text-xl font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
+            <Star size={14} fill={TURMERIC} color={TURMERIC} />
           </div>
-          <StaggeredStars value={avgRating || 0} size={14} className="mt-1" />
           <span className="text-white/40 text-[10px] mt-0.5">
-            {reviews.length ? `${reviews.length.toLocaleString()} reviews` : "No reviews yet"}
+            {reviews.length ? `${reviews.length.toLocaleString()} Reviews` : "0 Reviews"}
           </span>
         </div>
-        <div className="w-px h-10 bg-white/10 self-stretch" />
+        <div className="w-px h-10 bg-white/10 self-center" />
         <div className="flex-1 min-w-0">
           <span className="text-[12px] text-white/80 font-bold flex items-center gap-1">
-            Rate & review
+            Add Review
             <ChevronDown size={12} className="-rotate-90 text-zinc-400" />
           </span>
           <div className="mt-1" onClick={(e) => e.stopPropagation()}>
@@ -707,11 +706,11 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
 
       {/* ---- Section 4: Description ---- */}
       {lecture.description && (
-        <div className="mt-4 text-left">
-          <p className={`text-white/70 text-[13px] leading-relaxed transition-all ${descExpanded ? "" : "line-clamp-2"}`}>
+        <div className="mt-3 text-left">
+          <p className={`text-white/60 text-[15px] leading-[1.6] transition-all ${descExpanded ? "" : "line-clamp-2"}`}>
             {lecture.description}
           </p>
-          <button onClick={() => setDescExpanded((d) => !d)} className="text-white/50 hover:text-white text-[12px] mt-1.5 flex items-center gap-1 cursor-pointer transition-colors">
+          <button onClick={() => setDescExpanded((d) => !d)} className="text-white/50 hover:text-white text-[12px] mt-1 flex items-center gap-1 cursor-pointer transition-colors">
             {descExpanded ? "Read Less" : "Read More"}
             {descExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
@@ -774,7 +773,6 @@ function ChannelAvatar({ name, url }: { name: string; url: string | null }) {
     />
   );
 }
-
 function ChannelCard({
   loading,
   channel,
@@ -790,13 +788,13 @@ function ChannelCard({
     return (
       <div className="flex items-center justify-between pt-4 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/10" />
+          <div className="w-12 h-12 rounded-full bg-white/10" />
           <div className="space-y-2">
-            <div className="h-3 w-24 bg-white/10 rounded" />
-            <div className="h-2.5 w-16 bg-white/10 rounded" />
+            <div className="h-3.5 w-28 bg-white/10 rounded" />
+            <div className="h-3 w-20 bg-white/10 rounded" />
           </div>
         </div>
-        <div className="h-7 w-20 bg-white/10 rounded-full" />
+        <div className="h-[42px] w-20 bg-white/10 rounded-full" />
       </div>
     );
   }
@@ -804,22 +802,24 @@ function ChannelCard({
   if (!channel) return null;
 
   return (
-    <div className="flex items-center justify-between py-2 text-left border-y border-white/5 my-2">
+    <div className="flex items-center justify-between py-2.5 text-left border-y border-white/5 my-3">
       <div className="flex items-center gap-3 min-w-0">
         <ChannelAvatar name={channel.name} url={channel.avatar_url} />
         <div className="min-w-0">
-          <p className="font-bold text-[14px] truncate flex items-center gap-1.5 leading-snug">
-            {channel.name}
-            {channel.verified && <BadgeCheck size={14} className="text-emerald-500 fill-emerald-500/20 shrink-0" />}
+          <p className="font-bold text-[18px] truncate flex items-baseline gap-1.5 leading-none">
+            <span>{channel.name}</span>
+            {channel.verified && (
+              <BadgeCheck size={15} className="text-[#3B82F6] fill-[#3B82F6]/10 shrink-0 self-center" />
+            )}
           </p>
-          <p className="text-white/50 text-[11px] leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
+          <p className="text-white/50 text-[13px] mt-0.5 leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
         </div>
       </div>
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-3.5 shrink-0">
         <TrustRing value={channel.trust_score} />
         <button
           onClick={onToggleFollow}
-          className={`px-4 py-1.5 rounded-full text-[12px] font-bold cursor-pointer transition-colors ${
+          className={`px-4 h-[42px] rounded-full text-[12px] font-bold cursor-pointer transition-colors ${
             following 
               ? "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white" 
               : "bg-[#3B82F6] hover:bg-[#2563EB] text-white"
@@ -833,47 +833,44 @@ function ChannelCard({
 }
 
 function TrustRing({ value }: { value: number }) {
-  const r = 14;
+  const r = 16;
   const c = 2 * Math.PI * r;
   const offset = c - (Math.max(0, Math.min(100, value)) / 100) * c;
   return (
-    <div className="relative w-9 h-9 flex items-center justify-center">
-      <svg viewBox="0 0 36 36" className="w-9 h-9 -rotate-90">
-        <circle cx="18" cy="18" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3" />
-        <circle
-          cx="18" cy="18" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="3"
-          strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
-        />
-      </svg>
-      <span className="absolute text-[10px] font-bold font-mono tracking-tighter leading-none">{value}</span>
+    <div className="flex flex-col items-center shrink-0 select-none">
+      <div className="relative w-11 h-11 flex items-center justify-center">
+        <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
+          <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+          <circle
+            cx="22" cy="22" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="2.5"
+            strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
+          />
+        </svg>
+        <span className="absolute text-[12px] font-bold font-mono tracking-tighter leading-none">{value}</span>
+      </div>
+      <span className="text-[8px] text-white/45 font-bold uppercase tracking-wider leading-none mt-1">Trust Score</span>
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
 // Shared small pieces
 // ---------------------------------------------------------------------------
-
 function ActionPill({
   icon, label, active, onClick,
 }: { icon: React.ReactNode; label: string; active?: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
+      className={`flex items-center justify-center gap-1.5 h-[40px] px-4 rounded-xl text-[12px] font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
         active 
-          ? "bg-white text-black font-bold" 
-          : "bg-zinc-900 border border-zinc-800/80 text-white/80 hover:bg-zinc-850 hover:text-white"
+          ? "bg-white text-black" 
+          : "bg-zinc-900 border border-zinc-800/80 text-white/90 hover:bg-zinc-850 hover:text-white"
       }`}
     >
       {icon}
-      {label}
+      <span>{label}</span>
     </button>
   );
 }
-
-
-
 // ---------------------------------------------------------------------------
 // Section 3 — Write Review bottom sheet
 // ---------------------------------------------------------------------------

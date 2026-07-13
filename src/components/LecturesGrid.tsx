@@ -87,7 +87,7 @@ export const LecturesGrid: React.FC<LecturesGridProps> = ({ playlistId }) => {
             const pseudoLecture: TypesLecture = {
               id: video.id,
               title: video.title,
-              description: video.description || 'Verified YouTube Academic Video lecture.',
+              description: video.description || '',
               videoUrl: video.videoUrl || `https://www.youtube.com/watch?v=${video.id}`,
               thumbnailUrl: video.thumbnail,
               subject: 'Academic',

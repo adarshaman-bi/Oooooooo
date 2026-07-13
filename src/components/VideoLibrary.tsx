@@ -642,7 +642,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
     const pseudoLecture: TypesLecture = {
       id: selectedVideo.videoId,
       title: selectedVideo.title,
-      description: selectedVideo.description || 'Verified YouTube Academic Video lecture.',
+      description: selectedVideo.description || '',
       videoUrl: `https://www.youtube.com/watch?v=${selectedVideo.videoId}`,
       thumbnailUrl: `https://img.youtube.com/vi/${selectedVideo.videoId}/hqdefault.jpg`,
       subject: selectedPlaylist?.subject || 'Academic',
@@ -659,7 +659,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
     const playlistLectures = playlistVideos.map(video => ({
       id: video.videoId,
       title: video.title,
-      description: video.description || 'Verified YouTube Academic Video lecture.',
+      description: video.description || '',
       videoUrl: `https://www.youtube.com/watch?v=${video.videoId}`,
       thumbnailUrl: `https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`,
       subject: selectedPlaylist?.subject || 'Academic',
