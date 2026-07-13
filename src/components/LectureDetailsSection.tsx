@@ -607,7 +607,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
   }
 
   return (
-    <div className="w-full bg-neutral-950 text-white pb-10 max-w-7xl mx-auto px-4 md:px-8 mt-4">
+    <div className="w-full bg-neutral-950 text-white pb-4 max-w-7xl mx-auto px-4 mt-2">
       {toast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] bg-white text-black text-[13px] font-medium px-4 py-2 rounded-full shadow-xl flex items-center gap-2">
           <CheckCircle2 size={14} className="text-emerald-500" /> {toast}
@@ -621,7 +621,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       >
         <motion.h1 
           layout="position"
-          className="text-xl md:text-2xl font-bold text-white leading-snug select-none cursor-pointer"
+          className="text-lg md:text-xl font-bold text-white leading-snug select-none cursor-pointer"
           onClick={() => needsTruncation && setTitleExpanded(!titleExpanded)}
         >
           {displayedTitle}
@@ -629,13 +629,13 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
         {needsTruncation && (
           <button 
             onClick={() => setTitleExpanded(!titleExpanded)}
-            className="text-white/50 hover:text-white text-[12px] mt-2 flex items-center gap-1 cursor-pointer transition-colors"
+            className="text-white/50 hover:text-white text-[11px] mt-1 flex items-center gap-1 cursor-pointer transition-colors font-medium"
           >
             {titleExpanded ? "Show Less" : "Show More"}
             {titleExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
         )}
-        <p className="text-white/50 text-[12px] md:text-[13px] mt-2 flex items-center gap-2">
+        <p className="text-white/40 text-[11px] mt-1.5 flex items-center gap-1.5 font-medium">
           {[lecture.subject, lecture.examType || lecture.exam_type, lecture.teacherName || lecture.teacher_name].filter(Boolean).join(" \u2022 ")}
         </p>
       </motion.div>
@@ -670,22 +670,25 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
           setComposerInitialRating(null);
           setShowReviewsScreen(true);
         }} 
-        className="w-full text-left mt-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-5 flex items-stretch gap-4 hover:bg-zinc-900/60 transition-colors cursor-pointer"
+        className="w-full text-left mt-3.5 rounded-xl border border-white/10 bg-zinc-900/30 p-3.5 flex items-center gap-4 hover:bg-zinc-900/50 transition-colors cursor-pointer"
       >
         <div className="flex flex-col items-start shrink-0">
-          <span className="text-[28px] font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
-          <StaggeredStars value={avgRating || 0} size={18} className="mt-1.5" />
-          <span className="text-white/40 text-[12px] mt-1">
-            {reviews.length ? `(${reviews.length.toLocaleString()} reviews)` : "No reviews yet"}
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
+            <span className="text-[10px] text-white/40 font-mono">/ 5</span>
+          </div>
+          <StaggeredStars value={avgRating || 0} size={14} className="mt-1" />
+          <span className="text-white/40 text-[10px] mt-0.5">
+            {reviews.length ? `${reviews.length.toLocaleString()} reviews` : "No reviews yet"}
           </span>
         </div>
-        <div className="w-px bg-white/15" />
-        <div className="flex-1">
-          <span className="text-[13px] text-white/70 flex items-center gap-1">
-            Add review
-            <ChevronDown size={14} className="-rotate-90 text-zinc-400" />
+        <div className="w-px h-10 bg-white/10 self-stretch" />
+        <div className="flex-1 min-w-0">
+          <span className="text-[12px] text-white/80 font-bold flex items-center gap-1">
+            Rate & review
+            <ChevronDown size={12} className="-rotate-90 text-zinc-400" />
           </span>
-          <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+          <div className="mt-1" onClick={(e) => e.stopPropagation()}>
             <InteractiveStars
               value={pendingRating || 0}
               onChange={(ratingVal) => {
@@ -696,10 +699,9 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
                   setShowReviewsScreen(true);
                 }, 250);
               }}
-              size={22}
+              size={18}
             />
           </div>
-          <p className="text-white/40 text-[12px] mt-2">Share your thoughts about this video…</p>
         </div>
       </div>
 
@@ -716,11 +718,11 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
         </div>
       )}
 
-      <div className="border-t border-white/10 mt-5" />
+      <div className="border-t border-white/10 mt-4" />
 
       {/* ---- Section 5: Recommended Lectures ---- */}
-      <div className="mt-4 text-left">
-        <h2 className="font-semibold text-[15px] mb-4">Recommended Lessons ({recommended.length})</h2>
+      <div className="mt-3 text-left">
+        <h2 className="font-semibold text-[14px] mb-3">Recommended Lessons ({recommended.length})</h2>
         <RecommendedList
           items={recommended}
           loading={recommendedLoading}
@@ -786,15 +788,15 @@ function ChannelCard({
 }) {
   if (loading) {
     return (
-      <div className="flex items-center justify-between pt-5 animate-pulse">
+      <div className="flex items-center justify-between pt-4 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-white/10" />
-          <div>
-            <div className="h-3.5 w-32 bg-white/10 rounded" />
-            <div className="h-3 w-20 bg-white/10 rounded mt-2" />
+          <div className="w-10 h-10 rounded-full bg-white/10" />
+          <div className="space-y-2">
+            <div className="h-3 w-24 bg-white/10 rounded" />
+            <div className="h-2.5 w-16 bg-white/10 rounded" />
           </div>
         </div>
-        <div className="w-14 h-14 rounded-full bg-white/10" />
+        <div className="h-7 w-20 bg-white/10 rounded-full" />
       </div>
     );
   }
@@ -802,21 +804,19 @@ function ChannelCard({
   if (!channel) return null;
 
   return (
-    <div className="flex items-center justify-between pt-5 text-left">
+    <div className="flex items-center justify-between py-2 text-left border-y border-white/5 my-2">
       <div className="flex items-center gap-3 min-w-0">
         <ChannelAvatar name={channel.name} url={channel.avatar_url} />
         <div className="min-w-0">
-          <p className="font-semibold text-[15px] truncate flex items-center gap-1.5">
+          <p className="font-bold text-[14px] truncate flex items-center gap-1.5 leading-snug">
             {channel.name}
-            {channel.verified && <BadgeCheck size={14} className="text-emerald-500 fill-emerald-500/20" />}
+            {channel.verified && <BadgeCheck size={14} className="text-emerald-500 fill-emerald-500/20 shrink-0" />}
           </p>
-          <p className="text-white/50 text-[12px]">{channel.followers_count.toLocaleString()} subscribers</p>
+          <p className="text-white/50 text-[11px] leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <div className="flex flex-col items-center">
-          <TrustRing value={channel.trust_score} />
-        </div>
+        <TrustRing value={channel.trust_score} />
         <button
           onClick={onToggleFollow}
           className={`px-4 py-1.5 rounded-full text-[12px] font-bold cursor-pointer transition-colors ${
@@ -833,19 +833,19 @@ function ChannelCard({
 }
 
 function TrustRing({ value }: { value: number }) {
-  const r = 22;
+  const r = 14;
   const c = 2 * Math.PI * r;
   const offset = c - (Math.max(0, Math.min(100, value)) / 100) * c;
   return (
-    <div className="relative w-14 h-14">
-      <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90">
-        <circle cx="28" cy="28" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="4" />
+    <div className="relative w-9 h-9 flex items-center justify-center">
+      <svg viewBox="0 0 36 36" className="w-9 h-9 -rotate-90">
+        <circle cx="18" cy="18" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3" />
         <circle
-          cx="28" cy="28" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="4"
+          cx="18" cy="18" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="3"
           strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-[12px] font-bold">{value}%</span>
+      <span className="absolute text-[10px] font-bold font-mono tracking-tighter leading-none">{value}</span>
     </div>
   );
 }

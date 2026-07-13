@@ -674,7 +674,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
     }));
 
     return (
-      <div className="w-full min-h-screen bg-neutral-950 text-white font-sans selection:bg-white selection:text-black flex flex-col overflow-y-auto pb-24">
+      <div className="w-full bg-neutral-950 text-white font-sans selection:bg-white selection:text-black flex flex-col pb-6">
         <div className="w-full flex justify-center bg-neutral-950">
           <BiovisedPlayer
             lecture={pseudoLecture}

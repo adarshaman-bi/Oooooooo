@@ -2177,12 +2177,12 @@ function AppContent() {
               />
             </div>
           ) : (
-            // Explore View (Main Discovery Screen)
+            /* Explore View (Main Discovery Screen) */
             <>
               {activeLecture ? (
                 /* Dedicated Video Player View (Plays in its own clean page to prevent design collapse) */
                 <ErrorBoundary>
-                  <div className="w-full min-h-screen bg-neutral-950 flex flex-col overflow-y-auto pb-24">
+                  <div className="w-full bg-neutral-950 flex flex-col pb-6">
                     <div className="w-full flex justify-center bg-neutral-950">
                       <BiovisedPlayer
                         lecture={activeLecture}
