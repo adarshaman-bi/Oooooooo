@@ -13,10 +13,11 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 * **`public.get_review_thread` RPC function**: Implemented a recursive SQL CTE function to fetch complete flattened comment trees (including depth and `upvote_count`) in a single query.
 * **`public.get_reviewer_trust_score` RPC function**: Implemented a `SECURITY DEFINER` SQL helper to query and compute reviewer account age, flagged review count, and spam bursts safely without exposing the RLS-gated `profiles` table to public SELECTs.
 
-### 2. Spacing, Visual Card, and Title Polish (Section 1)
-* **Title Truncation**: Integrated Framer Motion (`motion.div` / `motion.h1`) into `LectureDetailsSection.tsx` to truncate titles to 50 characters with a trailing ellipsis. Tapping the title triggers a smooth, non-snappy height and opacity animation to expand or collapse.
-* **Metadata Spacing**: Doubled the section break gap between the Title/Metadata block and the channel/action pill rows to create a distinct, clean layout boundary.
-* **Inline Ratings Card**: Upgraded the ratings widget to a container matching the reference design: `rounded-2xl`, subtle `border border-white/5`, background `bg-white/[0.02]`, and a vertical split divider. Clicking anywhere on the card opens the full-screen reviews screen.
+### 2. Spacing, Visual Card, and Title Polish (Section 1 & 2)
+* **Title Truncation**: Integrated Framer Motion (`motion.div` / `motion.h1`) into `LectureDetailsSection.tsx` to truncate titles to 50 characters with a trailing ellipsis. Tapping the title triggers a smooth height and opacity animation to expand or collapse.
+* **Title Expand Button (Round 2)**: Styled the "Show More" link below the title to match the description's "See more" style (same font weight, size, color, with chevron icons) and gave it dedicated breathing room (`mt-2`) to avoid looking orphaned.
+* **Metadata Spacing (Round 2)**: Reduced the empty dead space between the Subject caption and the Channel Card row to `h-4 md:h-5` (16-20px), matching the adjacent margins across the page.
+* **Inline Ratings Card (Round 2)**: Upgraded the ratings card to a clearly defined visual container using `border-white/10` and `bg-zinc-900/40` to distinguish it from the background, adding a `bg-white/15` vertical divider.
 * **Staggered Stars**: average ratings load-in stars animate sequentially from left to right using stagger delays in Framer Motion.
 
 ### 3. State & Network Reliability (Section 2)
@@ -32,8 +33,10 @@ Applied the following schema migrations directly to the Supabase database (`jicy
   * **Screen 4 (Write Review Composer)**: Includes a tactile interactive 5-star selector, title/review fields, mock image attach, and helpful toggles.
 * **Layout Integration**: Wired up the new screen view trigger state inside `LectureDetailsSection.tsx` and `VideoLibrary.tsx`.
 
-### 5. Final Visual Pass & Polish Details
+### 5. Final Visual Pass & Polish Details (Round 2)
 * **Duplicate Code Cleanup**: Safely deleted the unused/draft component `src/components/LectureDetailView.tsx` to prevent production confusion, leaving `src/components/LectureDetailsSection.tsx` as the single active details component.
+* **Fallback Initials Avatar**: Implemented `ChannelAvatar` helper component in `LectureDetailsSection.tsx` to trap image load failures (`onError`) and dynamically render a solid circle centering the teacher's initials safely without spillover. Logs failed URLs in the console for data audit.
+* **Follow Button Accent**: Switched the follow button's default inactive state to render as a solid blue accent fill with white text (`bg-blue-600 hover:bg-blue-700 text-white`) matching the unified theme.
 * **Unified Stars Components**: Exported `StaggeredStars` (mount stagger fade-in animation) and `InteractiveStars` (scale-up + color transition on hover/tap) from `ReviewsAndRatingsScreen.tsx` and imported them directly in `LectureDetailsSection.tsx` to reuse them.
 * **Watch Page Ratings Card**: Wired the watch-page card's right-hand-side to render the interactive stars selector. Tapping a star triggers a quick 250ms scale-up animation and immediately launches the Reviews flow with that rating pre-filled.
 * **Upvote & Reply Scale Pop**: Added Framer Motion tap scale pops (`whileTap={{ scale: 0.85 }}`) and upvote toggle bounces (`animate={{ scale: upvoted ? [1, 1.25, 1] : 1 }}`) on upvotes and replies in both main review cards and Reddit-style nested reply nodes.
