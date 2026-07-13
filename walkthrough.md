@@ -72,13 +72,14 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 ### 8. Unacademy UI Visual Parity Redesign
 * **Rebuilt Channel Card Row**: Re-implemented the layout into a single, baseline-aligned horizontal row:
   * **Avatar**: Kept at a clean 48px circle (`w-12 h-12`).
-  * **Name & Subscribers**: Stacked on the right, utilizing `text-[18px]` for the channel name, attaching the verified badge directly next to it with a 6px gap (`ml-1.5`) and aligning it to the text baseline.
-  * **Trust Score Indicator**: Placed next to the Follow button, using a thin `w-11 h-11` circular gauge and moving the `"Trust Score"` label directly underneath it.
-  * **Follow Button**: Set the button height to 42px (`h-[42px]`) with proportional rounded boundaries and blue accent fill.
-* **Redesigned Action Bar**: Overhauled the action bar buttons to render as a connected toolbar with a uniform 40px height (`h-[40px]`), `rounded-xl` corners, and 16px horizontal spacing. Added a thin low-opacity `border-white/5` separator directly below.
-* **Streamlined Review Card**: Compressed vertical height by 35% with a centered horizontal layout (`py-2.5 px-3.5`). The left panel houses the bold rating numeral (`text-xl`) + a gold star with review counts underneath, while the right panel displays the `"Add Review"` trigger and interactive stars.
-* **Real Descriptions Only**: Updated description queries to fall back to an empty string `""` (removing fallback texts completely), guaranteeing that the description container only renders when a real description exists.
-* **Strict Spacing System**: Confirmed visual margins of 12px (Video -> Title, Title -> Metadata, Metadata -> Channel, Review -> Description) and 16px (Channel -> Actions, Actions -> Review, Description -> Recommended).
+  * **Name & Subscribers**: Stacked on the right, utilizing `text-[16px]` for the channel name, attaching the verified badge directly next to it with a 4px gap (`gap-[4px]`) and aligning it to the text baseline.
+  * **Trust Score Indicator**: Placed next to the Follow button, using a `48px` circular indicator (`w-12 h-12`) with percentage text inside (`value%`), overlapping checkmark tick badge at the bottom-right, and moving the sentence-case `"Trust Score"` label underneath it.
+  * **Follow Button**: Set the button height to 36px (`h-9`) with 20px padding (`px-5`) and fully rounded corners (`rounded-full`).
+* **Redesigned Action Bar**: Rebuilt the action bar buttons to render horizontally (icon left of label) with a uniform 36px height (`h-9`), fully rounded corners (`rounded-full`), and 8px spacing (`gap-2`), adding a 5th button `"Add to playlist"`.
+* **Streamlined Review Card**: Sized with a `1px` low-opacity accent blue border (`border-[#3B82F6]/25`), custom radius `12px`, and vertical/horizontal padding (`py-3 px-3.5`). The left panel houses the rating numeral (`28px` bold) + a gold star with review counts underneath, while the right panel displays the `"Add review"` label + pencil icon, interactive stars, and comment input field.
+* **Description Relocation**: Repositioned description below the review card with a `"See more"` and `"See less"` chevron toggle.
+* **Strict Spacing System**: Confirmed visual margins of 12px (Video -> Title), 8px (Title -> Metadata), 14px (Metadata -> Channel), 12px (Channel -> Actions), 14px (Actions -> Review), 12px (Review -> Description), and 16px (Description -> Recommended).
+* **Divider Line Removals**: Removed all divider lines between the sections, retaining only the low-opacity divider directly above "Recommended Lessons".
 
 ---
 
@@ -86,7 +87,7 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 
 | File | Change Type | Summary of Changes |
 |------|------------|--------------------|
-| [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) | **Modified** | Rebuilt the channel row layout, updated action pills to h-40px rounded-xl, redesigned the ratings card layout, and adjusted spacing margins. |
+| [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) | **Modified** | Rebuilt the channel row layout, updated action pills to h-36 rounded-full inline layout with playlist button, redesigned the ratings card layout, relocated description, and adjusted spacing margins. |
 | [`src/components/LecturesGrid.tsx`](file:///c:/onion.so/src/components/LecturesGrid.tsx) | **Modified** | Updated the fallback description to an empty string to prevent rendering empty descriptions. |
 | [`src/components/VideoLibrary.tsx`](file:///c:/onion.so/src/components/VideoLibrary.tsx) | **Modified** | Updated fallback descriptions to empty string and cleaned up min-height scroll classes. |
 | [`src/components/ReviewsAndRatingsScreen.tsx`](file:///c:/onion.so/src/components/ReviewsAndRatingsScreen.tsx) | **Modified** | Updated star stroke weights/colors, audience score zero-state ratings, friendly review empty state card, and HEX color bypasses. |
