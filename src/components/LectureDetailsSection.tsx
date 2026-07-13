@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../utils/supabaseClient";
 import { motion } from "motion/react";
-import ReviewsAndRatingsScreen from "./ReviewsAndRatingsScreen";
+import ReviewsAndRatingsScreen, { StaggeredStars, InteractiveStars } from "./ReviewsAndRatingsScreen";
 
 // ============================================================================
 // SCHEMA ASSUMPTIONS — VERIFY AGAINST LIVE DB BEFORE SHIPPING
@@ -135,14 +135,17 @@ function useChannel(teacherId: string | undefined) {
         .single();
       if (cancelled) return;
       if (error) {
-        console.warn("useChannel query error for teacherId:", teacherId, "resolvedId:", resolvedId, error);
+        console.error("Supabase error fetching teacher/channel details:", error);
         setChannel(null);
       } else if (data) {
+        if (!data.name || !data.avatar) {
+          console.error("Teacher details returned null/undefined: name =", data.name, ", avatar =", data.avatar);
+        }
         setChannel({
           id: data.id,
-          name: data.name,
-          avatar_url: data.avatar,
-          verified: data.is_verified,
+          name: data.name || "BIOVISED Educator",
+          avatar_url: data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'Educator')}&background=202024&color=3B82F6&size=128&bold=true`,
+          verified: !!data.is_verified,
           followers_count: data.followers_count || 0,
           trust_score: data.accuracy || 0
         });
@@ -553,6 +556,8 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
   const [showReviewsScreen, setShowReviewsScreen] = useState(false);
   const [titleExpanded, setTitleExpanded] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [pendingRating, setPendingRating] = useState<number | null>(null);
+  const [composerInitialRating, setComposerInitialRating] = useState<number | null>(null);
 
   const needsTruncation = (lecture.title || "").length > 50;
   const displayedTitle = needsTruncation && !titleExpanded
@@ -591,8 +596,10 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
         lectureTitle={lecture.title}
         currentUserId={currentUserId}
         currentUserProfile={null}
+        initialRating={composerInitialRating}
         onClose={() => {
           setShowReviewsScreen(false);
+          setComposerInitialRating(null);
           refetch();
         }}
       />
@@ -641,7 +648,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       />
 
       {/* ---- Section 2: Action Bar ---- */}
-      <div className="flex items-center gap-2 mt-4 overflow-x-auto no-scrollbar py-2">
+      <div className="flex items-center gap-2 mt-8 overflow-x-auto no-scrollbar py-2">
         <ActionPill icon={<ThumbsUp size={15} />} label="Like" active={liked} onClick={requireAuth(toggleLiked)} />
         <ActionPill icon={<Bookmark size={15} />} label="Save" active={saved} onClick={requireAuth(toggleSaved)} />
         {playlists.map((p) => (
@@ -654,13 +661,16 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       <div className="border-t border-white/10 mt-4" />
 
       {/* ---- Section 3: Ratings & Reviews ---- */}
-      <button 
-        onClick={() => setShowReviewsScreen(true)} 
+      <div 
+        onClick={() => {
+          setComposerInitialRating(null);
+          setShowReviewsScreen(true);
+        }} 
         className="w-full text-left mt-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 flex items-stretch gap-4 hover:bg-white/[0.04] transition-colors cursor-pointer"
       >
         <div className="flex flex-col items-start shrink-0">
           <span className="text-[28px] font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
-          <Stars value={avgRating || 0} size={18} className="mt-1.5" />
+          <StaggeredStars value={avgRating || 0} size={18} className="mt-1.5" />
           <span className="text-white/40 text-[12px] mt-1">
             {reviews.length ? `(${reviews.length.toLocaleString()} reviews)` : "No reviews yet"}
           </span>
@@ -668,17 +678,26 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
         <div className="w-px bg-white/10" />
         <div className="flex-1">
           <span className="text-[13px] text-white/70 flex items-center gap-1">
-            Add review / View reviews
+            Add review
             <ChevronDown size={14} className="-rotate-90 text-zinc-400" />
           </span>
-          <div className="mt-2 flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Star key={n} size={20} fill={avgRating && n <= Math.round(avgRating) ? TURMERIC : "transparent"} color={TURMERIC} strokeWidth={1.5} />
-            ))}
+          <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+            <InteractiveStars
+              value={pendingRating || 0}
+              onChange={(ratingVal) => {
+                setPendingRating(ratingVal);
+                setTimeout(() => {
+                  setPendingRating(null);
+                  setComposerInitialRating(ratingVal);
+                  setShowReviewsScreen(true);
+                }, 250);
+              }}
+              size={22}
+            />
           </div>
-          <p className="text-white/40 text-[12px] mt-2">Tap to view comments, rating distribution, or write a review</p>
+          <p className="text-white/40 text-[12px] mt-2">Share your thoughts about this video…</p>
         </div>
-      </button>
+      </div>
 
       {/* ---- Section 4: Description ---- */}
       {lecture.description && (
@@ -816,29 +835,7 @@ function ActionPill({
   );
 }
 
-function Stars({ value, size = 13, className = "" }: { value: number; size?: number; className?: string }) {
-  const rounded = Math.round(value);
-  return (
-    <span className={`flex items-center gap-0.5 ${className}`}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <motion.div
-          key={n}
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: (n - 1) * 0.08, duration: 0.2, type: "spring", stiffness: 200 }}
-          className="relative inline-block"
-        >
-          <Star
-            size={size}
-            fill={n <= rounded ? TURMERIC : "transparent"}
-            color={TURMERIC}
-            strokeWidth={1.5}
-          />
-        </motion.div>
-      ))}
-    </span>
-  );
-}
+
 
 // ---------------------------------------------------------------------------
 // Section 3 — Write Review bottom sheet

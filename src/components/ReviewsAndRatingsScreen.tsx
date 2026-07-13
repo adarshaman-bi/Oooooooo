@@ -42,6 +42,7 @@ interface ReviewsAndRatingsScreenProps {
   currentUserId: string | null;
   currentUserProfile: any;
   onClose: () => void;
+  initialRating?: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -77,13 +78,21 @@ function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
+function formatProfileAge(dateString: string): string {
+  if (!dateString) return "";
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return "";
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return `Member since ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 // ---------------------------------------------------------------------------
 // Sub-component: Staggered load-in stars for Average Rating
 // ---------------------------------------------------------------------------
-function StaggeredStars({ value, size = 18 }: { value: number; size?: number }) {
+export function StaggeredStars({ value, size = 18, className = "" }: { value: number; size?: number; className?: string }) {
   const rounded = Math.round(value);
   return (
-    <div className="flex items-center gap-0.5">
+    <div className={`flex items-center gap-0.5 ${className}`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <motion.div
           key={n}
@@ -106,7 +115,7 @@ function StaggeredStars({ value, size = 18 }: { value: number; size?: number }) 
 // ---------------------------------------------------------------------------
 // Sub-component: Interactive star selector
 // ---------------------------------------------------------------------------
-function InteractiveStars({
+export function InteractiveStars({
   value,
   onChange,
   size = 28,
@@ -152,6 +161,7 @@ export default function ReviewsAndRatingsScreen({
   currentUserId,
   currentUserProfile,
   onClose,
+  initialRating = null,
 }: ReviewsAndRatingsScreenProps) {
   const [reviewsList, setReviewsList] = useState<Review[]>([]);
   const [profile, setProfile] = useState<any>(currentUserProfile || null);
@@ -183,7 +193,8 @@ export default function ReviewsAndRatingsScreen({
   const [loading, setLoading] = useState(true);
   const [filterStar, setFilterStar] = useState<number | null>(null); // null = All
   const [sortBy, setSortBy] = useState<"helpful" | "recent" | "highest" | "lowest">("helpful");
-  const [showComposer, setShowComposer] = useState(false);
+  const [showComposer, setShowComposer] = useState(!!initialRating);
+  const [composerInitialRating, setComposerInitialRating] = useState<number | null>(initialRating);
   const [activeThreadRoot, setActiveThreadRoot] = useState<Review | null>(null);
   const [threadLoading, setThreadLoading] = useState(false);
   const [threadReplies, setThreadReplies] = useState<Review[]>([]);
@@ -661,8 +672,12 @@ export default function ReviewsAndRatingsScreen({
       <AnimatePresence>
         {showComposer && (
           <WriteReviewComposer
+            initialRating={composerInitialRating || 5}
             onSubmit={handlePostReview}
-            onClose={() => setShowComposer(false)}
+            onClose={() => {
+              setShowComposer(false);
+              setComposerInitialRating(null);
+            }}
           />
         )}
       </AnimatePresence>
@@ -931,7 +946,7 @@ function ReviewCard({
               </span>
               <span>•</span>
               <span>
-                {trustScore ? `Member for ${Math.round((Date.now() - new Date(trustScore.account_created_at).getTime()) / (1000 * 60 * 60 * 24))}d` : "..."}
+                {trustScore ? formatProfileAge(trustScore.account_created_at) : "..."}
               </span>
             </div>
           </div>
@@ -973,7 +988,8 @@ function ReviewCard({
         <motion.button
           onClick={() => onUpvote(review.id)}
           whileTap={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
+          animate={{ scale: upvoted ? [1, 1.25, 1] : 1 }}
+          transition={{ duration: 0.2 }}
           className={`flex items-center gap-1.5 text-[11px] font-bold cursor-pointer transition-colors ${
             upvoted ? "text-blue-500" : "text-white/50 hover:text-white"
           }`}
@@ -984,13 +1000,14 @@ function ReviewCard({
 
         {/* Reply button */}
         {onSelect && (
-          <button
+          <motion.button
             onClick={() => onSelect(review)}
+            whileTap={{ scale: 0.85 }}
             className="flex items-center gap-1.5 text-[11px] font-bold text-white/50 hover:text-white cursor-pointer transition-colors"
           >
             <MessageSquare size={12} />
             <span>Reply {repliesCount ? `(${repliesCount})` : ""}</span>
-          </button>
+          </motion.button>
         )}
       </div>
     </div>
@@ -1198,7 +1215,7 @@ function ThreadNodeComponent({
   }, [node.user_id, fetchTrust]);
 
   // Indent margins
-  const indentClass = "pl-4 md:pl-5 border-l border-white/5 mt-3 text-left relative";
+  const indentClass = "pl-4 md:pl-6 border-l border-white/10 mt-3 text-left relative hover:border-blue-500/30 transition-colors";
 
   // Capped depth limits: Reddit-style "continue thread"
   if (currentDepth > 3) {
@@ -1231,8 +1248,11 @@ function ThreadNodeComponent({
                 </span>
               )}
             </div>
-            <span className="text-[9px] text-white/30 block">
-              {formatRelativeTime(node.created_at)}
+            <span 
+              onClick={() => setShowFullTimestamp(!showFullTimestamp)}
+              className="text-[9px] text-white/30 hover:text-white/60 cursor-pointer block select-none"
+            >
+              {showFullTimestamp ? new Date(node.created_at).toLocaleString() : formatRelativeTime(node.created_at)}
             </span>
           </div>
         </div>
@@ -1256,6 +1276,8 @@ function ThreadNodeComponent({
         <motion.button
           onClick={() => onUpvote(node.id)}
           whileTap={{ scale: 0.85 }}
+          animate={{ scale: upvoted ? [1, 1.25, 1] : 1 }}
+          transition={{ duration: 0.2 }}
           className={`flex items-center gap-1 text-[10px] font-bold cursor-pointer transition-colors ${
             upvoted ? "text-blue-500" : "text-white/40 hover:text-white"
           }`}
@@ -1265,12 +1287,13 @@ function ThreadNodeComponent({
         </motion.button>
 
         {/* Reply */}
-        <button
+        <motion.button
           onClick={() => onInitiateReply(node)}
+          whileTap={{ scale: 0.85 }}
           className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-colors"
         >
           Reply
-        </button>
+        </motion.button>
       </div>
 
       {/* Render children replies */}
@@ -1295,13 +1318,15 @@ function ThreadNodeComponent({
 // Screen 4: Full screen write & rate composer overlay
 // ---------------------------------------------------------------------------
 function WriteReviewComposer({
+  initialRating = 5,
   onSubmit,
   onClose,
 }: {
+  initialRating?: number;
   onSubmit: (stars: number, comment: string) => Promise<void>;
   onClose: () => void;
 }) {
-  const [stars, setStars] = useState(5);
+  const [stars, setStars] = useState(initialRating);
   const [text, setText] = useState("");
   const [helpfulToggle, setHelpfulToggle] = useState(true);
   const [submitting, setSubmitting] = useState(false);
