@@ -1,4 +1,4 @@
-# Implementation Plan - Unacademy UI Visual Parity Redesign (v2)
+# Implementation Plan - Unacademy UI 10/10 Visual Parity Redesign (v2)
 
 This plan outlines the visual and structural alignment of the Watch Details section with the Unacademy reference UI (v2 specifications). It details structural corrections, spacing scales, updated component states, and awaits the user's magic word to proceed.
 
@@ -14,6 +14,9 @@ We will perform the following structural modifications inside [`LectureDetailsSe
 6. **Pencil Icon for Reviews**: Replace `"Add Review >"` chevron with a modern Pencil edit icon positioned directly next to the `"Add review"` label.
 7. **Trust Score Tick overlapping badge**: Rebuild the Trust Score indicator to feature percentage text centered inside the ring (e.g. `92%`), with a small white circular tick badge (`12px`/`14px`) overlapping the bottom-right edge of the ring.
 8. **Divider Line Removals**: Delete the `<div className="border-t border-white/5 mt-4 mb-4" />` horizontal rule between the action row and the review card, as well as any other intermediate horizontal lines in the details section (retaining only the divider directly above "Recommended Lessons").
+
+---
+
 ### 1. Spacing Scale & Layout Constraints
 We will replace all arbitrary margins and vertical gaps with the strict spacing system specified in the v2 guidelines:
 * **Video Player to Title**: `mt-3` (12px)
@@ -88,6 +91,40 @@ Rebuild the channel row inside `LectureDetailsSection.tsx` with center vertical 
 * **Toggle**: `"See more ⌄"` link directly below, `mt-1` (4px gap), `13px` brighter gray, with small chevron-down icon.
 
 ---
+
+## Regression Guard (Mandatory)
+During implementation, preserve every improvement that has already been achieved.
+Do not regress previously refined areas while improving another section.
+Each iteration should be cumulative.
+Before modifying any component:
+* Verify that the change does not negatively affect spacing elsewhere.
+* Preserve typography hierarchy.
+* Preserve horizontal alignment.
+* Preserve vertical rhythm.
+* Preserve interaction behavior.
+* Preserve responsiveness.
+* Preserve accessibility.
+* Preserve existing animations unless they directly conflict with the reference.
+
+If a refinement introduces a new visual inconsistency, continue iterating until both the old and new sections satisfy the acceptance criteria simultaneously.
+The implementation is complete only when all sections meet the target together—not when individual sections look correct in isolation.
+
+### Continuous Refinement Loop
+For every visual change:
+1. Implement the refinement.
+2. Compare against the reference.
+3. Compare against the previous implementation.
+4. Check that no regressions have appeared.
+5. Repeat until no obvious differences remain.
+
+Never stop after the first visually acceptable result. The goal is visual convergence, not simply completing the checklist.
+
+### Definition of Done
+The redesign is complete only when:
+* The UI feels immediately familiar to someone accustomed to the Unacademy interface.
+* The overall layout, spacing, proportions, density, hierarchy, and polish closely match the reference.
+* No component draws unnecessary attention because of inconsistent spacing, sizing, alignment, or visual weight.
+* A side-by-side comparison reveals only minor branding differences rather than structural or compositional differences.
 
 ## Verification Plan
 
