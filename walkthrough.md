@@ -44,6 +44,14 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 * **Profile Age Formatting**: Formatted reviewer account age to read `"Member since {Month} {Year}"` utilizing the profile's real creation date.
 * **Database Trust Seeding**: Seeded `review_upvotes` and spaced out comment timestamps for user `c075d736-aa8c-4e1b-adc0-e084fc6c4f39` in the database, allowing them to organically meet the trust criteria and correctly display the gold **Top Contributor** badge.
 
+### 6. Caching & UI/UX Pass (Round 3)
+* **Key-driven Fresh Remounting**: Assigned `key={activeLecture.id}` / `key={pseudoLecture.id}` on `<LectureDetailsSection />` inside `App.tsx` and `VideoLibrary.tsx` respectively. This forces React to unmount and cleanly re-mount the component whenever switching videos, completely clearing state leakage and ensuring the `useChannel` query hook re-runs on every load.
+* **External Recommended Video Selection**: Improved `onSelectRecommended` inside `VideoLibrary.tsx` to construct and select a full `YouTubeVideo` object from database results when recommended videos outside the current playlist are tapped.
+* **Tailwind Redefined Color Bypass**: Discovered that Tailwind color tokens for `blue` have been globally redefined/overridden in `index.css` (mapping `blue-600` to `#FFFFFF` white). Updated the Follow button, Write a Review button, Post Review button, and helpful toggle inside both `LectureDetailsSection.tsx` and `ReviewsAndRatingsScreen.tsx` to use the explicit HEX color `#3B82F6` and `#2563EB` to guarantee they render in the intended blue fill with legible white text.
+* **Gold Star Visual Enhancements**: Boldened the star icon stroke weights to `2.2` and changed the empty star colors to a low-opacity white outline (`rgba(255, 255, 255, 0.2)`), ensuring filled stars render in a solid gold turmeric color. Sized the stars clearly larger (average rating to `22` and interactive to `28` / `26`).
+* **Audience Score Zero-State**: Enhanced the zero-rating state on the analytics panel to show a clean `"0.0"` numeral and 5 outline stars next to it, rather than a lone dash + single star.
+* **Friendly Review List Empty State**: Added an on-brand empty state card featuring a `MessageSquare` icon, custom prompt, and "Write a Review" button when the video has no reviews yet.
+
 ---
 
 ## Verification Results
@@ -59,7 +67,9 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 
 | File | Change Type | Summary of Changes |
 |------|------------|--------------------|
-| [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) | **Modified** | Imported unified star components, added `pendingRating` state, interactive ratings card handlers, increased spacing (`mt-8` on action bar), and improved Supabase error logging. |
-| [`src/components/ReviewsAndRatingsScreen.tsx`](file:///c:/onion.so/src/components/ReviewsAndRatingsScreen.tsx) | **Modified** | Exported shared star components, added `initialRating` props, upvote/reply tap scale bounces, exact timestamp toggle, and profile age string formatting. |
+| [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) | **Modified** | Added remount keys, clean segment gap (`h-4 md:h-5`), ratings card container updates (`border-white/10` and `bg-zinc-900/40`), and HEX color bypasses. |
+| [`src/components/ReviewsAndRatingsScreen.tsx`](file:///c:/onion.so/src/components/ReviewsAndRatingsScreen.tsx) | **Modified** | Updated star stroke weights/colors, audience score zero-state ratings, friendly review empty state card, and HEX color bypasses. |
+| [`src/components/VideoLibrary.tsx`](file:///c:/onion.so/src/components/VideoLibrary.tsx) | **Modified** | Mapped recommended lecture selections from outside playlists and added fresh remount key on `LectureDetailsSection`. |
+| [`src/App.tsx`](file:///c:/onion.so/src/App.tsx) | **Modified** | Added fresh remount key on `LectureDetailsSection`. |
 | [`src/components/LectureDetailView.tsx`](file:///c:/onion.so/src/components/LectureDetailView.tsx) | **Deleted** | Removed unused duplicate/draft component file to guarantee single-file production consistency. |
 
