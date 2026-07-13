@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from "react";
 import {
   ThumbsUp, Bookmark, ListPlus, Clock, Share2, Star, ChevronDown, ChevronUp,
-  BadgeCheck, X, Send, CheckCircle2, MessageSquare,
+  BadgeCheck, X, Send, CheckCircle2, MessageSquare, Pencil,
 } from "lucide-react";
 import { supabase } from "../utils/supabaseClient";
 import { motion } from "motion/react";
@@ -615,78 +615,55 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       )}
 
       {/* ---- Section 0: Title Block ---- */}
-      <motion.div 
-        layout
-        className="text-left"
-      >
-        <motion.h1 
-          layout="position"
-          className="text-2xl md:text-3xl font-bold text-white leading-[1.2] line-clamp-2 select-none cursor-pointer"
-          onClick={() => needsTruncation && setTitleExpanded(!titleExpanded)}
-        >
-          {displayedTitle}
-        </motion.h1>
-        {needsTruncation && (
-          <button 
-            onClick={() => setTitleExpanded(!titleExpanded)}
-            className="text-white/50 hover:text-white text-[11px] mt-1 flex items-center gap-1 cursor-pointer transition-colors font-medium"
-          >
-            {titleExpanded ? "Show Less" : "Show More"}
-            {titleExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-        )}
-        <p className="text-white/40 text-[13px] mt-1.5 flex items-center gap-1.5 font-medium">
-          {[lecture.subject, lecture.examType || lecture.exam_type].filter(Boolean).join(" \u2022 ")}
+      <div className="text-left">
+        <h1 className="text-[20px] font-bold text-white leading-[1.2] line-clamp-2 select-none">
+          {lecture.title}
+        </h1>
+        <p className="text-[#9CA3AF] text-[14px] mt-2 flex items-center gap-1.5 font-medium leading-none">
+          {[lecture.subject, lecture.examType || lecture.exam_type].filter(Boolean).join(" • ")}
         </p>
-      </motion.div>
+      </div>
 
-      {/* Spacing: clean segment gap */}
-      <div className="h-2.5" />
-
-      {/* ---- Section 1: Channel Card ---- */}
+      <div className="mt-[14px]" />
       <ChannelCard
         loading={channelLoading}
         channel={channel}
         following={following}
         onToggleFollow={requireAuth(toggleFollow)}
       />
-
       {/* ---- Section 2: Action Bar ---- */}
-      <div className="flex items-center gap-2 mt-4 overflow-x-auto no-scrollbar py-2">
+      <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar py-1">
         <ActionPill icon={<ThumbsUp size={15} />} label="Like" active={liked} onClick={requireAuth(toggleLiked)} />
         <ActionPill icon={<Bookmark size={15} />} label="Save" active={saved} onClick={requireAuth(toggleSaved)} />
-        {playlists.map((p) => (
-          <ActionPill key={p.id} icon={<ListPlus size={15} />} label={p.name} onClick={() => flashToast(`Added to ${p.name}`)} />
-        ))}
+        <ActionPill icon={<ListPlus size={15} />} label="Add to playlist" onClick={() => flashToast("Added to Playlist")} />
         <ActionPill icon={<Clock size={15} />} label="Watch later" active={watchLater} onClick={requireAuth(toggleWatchLater)} />
         <ActionPill icon={<Share2 size={15} />} label="Share" onClick={shareLecture} />
       </div>
-
-      <div className="border-t border-white/5 mt-4 mb-4" />
-
       {/* ---- Section 3: Ratings & Reviews ---- */}
       <div 
         onClick={() => {
           setComposerInitialRating(null);
           setShowReviewsScreen(true);
         }} 
-        className="w-full text-left mt-3.5 rounded-xl border border-white/10 bg-zinc-900/30 py-2.5 px-3.5 flex items-center gap-4 hover:bg-zinc-900/50 transition-colors cursor-pointer"
+        className="w-full text-left mt-[14px] rounded-[12px] border border-[#3B82F6]/25 bg-zinc-900/30 py-3 px-3.5 flex items-center hover:bg-zinc-900/50 transition-colors cursor-pointer"
       >
         <div className="flex flex-col justify-center shrink-0">
-          <div className="flex items-center gap-1">
-            <span className="text-xl font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
-            <Star size={14} fill={TURMERIC} color={TURMERIC} />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[28px] font-bold text-white leading-none">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
+            <Star size={16} fill={TURMERIC} color={TURMERIC} className="shrink-0" />
           </div>
-          <span className="text-white/40 text-[10px] mt-0.5">
-            {reviews.length ? `${reviews.length.toLocaleString()} Reviews` : "0 Reviews"}
+          <span className="text-white/50 text-[13px] mt-2 font-medium leading-none">
+            ({reviews.length ? reviews.length.toLocaleString() : "0"} reviews)
           </span>
         </div>
-        <div className="w-px h-10 bg-white/10 self-center" />
-        <div className="flex-1 min-w-0">
-          <span className="text-[12px] text-white/80 font-bold flex items-center gap-1">
-            Add Review
-            <ChevronDown size={12} className="-rotate-90 text-zinc-400" />
-          </span>
+        <div className="w-px bg-white/10 self-stretch mx-3" />
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex items-center justify-between">
+            <span className="text-[14px] text-white/90 font-medium leading-none">
+              Add review
+            </span>
+            <Pencil size={15} className="text-[#3B82F6] shrink-0" />
+          </div>
           <div className="mt-1" onClick={(e) => e.stopPropagation()}>
             <InteractiveStars
               value={pendingRating || 0}
@@ -701,23 +678,30 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
               size={18}
             />
           </div>
+          <div className="mt-2 w-full">
+            <div className="w-full bg-zinc-800/40 border border-white/5 rounded-lg py-2 px-3 text-[13px] text-white/40 font-medium truncate select-none">
+              Share your thoughts about this video...
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* ---- Section 4: Description ---- */}
       {lecture.description && (
         <div className="mt-3 text-left">
-          <p className={`text-white/60 text-[15px] leading-[1.6] transition-all ${descExpanded ? "" : "line-clamp-2"}`}>
+          <p className={`text-white/60 text-[14px] leading-[1.6] transition-all ${descExpanded ? "" : "line-clamp-2"}`}>
             {lecture.description}
           </p>
-          <button onClick={() => setDescExpanded((d) => !d)} className="text-white/50 hover:text-white text-[12px] mt-1 flex items-center gap-1 cursor-pointer transition-colors">
-            {descExpanded ? "Read Less" : "Read More"}
+          <button 
+            onClick={() => setDescExpanded((d) => !d)} 
+            className="text-white/80 hover:text-white text-[13px] mt-1 flex items-center gap-1 cursor-pointer transition-colors font-medium"
+          >
+            {descExpanded ? "See less" : "See more"}
             {descExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
         </div>
       )}
 
-      <div className="border-t border-white/10 mt-4" />
+      {/* Low-opacity divider above Recommended Lessons */}
+      <div className="border-t border-white/5 mt-4" />
 
       {/* ---- Section 5: Recommended Lectures ---- */}
       <div className="mt-3 text-left">
@@ -755,7 +739,7 @@ function ChannelAvatar({ name, url }: { name: string; url: string | null }) {
 
   if (!url || hasError) {
     return (
-      <div className="w-12 h-12 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm shrink-0 select-none overflow-hidden">
+      <div className="w-11 h-11 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm shrink-0 select-none overflow-hidden">
         {initials}
       </div>
     );
@@ -769,10 +753,11 @@ function ChannelAvatar({ name, url }: { name: string; url: string | null }) {
         console.error("Avatar failed to load for teacher:", name, "URL:", url);
         setHasError(true);
       }}
-      className="w-12 h-12 rounded-full object-cover bg-neutral-800 shrink-0 border border-white/5"
+      className="w-11 h-11 rounded-full object-cover bg-neutral-800 shrink-0 border border-white/5"
     />
   );
 }
+
 function ChannelCard({
   loading,
   channel,
@@ -788,13 +773,13 @@ function ChannelCard({
     return (
       <div className="flex items-center justify-between pt-4 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-white/10" />
+          <div className="w-11 h-11 rounded-full bg-white/10" />
           <div className="space-y-2">
             <div className="h-3.5 w-28 bg-white/10 rounded" />
             <div className="h-3 w-20 bg-white/10 rounded" />
           </div>
         </div>
-        <div className="h-[42px] w-20 bg-white/10 rounded-full" />
+        <div className="h-9 w-20 bg-white/10 rounded-full" />
       </div>
     );
   }
@@ -802,24 +787,24 @@ function ChannelCard({
   if (!channel) return null;
 
   return (
-    <div className="flex items-center justify-between py-2.5 text-left border-y border-white/5 my-3">
+    <div className="flex items-center justify-between py-2 text-left mt-[14px]">
       <div className="flex items-center gap-3 min-w-0">
         <ChannelAvatar name={channel.name} url={channel.avatar_url} />
         <div className="min-w-0">
-          <p className="font-bold text-[18px] truncate flex items-center gap-[6px] leading-none">
+          <p className="font-bold text-[16px] text-white truncate flex items-center gap-[4px] leading-none">
             <span>{channel.name}</span>
             {channel.verified && (
-              <BadgeCheck size={16} className="text-[#3B82F6] fill-[#3B82F6]/10 shrink-0 align-middle" />
+              <BadgeCheck size={14} className="text-[#3B82F6] fill-[#3B82F6]/10 shrink-0 align-middle" />
             )}
           </p>
-          <p className="text-white/50 text-[13px] mt-0.5 leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
+          <p className="text-white/50 text-[13px] mt-[2px] leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
         </div>
       </div>
       <div className="flex items-center gap-3.5 shrink-0">
         <TrustRing value={channel.trust_score} />
         <button
           onClick={onToggleFollow}
-          className={`px-4 h-[42px] rounded-full text-[12px] font-bold cursor-pointer transition-colors ${
+          className={`px-5 h-9 rounded-full text-[14px] font-semibold cursor-pointer transition-colors ${
             following 
               ? "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white" 
               : "bg-[#3B82F6] hover:bg-[#2563EB] text-white"
@@ -833,26 +818,31 @@ function ChannelCard({
 }
 
 function TrustRing({ value }: { value: number }) {
-  const r = 16;
+  const r = 18;
   const c = 2 * Math.PI * r;
   const offset = c - (Math.max(0, Math.min(100, value)) / 100) * c;
   return (
     <div className="flex flex-col items-center shrink-0 select-none">
-      <div className="relative w-11 h-11 flex items-center justify-center">
-        <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
-          <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+      <div className="relative w-12 h-12 flex items-center justify-center">
+        <svg viewBox="0 0 48 48" className="w-12 h-12 -rotate-90">
+          <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
           <circle
-            cx="22" cy="22" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="2.5"
+            cx="24" cy="24" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="3"
             strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
           />
         </svg>
-        <span className="absolute text-[12px] font-bold font-mono tracking-tighter leading-none">{value}</span>
+        <span className="absolute text-[13px] font-bold font-mono tracking-tighter leading-none">{value}%</span>
+        {/* White checkmark overlapping badge bottom-right */}
+        <div className="absolute bottom-[1px] right-[1px] w-3.5 h-3.5 bg-white rounded-full border border-neutral-950 flex items-center justify-center shadow-sm z-10">
+          <svg viewBox="0 0 24 24" className="w-2 h-2 text-[#59C749] fill-none stroke-[4]" stroke="currentColor">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
       </div>
-      <span className="text-[8px] text-white/45 font-bold uppercase tracking-wider leading-none mt-1">Trust Score</span>
+      <span className="text-[11px] text-white/50 font-medium leading-none mt-1">Trust Score</span>
     </div>
   );
 }
-// Shared small pieces
 // ---------------------------------------------------------------------------
 function ActionPill({
   icon, label, active, onClick,
@@ -860,10 +850,10 @@ function ActionPill({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center justify-center gap-1.5 h-[40px] px-4 rounded-xl text-[12px] font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
+      className={`flex items-center justify-center gap-[6px] h-9 px-[14px] rounded-full text-[13px] font-medium whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
         active 
-          ? "bg-white text-black" 
-          : "bg-zinc-900 border border-zinc-800/80 text-white/90 hover:bg-zinc-850 hover:text-white"
+          ? "bg-white text-black font-semibold" 
+          : "bg-zinc-950/20 border border-white/10 text-white/80 hover:bg-white/5 hover:text-white"
       }`}
     >
       {icon}
@@ -871,7 +861,6 @@ function ActionPill({
     </button>
   );
 }
-// ---------------------------------------------------------------------------
 // Section 3 — Write Review bottom sheet
 // ---------------------------------------------------------------------------
 
