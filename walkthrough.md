@@ -52,6 +52,14 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 * **Audience Score Zero-State**: Enhanced the zero-rating state on the analytics panel to show a clean `"0.0"` numeral and 5 outline stars next to it, rather than a lone dash + single star.
 * **Friendly Review List Empty State**: Added an on-brand empty state card featuring a `MessageSquare` icon, custom prompt, and "Write a Review" button when the video has no reviews yet.
 
+### 7. Layout Spacing & Premium Alignment Polish
+* **Collapsed Viewport Empty Space**: Removed `min-h-screen`, `overflow-y-auto`, and excessive nested container padding (`pb-24`) from the video watch layout wrappers in both [`src/App.tsx`](file:///c:/onion.so/src/App.tsx) and [`src/components/VideoLibrary.tsx`](file:///c:/onion.so/src/components/VideoLibrary.tsx). The recommended/playlist lists now naturally wrap around their content with a compact 24px bottom margin before the footer.
+* **Reduced Player Gap**: Reduced top padding below the video player in [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) (`mt-2`) to keep the title closer to the viewport.
+* **Baseline Baseline Alignment**: Wrapped the channel card avatar, channel name, subscriber count, trust score, and Follow button inside a single clean row container with `border-y border-white/5` and `py-2` to align them on the same visual baseline.
+* **Compact Trust Ring**: Scaled down the trust ring from `w-14 h-14` (56px) to `w-9 h-9` (36px) with an inner `text-[10px]` label to perfectly balance it next to the Follow button.
+* **Compact Rating Card**: Shrunk the rating review card's vertical height (`p-3.5 mt-3.5`) and stars size (`18`/`14`) to build a clean vertical rhythm.
+* **Horizontal Padding System**: Confirmed consistent 16px (`px-4`) margins across all layout divisions.
+
 ---
 
 ## Verification Results
@@ -67,9 +75,9 @@ Applied the following schema migrations directly to the Supabase database (`jicy
 
 | File | Change Type | Summary of Changes |
 |------|------------|--------------------|
-| [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) | **Modified** | Added remount keys, clean segment gap (`h-4 md:h-5`), ratings card container updates (`border-white/10` and `bg-zinc-900/40`), and HEX color bypasses. |
+| [`src/components/LectureDetailsSection.tsx`](file:///c:/onion.so/src/components/LectureDetailsSection.tsx) | **Modified** | Polished layout padding/margins, aligned channel cards on a strict baseline, shrunk the trust ring size to `w-9 h-9`, and reduced the ratings card height. |
 | [`src/components/ReviewsAndRatingsScreen.tsx`](file:///c:/onion.so/src/components/ReviewsAndRatingsScreen.tsx) | **Modified** | Updated star stroke weights/colors, audience score zero-state ratings, friendly review empty state card, and HEX color bypasses. |
-| [`src/components/VideoLibrary.tsx`](file:///c:/onion.so/src/components/VideoLibrary.tsx) | **Modified** | Mapped recommended lecture selections from outside playlists and added fresh remount key on `LectureDetailsSection`. |
-| [`src/App.tsx`](file:///c:/onion.so/src/App.tsx) | **Modified** | Added fresh remount key on `LectureDetailsSection`. |
+| [`src/components/VideoLibrary.tsx`](file:///c:/onion.so/src/components/VideoLibrary.tsx) | **Modified** | Removed watch page viewport min-height/overflow wrappers to prevent blank spaces below playlist. |
+| [`src/App.tsx`](file:///c:/onion.so/src/App.tsx) | **Modified** | Removed watch page viewport min-height/overflow wrappers to prevent blank spaces below details. |
 | [`src/components/LectureDetailView.tsx`](file:///c:/onion.so/src/components/LectureDetailView.tsx) | **Deleted** | Removed unused duplicate/draft component file to guarantee single-file production consistency. |
 
