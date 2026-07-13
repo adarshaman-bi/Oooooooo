@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from "react";
 import {
   ThumbsUp, Bookmark, ListPlus, Clock, Share2, Star, ChevronDown, ChevronUp,
-  BadgeCheck, X, Send, CheckCircle2,
+  BadgeCheck, X, Send, CheckCircle2, MessageSquare,
 } from "lucide-react";
 import { supabase } from "../utils/supabaseClient";
 import { motion } from "motion/react";
@@ -617,27 +617,31 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       {/* ---- Section 0: Title Block ---- */}
       <motion.div 
         layout
-        className="cursor-pointer text-left"
-        onClick={() => needsTruncation && setTitleExpanded(!titleExpanded)}
+        className="text-left"
       >
         <motion.h1 
           layout="position"
-          className="text-xl md:text-2xl font-bold text-white leading-snug select-none flex flex-wrap items-center gap-1.5"
+          className="text-xl md:text-2xl font-bold text-white leading-snug select-none cursor-pointer"
+          onClick={() => needsTruncation && setTitleExpanded(!titleExpanded)}
         >
           {displayedTitle}
-          {needsTruncation && (
-            <span className="text-xs font-semibold text-blue-500 hover:text-blue-400 select-none ml-2">
-              {titleExpanded ? "show less" : "show more"}
-            </span>
-          )}
         </motion.h1>
-        <p className="text-white/50 text-[12px] md:text-[13px] mt-1.5 flex items-center gap-2">
+        {needsTruncation && (
+          <button 
+            onClick={() => setTitleExpanded(!titleExpanded)}
+            className="text-white/50 hover:text-white text-[12px] mt-2 flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            {titleExpanded ? "Show Less" : "Show More"}
+            {titleExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
+        )}
+        <p className="text-white/50 text-[12px] md:text-[13px] mt-2 flex items-center gap-2">
           {[lecture.subject, lecture.examType || lecture.exam_type, lecture.teacherName || lecture.teacher_name].filter(Boolean).join(" \u2022 ")}
         </p>
       </motion.div>
 
-      {/* Spacing: clearly widened gap (double the standard spacing) */}
-      <div className="h-8 md:h-10" />
+      {/* Spacing: clean segment gap */}
+      <div className="h-4 md:h-5" />
 
       {/* ---- Section 1: Channel Card ---- */}
       <ChannelCard
@@ -666,7 +670,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
           setComposerInitialRating(null);
           setShowReviewsScreen(true);
         }} 
-        className="w-full text-left mt-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 flex items-stretch gap-4 hover:bg-white/[0.04] transition-colors cursor-pointer"
+        className="w-full text-left mt-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-5 flex items-stretch gap-4 hover:bg-zinc-900/60 transition-colors cursor-pointer"
       >
         <div className="flex flex-col items-start shrink-0">
           <span className="text-[28px] font-bold leading-none">{avgRating ? avgRating.toFixed(1) : "—"}</span>
@@ -675,7 +679,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
             {reviews.length ? `(${reviews.length.toLocaleString()} reviews)` : "No reviews yet"}
           </span>
         </div>
-        <div className="w-px bg-white/10" />
+        <div className="w-px bg-white/15" />
         <div className="flex-1">
           <span className="text-[13px] text-white/70 flex items-center gap-1">
             Add review
@@ -728,8 +732,46 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
 }
 
 // ---------------------------------------------------------------------------
-// Section 1 — Channel Card
+// Section 1 — Channel Card & Fallback Avatar
 // ---------------------------------------------------------------------------
+
+function getInitials(name: string): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
+function ChannelAvatar({ name, url }: { name: string; url: string | null }) {
+  const [hasError, setHasError] = useState(false);
+  const initials = getInitials(name);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [url]);
+
+  if (!url || hasError) {
+    return (
+      <div className="w-12 h-12 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm shrink-0 select-none overflow-hidden">
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt={name}
+      onError={() => {
+        console.error("Avatar failed to load for teacher:", name, "URL:", url);
+        setHasError(true);
+      }}
+      className="w-12 h-12 rounded-full object-cover bg-neutral-800 shrink-0 border border-white/5"
+    />
+  );
+}
 
 function ChannelCard({
   loading,
@@ -762,12 +804,7 @@ function ChannelCard({
   return (
     <div className="flex items-center justify-between pt-5 text-left">
       <div className="flex items-center gap-3 min-w-0">
-        <img
-          src={channel.avatar_url || undefined}
-          alt={channel.name}
-          loading="lazy"
-          className="w-12 h-12 rounded-full object-cover bg-neutral-800 shrink-0 border border-white/5"
-        />
+        <ChannelAvatar name={channel.name} url={channel.avatar_url} />
         <div className="min-w-0">
           <p className="font-semibold text-[15px] truncate flex items-center gap-1.5">
             {channel.name}
@@ -785,7 +822,7 @@ function ChannelCard({
           className={`px-4 py-1.5 rounded-full text-[12px] font-bold cursor-pointer transition-colors ${
             following 
               ? "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white" 
-              : "bg-white text-black hover:bg-zinc-200"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
           }`}
         >
           {following ? "Following" : "Follow"}
