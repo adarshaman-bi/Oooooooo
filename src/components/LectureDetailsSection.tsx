@@ -806,10 +806,10 @@ function ChannelCard({
       <div className="flex items-center gap-3 min-w-0">
         <ChannelAvatar name={channel.name} url={channel.avatar_url} />
         <div className="min-w-0">
-          <p className="font-bold text-[18px] truncate flex items-baseline gap-1.5 leading-none">
+          <p className="font-bold text-[18px] truncate flex items-center gap-[6px] leading-none">
             <span>{channel.name}</span>
             {channel.verified && (
-              <BadgeCheck size={15} className="text-[#3B82F6] fill-[#3B82F6]/10 shrink-0 self-center" />
+              <BadgeCheck size={16} className="text-[#3B82F6] fill-[#3B82F6]/10 shrink-0 align-middle" />
             )}
           </p>
           <p className="text-white/50 text-[13px] mt-0.5 leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
