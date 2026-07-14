@@ -606,112 +606,878 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
     );
   }
 
+  const spawnHearts = useCallback((x: number, y: number) => {
+    const container = document.getElementById('likePopupContainer');
+    if (!container) return;
+    const emojis = ['❤️', '💖', '💕', '✨', '💗', '💓'];
+    for (let i = 0; i < 14; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'like-heart';
+      heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const angle = (Math.PI * 2 * i) / 14;
+      const distance = 50 + Math.random() * 90;
+      const tx = Math.cos(angle) * distance;
+      const rot = (Math.random() - 0.5) * 360;
+      heart.style.left = x + 'px';
+      heart.style.top = y + 'px';
+      heart.style.setProperty('--tx', tx + 'px');
+      heart.style.setProperty('--rot', rot + 'deg');
+      heart.style.fontSize = (16 + Math.random() * 18) + 'px';
+      heart.style.animationDelay = (Math.random() * 0.15) + 's';
+      container.appendChild(heart);
+      setTimeout(() => heart.remove(), 1700);
+    }
+  }, []);
+
+  const handleLikeClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const nextLiked = !liked;
+    if (nextLiked) {
+      spawnHearts(e.clientX, e.clientY);
+    }
+    const btn = document.getElementById('likeBtn');
+    if (btn) {
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      btn.classList.add('pop');
+      setTimeout(() => btn.classList.remove('pop'), 400);
+    }
+    requireAuth(toggleLiked)();
+  }, [liked, requireAuth, toggleLiked, spawnHearts]);
+
+  const handleSaveClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const btn = document.getElementById('saveBtn');
+    if (btn) {
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      btn.classList.add('pop');
+      setTimeout(() => btn.classList.remove('pop'), 400);
+    }
+    requireAuth(toggleSaved)();
+  }, [requireAuth, toggleSaved]);
+
+  const handleWatchLaterClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const btn = document.getElementById('wlBtn');
+    if (btn) {
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      btn.classList.add('pop');
+      setTimeout(() => btn.classList.remove('pop'), 400);
+    }
+    requireAuth(toggleWatchLater)();
+  }, [requireAuth, toggleWatchLater]);
+
+  const r = 20;
+  const c = 2 * Math.PI * r;
+  const trustValue = channel ? channel.trust_score : 0;
+  const offset = c - (Math.max(0, Math.min(100, trustValue)) / 100) * c;
+  const channelInitials = channel ? getInitials(channel.name) : "?";
+
   return (
-    <div className="w-full bg-neutral-950 text-white pb-4 max-w-7xl mx-auto px-4 mt-3">
+    <div className="lecture-details-container">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .lecture-details-container {
+          max-width: 640px;
+          margin: 0 auto;
+          padding: 12px 16px;
+          background-color: #0f0f0f;
+          color: #f1f1f1;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .lecture-details-container .video-title {
+          font-size: 17px;
+          font-weight: 600;
+          line-height: 1.35;
+          color: #f1f1f1;
+          margin-bottom: 4px;
+          text-align: left;
+        }
+
+        .lecture-details-container .video-meta {
+          font-size: 13px;
+          color: #aaa;
+          margin-bottom: 14px;
+          text-align: left;
+        }
+
+        .lecture-details-container .channel-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 14px;
+          flex-wrap: wrap;
+          gap: 10px;
+          text-align: left;
+        }
+
+        .lecture-details-container .channel-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .lecture-details-container .channel-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          position: relative;
+          box-shadow: 0 0 0 2px #0f0f0f, 0 0 0 3px #d4af37;
+        }
+
+        .lecture-details-container .channel-avatar .pw-text {
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          background: linear-gradient(135deg, #f4e058, #d4af37);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .lecture-details-container .premium-badge {
+          position: absolute;
+          bottom: -3px;
+          right: -3px;
+          width: 16px;
+          height: 16px;
+          background: linear-gradient(135deg, #d4af37, #f4e058);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(212, 175, 55, 0.4);
+          border: 1.5px solid #0f0f0f;
+        }
+
+        .lecture-details-container .premium-badge svg {
+          width: 10px;
+          height: 10px;
+        }
+
+        .lecture-details-container .channel-details {
+          min-width: 0;
+        }
+
+        .lecture-details-container .channel-name {
+          font-size: 13px;
+          font-weight: 600;
+          color: #f1f1f1;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .lecture-details-container .verified-badge {
+          width: 14px;
+          height: 14px;
+          background: linear-gradient(135deg, #3ea6ff, #1a73e8);
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          box-shadow: 0 0 6px rgba(62, 166, 255, 0.3);
+        }
+
+        .lecture-details-container .verified-badge svg {
+          width: 9px;
+          height: 9px;
+        }
+
+        .lecture-details-container .channel-subs {
+          font-size: 12px;
+          color: #aaa;
+          margin-top: 1px;
+        }
+
+        .lecture-details-container .channel-right {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .lecture-details-container .trust-score {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+        }
+
+        .lecture-details-container .trust-circle {
+          width: 44px;
+          height: 44px;
+          position: relative;
+        }
+
+        .lecture-details-container .trust-circle svg {
+          transform: rotate(-90deg);
+        }
+
+        .lecture-details-container .trust-circle .circle-bg {
+          fill: none;
+          stroke: #333;
+          stroke-width: 3.5;
+        }
+
+        .lecture-details-container .trust-circle .circle-progress {
+          fill: none;
+          stroke: url(#trustGrad);
+          stroke-width: 3.5;
+          stroke-linecap: round;
+          stroke-dasharray: 125.66;
+          transition: stroke-dashoffset 0.35s;
+        }
+
+        .lecture-details-container .trust-value {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 11px;
+          font-weight: 700;
+          color: #f1f1f1;
+        }
+
+        .lecture-details-container .trust-label {
+          font-size: 10px;
+          color: #aaa;
+        }
+
+        .lecture-details-container .follow-btn {
+          background: #3ea6ff;
+          color: #000;
+          border: none;
+          padding: 8px 20px;
+          border-radius: 18px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .lecture-details-container .follow-btn:hover {
+          background: #65b8ff;
+        }
+
+        .lecture-details-container .follow-btn.following {
+          background: #333;
+          color: #f1f1f1;
+        }
+
+        .lecture-details-container .action-buttons {
+          display: flex;
+          gap: 6px;
+          margin-bottom: 14px;
+          overflow-x: auto;
+          padding-bottom: 2px;
+          scrollbar-width: none;
+        }
+
+        .lecture-details-container .action-buttons::-webkit-scrollbar {
+          display: none;
+        }
+
+        .lecture-details-container .action-btn {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          background: transparent;
+          border: 1px solid #3a3a3a;
+          color: #f1f1f1;
+          padding: 7px 14px;
+          border-radius: 18px;
+          font-size: 12px;
+          font-weight: 500;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .lecture-details-container .action-btn:hover {
+          background: #272727;
+        }
+
+        .lecture-details-container .action-btn.active {
+          background: #3ea6ff22;
+          border-color: #3ea6ff;
+          color: #3ea6ff;
+        }
+
+        .lecture-details-container .action-btn svg {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
+        }
+
+        .lecture-details-container .action-btn.pop {
+          animation: btnPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes btnPop {
+          0% { transform: scale(1); }
+          40% { transform: scale(0.88); }
+          70% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+        }
+
+        .like-popup-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1000;
+        }
+
+        .like-heart {
+          position: absolute;
+          font-size: 24px;
+          animation: floatHeart 1.5s ease-out forwards;
+          pointer-events: none;
+        }
+
+        @keyframes floatHeart {
+          0% { opacity: 1; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+          50% { opacity: 1; transform: translate(var(--tx), -100px) scale(1.2) rotate(var(--rot)); }
+          100% { opacity: 0; transform: translate(calc(var(--tx) * 1.5), -250px) scale(0.8) rotate(calc(var(--rot) * 2)); }
+        }
+
+        /* ===== COMPACT RATING CARD - scaled down ~30% further as requested ===== */
+        .lecture-details-container .rating-card {
+          background: #1A1A1A;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          padding: 10px 11px;
+          margin-bottom: 10px;
+          cursor: pointer;
+          transition: border-color 0.2s;
+          text-align: left;
+        }
+
+        .lecture-details-container .rating-card:hover {
+          border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .lecture-details-container .rating-card-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .lecture-details-container .rating-card-left {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .lecture-details-container .rating-card-right {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          flex-shrink: 0;
+        }
+
+        .lecture-details-container .add-review-label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .lecture-details-container .add-review-label-text {
+          font-size: 11px;
+          font-weight: 600;
+          color: #ffffff;
+          line-height: 1;
+        }
+
+        .lecture-details-container .add-review-label-icon {
+          color: #9CA3AF;
+          display: flex;
+          cursor: pointer;
+          transition: color 0.2s;
+          background: none;
+          border: none;
+          padding: 0;
+        }
+
+        .lecture-details-container .add-review-label-icon:hover {
+          color: #ffffff;
+        }
+
+        .lecture-details-container .add-review-label-icon svg {
+          width: 11px;
+          height: 11px;
+        }
+
+        .lecture-details-container .rating-summary .score {
+          font-size: 15px;
+          font-weight: 700;
+          color: #ffffff;
+          line-height: 1;
+        }
+
+        .lecture-details-container .rating-summary .star-icon {
+          width: 13px;
+          height: 13px;
+        }
+
+        .lecture-details-container .rating-summary .count {
+          font-size: 9px;
+          color: #9CA3AF;
+          font-weight: 400;
+        }
+
+        .lecture-details-container .card-stars {
+          display: flex;
+          gap: 6px;
+          margin-top: 8px;
+        }
+
+        .lecture-details-container .card-star {
+          cursor: pointer;
+          transition: transform 0.15s;
+          display: flex;
+        }
+
+        .lecture-details-container .card-star:hover {
+          transform: scale(1.15);
+        }
+
+        .lecture-details-container .card-star svg {
+          width: 17px;
+          height: 17px;
+        }
+
+        .lecture-details-container .card-comment-field {
+          width: 100%;
+          background: #262626;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 7px;
+          padding: 8px 10px;
+          color: #ffffff;
+          font-size: 9px;
+          font-family: 'Inter', sans-serif;
+          outline: none;
+          pointer-events: none;
+          margin-top: 10px;
+        }
+
+        .lecture-details-container .card-comment-field::placeholder {
+          color: #737373;
+        }
+
+        .lecture-details-container .description {
+          font-size: 13px;
+          line-height: 1.5;
+          color: #ccc;
+          margin-bottom: 16px;
+          text-align: left;
+        }
+
+        .lecture-details-container .description .desc-text {
+          font-size: 13px;
+          line-height: 1.5;
+          color: #ccc;
+          transition: all 0.2s;
+        }
+
+        .lecture-details-container .description .see-more-btn {
+          background: none;
+          border: none;
+          color: #aaa;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          margin-top: 4px;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .lecture-details-container .description .see-more-btn:hover {
+          color: #f1f1f1;
+        }
+
+        .lecture-details-container .section-title {
+          font-size: 15px;
+          font-weight: 700;
+          color: #f1f1f1;
+          margin-bottom: 12px;
+          text-align: left;
+        }
+
+        .lecture-details-container .lesson-item {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 14px;
+          align-items: flex-start;
+          text-align: left;
+        }
+
+        .lecture-details-container .lesson-thumb {
+          position: relative;
+          width: 150px;
+          min-width: 150px;
+          height: 84px;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #1a1a1a;
+          cursor: pointer;
+        }
+
+        .lecture-details-container .lesson-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .lecture-details-container .play-overlay {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 32px;
+          height: 32px;
+          background: rgba(0,0,0,0.7);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #fff;
+        }
+
+        .lecture-details-container .play-overlay svg {
+          width: 14px;
+          height: 14px;
+          fill: #fff;
+          margin-left: 2px;
+        }
+
+        .lecture-details-container .lesson-duration {
+          position: absolute;
+          bottom: 4px;
+          right: 4px;
+          background: rgba(0,0,0,0.85);
+          color: #fff;
+          font-size: 10px;
+          font-weight: 600;
+          padding: 2px 5px;
+          border-radius: 3px;
+        }
+
+        .lecture-details-container .lesson-info {
+          flex: 1;
+          min-width: 0;
+          padding-top: 2px;
+        }
+
+        .lecture-details-container .lesson-title {
+          font-size: 13px;
+          font-weight: 600;
+          color: #f1f1f1;
+          margin-bottom: 3px;
+          line-height: 1.3;
+        }
+
+        .lecture-details-container .lesson-category {
+          font-size: 11px;
+          color: #aaa;
+          margin-bottom: 6px;
+        }
+
+        .lecture-details-container .progress-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .lecture-details-container .progress-bar {
+          flex: 1;
+          height: 3px;
+          background: #333;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+
+        .lecture-details-container .progress-fill {
+          height: 100%;
+          background: #ff0000;
+          border-radius: 2px;
+          transition: width 1s ease;
+        }
+
+        .lecture-details-container .progress-percent {
+          font-size: 11px;
+          color: #aaa;
+          min-width: 28px;
+          text-align: right;
+        }
+
+        @media (max-width: 480px) {
+          .lecture-details-container { padding: 10px 12px; }
+          .lecture-details-container .video-title { font-size: 15px; }
+          .lecture-details-container .rating-card { padding: 8px 10px; }
+          .lecture-details-container .add-review-label-text { font-size: 10px; }
+          .lecture-details-container .rating-summary .score { font-size: 14px; }
+          .lecture-details-container .rating-summary .star-icon { width: 11px; height: 11px; }
+          .lecture-details-container .rating-summary .count { font-size: 8px; }
+          .lecture-details-container .card-star svg { width: 15px; height: 15px; }
+          .lecture-details-container .lesson-thumb { width: 130px; min-width: 130px; height: 74px; }
+        }
+      ` }} />
+
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <defs>
+          <linearGradient id="trustGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#4caf50"/>
+            <stop offset="100%" stopColor="#66bb6a"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
       {toast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] bg-white text-black text-[13px] font-medium px-4 py-2 rounded-full shadow-xl flex items-center gap-2">
           <CheckCircle2 size={14} className="text-emerald-500" /> {toast}
         </div>
       )}
 
-      {/* ---- Section 0: Title Block ---- */}
-      <div className="text-left">
-        <h1 className="text-[20px] font-bold text-white leading-[1.2] line-clamp-2 select-none">
-          {lecture.title}
-        </h1>
-        <p className="text-[#9CA3AF] text-[14px] mt-2 flex items-center gap-1.5 font-medium leading-none">
-          {[lecture.subject, lecture.examType || lecture.exam_type].filter(Boolean).join(" • ")}
-        </p>
+      <h1 className="video-title">{lecture.title}</h1>
+      <div className="video-meta">
+        {[lecture.subject, lecture.examType || lecture.exam_type].filter(Boolean).join(" • ")}
       </div>
 
-      <div className="mt-[14px]" />
-      <ChannelCard
-        loading={channelLoading}
-        channel={channel}
-        following={following}
-        onToggleFollow={requireAuth(toggleFollow)}
-      />
-      {/* ---- Section 2: Action Bar ---- */}
-      <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar">
-        <ActionPill icon={<ThumbsUp size={15} />} label="Like" active={liked} onClick={requireAuth(toggleLiked)} />
-        <ActionPill icon={<Bookmark size={15} />} label="Save" active={saved} onClick={requireAuth(toggleSaved)} />
-        <ActionPill icon={<ListPlus size={15} />} label="Add to playlist" onClick={() => flashToast("Added to Playlist")} />
-        <ActionPill icon={<Clock size={15} />} label="Watch later" active={watchLater} onClick={requireAuth(toggleWatchLater)} />
-        <ActionPill icon={<Share2 size={15} />} label="Share" onClick={shareLecture} />
-      </div>
-      {/* ---- Section 3: Ratings & Reviews ---- */}
-      <div 
-        onClick={() => {
-          setComposerInitialRating(null);
-          setShowReviewsScreen(true);
-        }} 
-        className="w-full text-left mt-[14px] rounded-[12px] border border-[#3B82F6]/25 bg-zinc-900/30 py-3 px-3.5 flex items-center hover:bg-zinc-900/50 transition-colors cursor-pointer"
-      >
-        <div className="flex flex-col justify-center shrink-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[28px] font-bold text-white leading-none">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
-            <Star size={16} fill={TURMERIC} color={TURMERIC} className="shrink-0" />
+      <div className="channel-row">
+        <div className="channel-info">
+          <div className="channel-avatar">
+            {channel && channel.avatar_url ? (
+              <img
+                src={channel.avatar_url}
+                alt={channel.name}
+                className="w-10 h-10 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <span className="pw-text">{channelInitials}</span>
+            )}
+            <div className="premium-badge">
+              <svg viewBox="0 0 24 24" fill="#000">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg>
+            </div>
           </div>
-          <span className="text-white/50 text-[13px] mt-2 font-medium leading-none">
-            ({reviews.length ? reviews.length.toLocaleString() : "0"} reviews)
-          </span>
-        </div>
-        <div className="w-px bg-white/10 self-stretch mx-3" />
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="flex items-center justify-between">
-            <span className="text-[14px] text-white/90 font-medium leading-none">
-              Add review
-            </span>
-            <Pencil size={15} className="text-[#3B82F6] shrink-0" />
-          </div>
-          <div className="mt-1" onClick={(e) => e.stopPropagation()}>
-            <InteractiveStars
-              value={pendingRating || 0}
-              onChange={(ratingVal) => {
-                setPendingRating(ratingVal);
-                setTimeout(() => {
-                  setPendingRating(null);
-                  setComposerInitialRating(ratingVal);
-                  setShowReviewsScreen(true);
-                }, 250);
-              }}
-              size={18}
-            />
-          </div>
-          <div className="mt-2 w-full">
-            <div className="w-full bg-zinc-800/40 border border-white/5 rounded-lg py-2 px-3 text-[13px] text-white/40 font-medium truncate select-none">
-              Share your thoughts about this video...
+          <div className="channel-details">
+            <div className="channel-name">
+              {channel ? channel.name : "Loading..."}
+              {channel && channel.verified && (
+                <span className="verified-badge">
+                  <svg viewBox="0 0 24 24" fill="#fff">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                  </svg>
+                </span>
+              )}
+            </div>
+            <div className="channel-subs">
+              {channelLoading
+                ? "Loading..."
+                : `${channel ? channel.followers_count.toLocaleString() : "0"} subscribers`}
             </div>
           </div>
         </div>
+        <div className="channel-right">
+          <div className="trust-score">
+            <div className="trust-circle">
+              <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle className="circle-bg" cx="22" cy="22" r="20"/>
+                <circle
+                  className="circle-progress"
+                  cx="22"
+                  cy="22"
+                  r="20"
+                  style={{ strokeDashoffset: offset }}
+                />
+              </svg>
+              <span className="trust-value">{channel ? channel.trust_score : 0}%</span>
+            </div>
+            <span className="trust-label">Trust Score</span>
+          </div>
+          <button
+            className={`follow-btn ${following ? 'following' : ''}`}
+            onClick={requireAuth(toggleFollow)}
+          >
+            {following ? 'Following' : 'Follow'}
+          </button>
+        </div>
       </div>
+
+      <div className="action-buttons">
+        <button className={`action-btn ${liked ? 'active' : ''}`} id="likeBtn" onClick={handleLikeClick}>
+          <svg viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+          </svg>
+          Like
+        </button>
+        <button className={`action-btn ${saved ? 'active' : ''}`} id="saveBtn" onClick={handleSaveClick}>
+          <svg viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          Save
+        </button>
+        <button className="action-btn" onClick={() => { flashToast("Added to playlist"); }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          Add to playlist
+        </button>
+        <button className={`action-btn ${watchLater ? 'active' : ''}`} id="wlBtn" onClick={handleWatchLaterClick}>
+          <svg viewBox="0 0 24 24" fill={watchLater ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Watch later
+        </button>
+        <button className="action-btn" onClick={shareLecture}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+          Share
+        </button>
+      </div>
+
+      <div
+        className="rating-card"
+        onClick={() => {
+          setComposerInitialRating(null);
+          setShowReviewsScreen(true);
+        }}
+      >
+        <div className="rating-card-top">
+          <div className="rating-card-left">
+            <div className="add-review-label">
+              <span className="add-review-label-text">Add review</span>
+              <button
+                className="add-review-label-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setComposerInitialRating(null);
+                  setShowReviewsScreen(true);
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+            <div className="card-stars" onClick={(e) => e.stopPropagation()}>
+              <InteractiveStars
+                value={pendingRating || 0}
+                onChange={(ratingVal) => {
+                  setPendingRating(ratingVal);
+                  setTimeout(() => {
+                    setPendingRating(null);
+                    setComposerInitialRating(ratingVal);
+                    setShowReviewsScreen(true);
+                  }, 250);
+                }}
+                size={17}
+              />
+            </div>
+          </div>
+          <div className="rating-card-right">
+            <div className="rating-summary">
+              <span className="score">{avgRating ? avgRating.toFixed(1) : "0.0"}</span>
+              <svg className="star-icon" viewBox="0 0 24 24">
+                <path fill="#FFC107" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span className="count">({reviews.length ? reviews.length.toLocaleString() : "0"} reviews)</span>
+            </div>
+          </div>
+        </div>
+        <input
+          type="text"
+          className="card-comment-field"
+          placeholder="Share your thoughts about this video..."
+          readOnly
+        />
+      </div>
+
       {lecture.description && (
-        <div className="mt-3 text-left">
-          <p className={`text-white/60 text-[14px] leading-[1.6] transition-all ${descExpanded ? "" : "line-clamp-2"}`}>
+        <div className="description">
+          <p className={`desc-text ${descExpanded ? "" : "line-clamp-2"}`}>
             {lecture.description}
           </p>
-          <button 
-            onClick={() => setDescExpanded((d) => !d)} 
-            className="text-white/80 hover:text-white text-[13px] mt-1 flex items-center gap-1 cursor-pointer transition-colors font-medium"
+          <button
+            onClick={() => setDescExpanded((d) => !d)}
+            className="see-more-btn"
           >
-            {descExpanded ? "See less" : "See more"}
-            {descExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            {descExpanded ? "See less" : "See more ⌄"}
           </button>
         </div>
       )}
 
-      {/* Low-opacity divider above Recommended Lessons */}
-      <div className="border-t border-white/5 mt-4" />
+      <h2 className="section-title">Recommended Lessons ({recommended.length})</h2>
 
-      {/* ---- Section 5: Recommended Lectures ---- */}
-      <div className="text-left">
-        <h2 className="font-semibold text-[14px] mb-3">Recommended Lessons ({recommended.length})</h2>
-        <RecommendedList
-          items={recommended}
-          loading={recommendedLoading}
-          onSelect={handleSelect}
-        />
-      </div>
+      {recommendedLoading ? (
+        <div className="lessons-loading">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="lesson-item animate-pulse">
+              <div className="lesson-thumb bg-white/10" style={{ width: '150px', height: '84px', borderRadius: '8px' }} />
+              <div className="lesson-info">
+                <div className="h-3.5 w-3/4 bg-white/10 rounded mb-2" />
+                <div className="h-3 w-1/2 bg-white/10 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : recommended.length === 0 ? (
+        <p className="text-white/40 text-[13px] font-mono text-left">No recommendations yet.</p>
+      ) : (
+        recommended.map((l) => (
+          <div key={l.id} className="lesson-item" onClick={() => handleSelect(l)}>
+            <div className="lesson-thumb">
+              <img
+                src={l.thumbnail_url || "https://image.qwenlm.ai/public_source/29098559-833f-40c2-bb9e-dac3880909af/1f2a9c4b2-94de-4b5a-880d-f6da9c48a149.png"}
+                alt={l.title}
+              />
+              <div className="play-overlay">
+                <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+              </div>
+              {l.duration && <span className="lesson-duration">{l.duration}</span>}
+            </div>
+            <div className="lesson-info">
+              <div className="lesson-title">{l.title}</div>
+              <div className="lesson-category">
+                {[l.subject, l.exam_type || (l as any).examType].filter(Boolean).join(" • ")}
+              </div>
+              <div className="progress-row">
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${l.progress_pct}%` }} />
+                </div>
+                <span className="progress-percent">{l.progress_pct}%</span>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+
+      <div className="like-popup-container" id="likePopupContainer" />
     </div>
   );
 }
@@ -729,138 +1495,6 @@ function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-function ChannelAvatar({ name, url }: { name: string; url: string | null }) {
-  const [hasError, setHasError] = useState(false);
-  const initials = getInitials(name);
-
-  useEffect(() => {
-    setHasError(false);
-  }, [url]);
-
-  if (!url || hasError) {
-    return (
-      <div className="w-11 h-11 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm shrink-0 select-none overflow-hidden">
-        {initials}
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={url}
-      alt={name}
-      onError={() => {
-        console.error("Avatar failed to load for teacher:", name, "URL:", url);
-        setHasError(true);
-      }}
-      className="w-11 h-11 rounded-full object-cover bg-neutral-800 shrink-0 border border-white/5"
-    />
-  );
-}
-
-function ChannelCard({
-  loading,
-  channel,
-  following,
-  onToggleFollow,
-}: {
-  loading: boolean;
-  channel: Channel | null;
-  following: boolean;
-  onToggleFollow: () => void;
-}) {
-  if (loading) {
-    return (
-      <div className="flex items-center justify-between pt-0 animate-pulse">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-3.5 w-28 bg-white/10 rounded" />
-            <div className="h-3 w-20 bg-white/10 rounded" />
-          </div>
-        </div>
-        <div className="h-9 w-20 bg-white/10 rounded-full" />
-      </div>
-    );
-  }
-
-  if (!channel) return null;
-
-  return (
-    <div className="flex items-center justify-between text-left">
-      <div className="flex items-center gap-3 min-w-0">
-        <ChannelAvatar name={channel.name} url={channel.avatar_url} />
-        <div className="min-w-0">
-          <p className="font-bold text-[16px] text-white truncate flex items-center gap-[4px] leading-none">
-            <span>{channel.name}</span>
-            {channel.verified && (
-              <BadgeCheck size={14} className="text-[#3B82F6] fill-[#3B82F6]/10 shrink-0 align-middle" />
-            )}
-          </p>
-          <p className="text-white/50 text-[13px] mt-[2px] leading-tight">{channel.followers_count.toLocaleString()} subscribers</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-3.5 shrink-0">
-        <TrustRing value={channel.trust_score} />
-        <button
-          onClick={onToggleFollow}
-          className={`px-5 h-9 rounded-full text-[14px] font-semibold cursor-pointer transition-colors ${
-            following 
-              ? "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white" 
-              : "bg-[#3B82F6] hover:bg-[#2563EB] text-white"
-          }`}
-        >
-          {following ? "Following" : "Follow"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function TrustRing({ value }: { value: number }) {
-  const r = 18;
-  const c = 2 * Math.PI * r;
-  const offset = c - (Math.max(0, Math.min(100, value)) / 100) * c;
-  return (
-    <div className="flex flex-col items-center shrink-0 select-none">
-      <div className="relative w-12 h-12 flex items-center justify-center">
-        <svg viewBox="0 0 48 48" className="w-12 h-12 -rotate-90">
-          <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
-          <circle
-            cx="24" cy="24" r={r} fill="none" stroke={TRUST_GREEN} strokeWidth="3"
-            strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
-          />
-        </svg>
-        <span className="absolute text-[13px] font-bold font-mono tracking-tighter leading-none">{value}%</span>
-        {/* White checkmark overlapping badge bottom-right */}
-        <div className="absolute bottom-[1px] right-[1px] w-3.5 h-3.5 bg-white rounded-full border border-neutral-950 flex items-center justify-center shadow-sm z-10">
-          <svg viewBox="0 0 24 24" className="w-2 h-2 text-[#59C749] fill-none stroke-[4]" stroke="currentColor">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-      </div>
-      <span className="text-[11px] text-white/50 font-medium leading-none mt-1">Trust Score</span>
-    </div>
-  );
-}
-// ---------------------------------------------------------------------------
-function ActionPill({
-  icon, label, active, onClick,
-}: { icon: React.ReactNode; label: string; active?: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center justify-center gap-[6px] h-9 px-[14px] rounded-full text-[13px] font-medium whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
-        active 
-          ? "bg-white text-black font-semibold" 
-          : "bg-zinc-950/20 border border-white/10 text-white/80 hover:bg-white/5 hover:text-white"
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-    </button>
-  );
-}
 // Section 3 — Write Review bottom sheet
 // ---------------------------------------------------------------------------
 
