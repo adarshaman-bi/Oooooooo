@@ -632,7 +632,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
         onToggleFollow={requireAuth(toggleFollow)}
       />
       {/* ---- Section 2: Action Bar ---- */}
-      <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar py-1">
+      <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar">
         <ActionPill icon={<ThumbsUp size={15} />} label="Like" active={liked} onClick={requireAuth(toggleLiked)} />
         <ActionPill icon={<Bookmark size={15} />} label="Save" active={saved} onClick={requireAuth(toggleSaved)} />
         <ActionPill icon={<ListPlus size={15} />} label="Add to playlist" onClick={() => flashToast("Added to Playlist")} />
@@ -704,7 +704,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       <div className="border-t border-white/5 mt-4" />
 
       {/* ---- Section 5: Recommended Lectures ---- */}
-      <div className="mt-3 text-left">
+      <div className="text-left">
         <h2 className="font-semibold text-[14px] mb-3">Recommended Lessons ({recommended.length})</h2>
         <RecommendedList
           items={recommended}
@@ -771,7 +771,7 @@ function ChannelCard({
 }) {
   if (loading) {
     return (
-      <div className="flex items-center justify-between pt-4 animate-pulse">
+      <div className="flex items-center justify-between pt-0 animate-pulse">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-white/10" />
           <div className="space-y-2">
@@ -787,7 +787,7 @@ function ChannelCard({
   if (!channel) return null;
 
   return (
-    <div className="flex items-center justify-between py-2 text-left mt-[14px]">
+    <div className="flex items-center justify-between text-left">
       <div className="flex items-center gap-3 min-w-0">
         <ChannelAvatar name={channel.name} url={channel.avatar_url} />
         <div className="min-w-0">
