@@ -45,6 +45,19 @@ This file is the single self-contained source-of-truth document for the **BIOVIS
 
 ## 3. Changelog (Reverse-Chronological)
 
+### July 14, 2026
+- **Tool**: Antigravity
+- **Files Touched**:
+  - [src/components/LectureDetailsSection.tsx](file:///c:/onion.so/src/components/LectureDetailsSection.tsx)
+  - [walkthrough.md](file:///c:/onion.so/walkthrough.md)
+- **Change**: Replaced the Watch Details UI layout with the custom mockup design:
+  1. Full teardown and rewrite of the title block, metadata, channel row, action pills, description, and recommended list.
+  2. Applied a 30% scale-down (`0.3x` reduction) to the inline Ratings & Reviews card (smaller padding, margins, text sizes, and icon widths).
+  3. Integrated interactive heart sprays (emojis floating up from click coordinates) and action button scale pop animations.
+  4. Dynamically bound all custom mockup elements to the Supabase hooks, queries, and event handlers.
+  5. Cleaned up dead helper sub-components from the file.
+- **Why**: Bring the watch details layout to verbatim mockup alignment, adding tactile micro-interactions and animations.
+
 ### July 13, 2026
 - **Tool**: Antigravity (Ponytail style)
 - **Files Touched**:
