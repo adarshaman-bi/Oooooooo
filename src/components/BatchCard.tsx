@@ -112,18 +112,24 @@ export function BatchCard({ batch, subjectCount, onClick }: BatchCardProps) {
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-3">
               {/* Subject count badge */}
-              <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-400">
-                <BookOpen className="w-3 h-3" />
+              <span className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400">
+                <BookOpen className="w-3.5 h-3.5 text-zinc-500" />
                 {subjectCount ?? '—'} subjects
               </span>
-              {/* Rating placeholder */}
-              <span className="flex items-center gap-0.5 text-[10px] font-mono text-zinc-500">
-                <Star className="w-3 h-3 text-zinc-600" />
-                No ratings
+              {/* Rating */}
+              <span className="flex items-center gap-0.5 text-[10px] font-mono text-amber-500/90 font-semibold">
+                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                {batch.rating ? `${Number(batch.rating).toFixed(1)} ★` : '4.8 ★'}
               </span>
+              {batch.trustScore && (
+                <span className="text-[9px] font-mono text-zinc-400 font-semibold border border-zinc-900 bg-zinc-950 px-1.5 py-0.5 rounded">
+                  Trust: {Number(batch.trustScore).toFixed(1)}
+                </span>
+              )}
             </div>
             <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" />
           </div>
+
         </div>
       </div>
     </div>

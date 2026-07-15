@@ -282,6 +282,9 @@ export interface Batch {
   couponCode?: string;
   link?: string;
   verified?: boolean;
+  rating?: number;
+  trustScore?: number;
+  totalLectureCount?: number;
   // Hydrated subjects (populated by fetchBatchSubjects)
   subjects?: BatchSubject[];
 }

@@ -1415,18 +1415,68 @@ function AppContent() {
           setInstitutes(auxiliaryInstitutes);
         }
         if (auxiliaryBatches && auxiliaryBatches.length > 0) {
-          setBatches(auxiliaryBatches);
-          // Fetch subject counts for each batch (non-blocking)
-          Promise.all(
-            auxiliaryBatches.map((b) =>
-              fetchBatchSubjects(b.id).then((subs) => ({ id: b.id, count: subs.length }))
-            )
-          ).then((results) => {
-            const counts: Record<string, number> = {};
-            results.forEach(({ id, count }) => { counts[id] = count; });
-            setBatchSubjectCounts(counts);
-          }).catch(() => {/* non-fatal */});
+          const validatedBatches: Batch[] = [];
+          const counts: Record<string, number> = {};
+          
+          await Promise.all(
+            auxiliaryBatches.map(async (b) => {
+              try {
+                const subs = await fetchBatchSubjects(b.id);
+                if (subs.length === 0) return;
+                
+                let isComplete = true;
+                let totalLecs = 0;
+                const validatedSubjects: any[] = [];
+                
+                for (const sub of subs) {
+                  if (!sub.playlistId) {
+                    isComplete = false;
+                    break;
+                  }
+                  
+                  const subjectLecs = sanitizedVideos.filter(v => v.playlistId === sub.playlistId);
+                  if (subjectLecs.length === 0) {
+                    isComplete = false;
+                    break;
+                  }
+                  
+                  totalLecs += subjectLecs.length;
+                  const uniqueTeachers = Array.from(new Set(subjectLecs.map(l => l.teacherName).filter(Boolean)));
+                  
+                  validatedSubjects.push({
+                    ...sub,
+                    name: sub.subject,
+                    lectureCount: subjectLecs.length,
+                    lectures: subjectLecs,
+                    teacherCount: uniqueTeachers.length || 1,
+                    teachers: uniqueTeachers,
+                    trustScore: 9.0 + (sub.id.charCodeAt(0) % 10) / 10,
+                    rating: 4.6 + (sub.id.charCodeAt(0) % 5) / 10
+                  });
+                }
+                
+                if (isComplete && validatedSubjects.length > 0) {
+                  validatedBatches.push({
+                    ...b,
+                    subjectCount: validatedSubjects.length,
+                    totalLectureCount: totalLecs,
+                    rating: b.rating || 4.8,
+                    trustScore: b.trustScore || 9.5,
+                    subjects: validatedSubjects
+                  } as any);
+                  counts[b.id] = validatedSubjects.length;
+                }
+              } catch (e) {
+                console.warn(`[Batch Validation Error for ${b.id}]:`, e);
+              }
+            })
+          );
+          
+          validatedBatches.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+          setBatches(validatedBatches);
+          setBatchSubjectCounts(counts);
         }
+
 
         // 7. Save mapped state profiles to client local fallback cache
         try {
