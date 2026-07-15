@@ -10,7 +10,8 @@ export const SWR_KEYS = {
 export const swrOptions = {
   dedupingInterval: 5 * 60 * 1000, // 5 minutes cache TTL
   revalidateOnFocus: false, // Prevent background refetch on tab focus to maintain a stable/flicker-free UI
-  revalidateOnReconnect: true,
+  revalidateOnReconnect: false, // Prevent reconnect refetches from flashing skeleton loaders
+  keepPreviousData: true, // Keep returning cached data during background revalidations instead of setting to undefined
   shouldRetryOnError: false
 };
 

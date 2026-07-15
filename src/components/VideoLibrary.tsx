@@ -41,6 +41,7 @@ import { handleRowKeyDown } from './HorizontalRow';
 interface VideoLibraryProps {
   onBackToHome: () => void;
   onSelectChannel?: (id: string, type: 'teacher' | 'institute') => void;
+  isActive?: boolean;
 }
 
 interface WatchHistoryItem {
@@ -56,7 +57,84 @@ interface WatchHistoryItem {
   subject: string;
 }
 
-export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLibraryProps) {
+function VideoLibrarySkeleton() {
+  return (
+    <div className="space-y-10 text-left animate-pulse">
+      {/* 1. SUBJECT STREAM TABS CONTROLLER SKELETON */}
+      <div className="h-[48px] flex items-center">
+        <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none border-b border-[#18181B] w-full">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="w-20 h-7 bg-neutral-900 border border-neutral-800 rounded-full shrink-0"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 2. FEATURED CURATED PLAYLISTS CAROUSEL SKELETON */}
+      <div className="space-y-4">
+        <div>
+          <div className="h-2.5 bg-neutral-800 rounded w-24 mb-2" />
+          <div className="h-5 bg-neutral-800 rounded w-48" />
+        </div>
+        <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="w-[280px] shrink-0 flex flex-col gap-3">
+              <div className="relative aspect-video bg-neutral-900 rounded-xl overflow-hidden" />
+              <div className="space-y-2">
+                <div className="h-3 bg-neutral-850 rounded w-16" />
+                <div className="h-3 bg-neutral-850 rounded w-5/6" />
+                <div className="h-2.5 bg-neutral-900 rounded w-2/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. CONTINUE WATCHING PROGRESS ROW SKELETON */}
+      <div className="space-y-4">
+        <div>
+          <div className="h-2.5 bg-neutral-800 rounded w-28 mb-2" />
+          <div className="h-5 bg-neutral-800 rounded w-48" />
+        </div>
+        <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="w-[280px] shrink-0 flex flex-col gap-3">
+              <div className="relative aspect-video bg-neutral-900 rounded-xl overflow-hidden" />
+              <div className="space-y-2">
+                <div className="h-3 bg-neutral-850 rounded w-16" />
+                <div className="h-3 bg-neutral-850 rounded w-5/6" />
+                <div className="h-2.5 bg-neutral-900 rounded w-2/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. NEW THIS WEEK IMPORTED VIDEOS ROW SKELETON */}
+      <div className="space-y-4">
+        <div>
+          <div className="h-2.5 bg-neutral-800 rounded w-24 mb-2" />
+          <div className="h-5 bg-neutral-800 rounded w-40" />
+        </div>
+        <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-none">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="w-[280px] shrink-0 flex flex-col gap-3">
+              <div className="relative aspect-video bg-neutral-900 rounded-xl overflow-hidden" />
+              <div className="space-y-2">
+                <div className="h-3 bg-neutral-850 rounded w-5/6" />
+                <div className="h-2.5 bg-neutral-900 rounded w-2/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive = true }: VideoLibraryProps) {
   const { user } = useAuth();
 
   // Active view states
@@ -71,6 +149,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
   
   // Statuses
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
+  const [isLoadingVideos, setIsLoadingVideos] = useState(true);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
 
   // Home Subjects tab
@@ -103,6 +182,20 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
   const ytPlayerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Pause off-screen video player if tab is inactive
+  useEffect(() => {
+    if (!isActive && isPlaying) {
+      setIsPlaying(false);
+      if (ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === 'function') {
+        try {
+          ytPlayerRef.current.pauseVideo();
+        } catch (e) {
+          console.warn("Failed to pause off-screen YouTube player:", e);
+        }
+      }
+    }
+  }, [isActive, isPlaying]);
 
   // SWR Caching Layer
   const { data: chanData, isLoading: channelsLoading } = useSWR(SWR_KEYS.CHANNELS, fetchActiveChannels, swrOptions);
@@ -177,8 +270,8 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
 
   // Sync isLoadingFeed based on SWR status
   useEffect(() => {
-    setIsLoadingFeed(channelsLoading || playlistsLoading);
-  }, [channelsLoading, playlistsLoading]);
+    setIsLoadingFeed(channelsLoading || playlistsLoading || isLoadingVideos);
+  }, [channelsLoading, playlistsLoading, isLoadingVideos]);
 
   useEffect(() => {
     if (playlists.length > 0) {
@@ -375,6 +468,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
 
   // Loading latest videos list for secondary categories
   useEffect(() => {
+    setIsLoadingVideos(true);
     supabase.from('videos').select('*').order('publish_date', { ascending: false }).limit(15).then(({ data, error }) => {
       if (error) {
         console.warn(error);
@@ -382,6 +476,10 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
         const vids = (data || []).map(mapVideoRow);
         setVideosState(vids);
       }
+      setIsLoadingVideos(false);
+    }).catch(err => {
+      console.warn("Failed fetching recent videos:", err);
+      setIsLoadingVideos(false);
     });
   }, []);
 
@@ -938,220 +1036,228 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
         )}
 
         {!isSearchActive && !selectedPlaylist && !selectedVideo && !selectedChannel && (
-          <div className="space-y-10 text-left">
-            
-            {/* SUBJECT STREAM TABS CONTROLLER */}
-            <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none border-b border-[#18181B]">
-              {(SUBJECT_TABS || []).map((sub) => (
-                <button
-                  key={sub}
-                  onClick={() => setSelectedSubject(sub)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-200 shrink-0 ${
-                    selectedSubject === sub
-                      ? 'bg-[#EEEEEE] text-black font-extrabold shadow shadow-white/5'
-                      : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  {sub}
-                </button>
-              ))}
-            </div>
-
-            {/* A. FEATURED CURATED PLAYLISTS CAROUSEL */}
-            <div className="space-y-4">
-              <div>
-                <span className="text-[9px] font-mono text-[#EEEEEE] tracking-widest font-extrabold uppercase block">CURATED CURRICULA</span>
-                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">Featured Chapters</h3>
-              </div>
-
-              {(filteredFeaturedPlaylists || []).length === 0 ? (
-                <div className="text-center py-10 rounded-xl bg-neutral-900/40 border border-neutral-910">
-                  <p className="text-xs text-zinc-550 font-mono">No chapter playlists synced for the {selectedSubject} subject yet.</p>
-                </div>
-              ) : (
-                <div 
-                  tabIndex={0}
-                  onKeyDown={handleRowKeyDown}
-                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
-                >
-                  {(filteredFeaturedPlaylists || []).map((play) => (
-                    <div
-                      key={play.id}
-                      onClick={() => setSelectedPlaylist(play)}
-                      className="w-[280px] shrink-0 snap-start bg-transparent rounded-xl overflow-hidden cursor-pointer flex flex-col group text-left"
+          isLoadingFeed ? (
+            <VideoLibrarySkeleton />
+          ) : (
+            <div className="space-y-10 text-left">
+              
+              {/* SUBJECT STREAM TABS CONTROLLER */}
+              <div className="h-[48px] flex items-center">
+                <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none border-b border-[#18181B] w-full">
+                  {(SUBJECT_TABS || []).map((sub) => (
+                    <button
+                      key={sub}
+                      onClick={() => setSelectedSubject(sub)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-200 shrink-0 ${
+                        selectedSubject === sub
+                          ? 'bg-[#EEEEEE] text-black font-extrabold shadow shadow-white/5'
+                          : 'bg-neutral-900 border border-neutral-800 text-zinc-400 hover:text-white'
+                      }`}
                     >
-                      <motion.div
-                        whileHover={{ scale: 1.04 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="relative aspect-video bg-neutral-950 overflow-hidden rounded-xl"
-                      >
-                        <img
-                          src={getPlaylistThumbnail(play)}
-                          alt={play.title}
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute right-2 bottom-2 bg-black/85 border border-zinc-850 text-[9.5px] px-2 py-0.5 rounded font-mono font-bold text-zinc-300 z-10">
-                          {play.lecturesCount || 0} Lectures
-                        </div>
-                      </motion.div>
-                      <div className="pt-3 pb-1 flex-1 flex flex-col justify-between items-start space-y-1">
-                        <div className="space-y-1 w-full">
-                          <span className="text-[9.5px] text-[#A0A0A0] font-mono uppercase bg-zinc-900/60 px-1.5 py-0.5 rounded font-bold inline-block">{play.subject}</span>
-                          <h4 className="text-xs font-bold text-white line-clamp-2 w-full uppercase leading-tight mt-1">{play.title}</h4>
-                        </div>
-                        <p
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (play.channelId) {
-                              onSelectChannel?.(play.channelId, 'institute');
-                            } else if (play.teacherId) {
-                              onSelectChannel?.(play.teacherId, 'teacher');
-                            }
-                          }}
-                          className="text-[10px] text-zinc-550 font-sans truncate w-full leading-none hover:text-[#f3b093] hover:underline cursor-pointer"
-                        >
-                          {play.channelName || play.teacherName || 'BIOVISED Educator'}
-                        </p>
-                      </div>
-                    </div>
+                      {sub}
+                    </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* B. CONTINUE WATCHING PROGRESS ROW (SAVED STATE HISTORY) */}
-            {(watchHistory || []).length > 0 && (
+              {/* A. FEATURED CURATED PLAYLISTS CAROUSEL */}
               <div className="space-y-4">
                 <div>
-                  <span className="text-[9px] font-mono text-[#EEEEEE] tracking-widest font-extrabold uppercase block">RESUME LEARNING</span>
-                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">Continue Watching</h3>
+                  <span className="text-[9px] font-mono text-[#EEEEEE] tracking-widest font-extrabold uppercase block">CURATED CURRICULA</span>
+                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">Featured Chapters</h3>
                 </div>
 
-                <div 
-                  tabIndex={0}
-                  onKeyDown={handleRowKeyDown}
-                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
-                >
-                  {(watchHistory || []).slice(0, 10).map((item) => {
-                    const progressPercent = Math.max(3, Math.min(100, Math.floor((item.progressSeconds / item.durationSeconds) * 100)));
-                    return (
+                {(filteredFeaturedPlaylists || []).length === 0 ? (
+                  <div className="text-center py-10 rounded-xl bg-neutral-900/40 border border-neutral-910">
+                    <p className="text-xs text-zinc-550 font-mono">No chapter playlists synced for the {selectedSubject} subject yet.</p>
+                  </div>
+                ) : (
+                  <div 
+                    tabIndex={0}
+                    onKeyDown={handleRowKeyDown}
+                    className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                  >
+                    {(filteredFeaturedPlaylists || []).map((play, idx) => (
                       <div
-                        key={item.videoId}
+                        key={play.id}
+                        onClick={() => setSelectedPlaylist(play)}
+                        className="w-[280px] shrink-0 snap-start bg-transparent rounded-xl overflow-hidden cursor-pointer flex flex-col group text-left"
+                      >
+                        <motion.div
+                          whileHover={{ scale: 1.04 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                          className="relative aspect-video bg-neutral-955 overflow-hidden rounded-xl"
+                        >
+                          <SafeImage
+                            src={getPlaylistThumbnail(play)}
+                            alt={play.title}
+                            variant="thumbnail"
+                            imageClassName="object-cover"
+                            priority={idx < 3}
+                          />
+                          <div className="absolute right-2 bottom-2 bg-black/85 border border-zinc-850 text-[9.5px] px-2 py-0.5 rounded font-mono font-bold text-zinc-300 z-10">
+                            {play.lecturesCount || 0} Lectures
+                          </div>
+                        </motion.div>
+                        <div className="pt-3 pb-1 flex-1 flex flex-col justify-between items-start space-y-1">
+                          <div className="space-y-1 w-full">
+                            <span className="text-[9.5px] text-[#A0A0A0] font-mono uppercase bg-zinc-900/60 px-1.5 py-0.5 rounded font-bold inline-block">{play.subject}</span>
+                            <h4 className="text-xs font-bold text-white line-clamp-2 w-full uppercase leading-tight mt-1">{play.title}</h4>
+                          </div>
+                          <p
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (play.channelId) {
+                                onSelectChannel?.(play.channelId, 'institute');
+                              } else if (play.teacherId) {
+                                onSelectChannel?.(play.teacherId, 'teacher');
+                              }
+                            }}
+                            className="text-[10px] text-zinc-550 font-sans truncate w-full leading-none hover:text-[#f3b093] hover:underline cursor-pointer"
+                          >
+                            {play.channelName || play.teacherName || 'BIOVISED Educator'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* B. CONTINUE WATCHING PROGRESS ROW (SAVED STATE HISTORY) */}
+              {(watchHistory || []).length > 0 && (
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-[9px] font-mono text-[#EEEEEE] tracking-widest font-extrabold uppercase block">RESUME LEARNING</span>
+                    <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">Continue Watching</h3>
+                  </div>
+
+                  <div 
+                    tabIndex={0}
+                    onKeyDown={handleRowKeyDown}
+                    className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                  >
+                    {(watchHistory || []).slice(0, 10).map((item, idx) => {
+                      const progressPercent = Math.max(3, Math.min(100, Math.floor((item.progressSeconds / item.durationSeconds) * 100)));
+                      return (
+                        <div
+                          key={item.videoId}
+                          onClick={() => {
+                            const matchedPlay = (playlists || []).find(p => p.id === item.playlistId);
+                            if (matchedPlay) setSelectedPlaylist(matchedPlay);
+                            
+                            const partialVideo: YouTubeVideo = {
+                              id: item.videoId,
+                              videoId: item.videoId,
+                              title: item.title,
+                              channelName: item.channelName,
+                              thumbnail: item.thumbnail,
+                              playlistId: item.playlistId,
+                              subject: item.subject,
+                              durationSeconds: item.durationSeconds,
+                              duration: `${Math.floor(item.durationSeconds / 60)}m`,
+                              channelId: '',
+                              description: '',
+                              publishedAt: '',
+                              viewCount: 0,
+                              likeCount: 0,
+                              position: 1,
+                              topic: '',
+                              examTags: [],
+                              isActive: true,
+                              importedAt: ''
+                            };
+                            setSelectedVideo(partialVideo);
+                          }}
+                          className="w-[280px] shrink-0 snap-start bg-transparent rounded-xl overflow-hidden cursor-pointer flex flex-col group text-left"
+                        >
+                          <motion.div
+                            whileHover={{ scale: 1.04 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                            className="relative aspect-video rounded-xl overflow-hidden bg-neutral-900 shadow"
+                          >
+                            <YoutubeThumbnailImg
+                              videoId={item.videoId}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              loading={idx < 3 ? "eager" : "lazy"}
+                            />
+                            <div className="absolute bottom-0 left-0 w-full h-1 bg-neutral-800 z-10">
+                              <div className="h-full bg-white" style={{ width: `${progressPercent}%` }} />
+                            </div>
+                          </motion.div>
+                          <div className="pt-3 pb-1 min-w-0 space-y-1 text-left">
+                            <span className="text-[9.5px] font-mono text-[#A0A0A0] uppercase block font-semibold">{item.subject}</span>
+                            <h4 className="text-xs font-bold text-white leading-tight line-clamp-2 uppercase">{item.title}</h4>
+                            <div className="flex justify-between items-center text-[10px] text-zinc-500 font-mono mt-1">
+                              <span>{item.channelName}</span>
+                              <span className="text-[9px] text-[#EEEEEE] font-extrabold">{progressPercent}% done</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* C. NEW THIS WEEK IMPORTED VIDEOS ROW */}
+              <div className="space-y-4">
+                <div>
+                  <span className="text-[9px] font-mono text-[#EEEEEE] tracking-widest font-extrabold uppercase block">FRESH CLASSES</span>
+                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">New This Week</h3>
+                </div>
+
+                {(recentWeekVideos || []).length === 0 ? (
+                  <div className="text-center py-8 rounded-xl border border-neutral-900 bg-neutral-955/20">
+                    <p className="text-xs text-zinc-650 font-mono uppercase tracking-wider">No new classes imported in past 7 days. Sync channels via Content Manager.</p>
+                  </div>
+                ) : (
+                  <div 
+                    tabIndex={0}
+                    onKeyDown={handleRowKeyDown}
+                    className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+                  >
+                    {(recentWeekVideos || []).slice(0, 10).map((vid, idx) => (
+                      <div
+                        key={vid.videoId}
                         onClick={() => {
-                          const matchedPlay = (playlists || []).find(p => p.id === item.playlistId);
+                          const matchedPlay = (playlists || []).find(p => p.id === vid.playlistId);
                           if (matchedPlay) setSelectedPlaylist(matchedPlay);
-                          
-                          const partialVideo: YouTubeVideo = {
-                            id: item.videoId,
-                            videoId: item.videoId,
-                            title: item.title,
-                            channelName: item.channelName,
-                            thumbnail: item.thumbnail,
-                            playlistId: item.playlistId,
-                            subject: item.subject,
-                            durationSeconds: item.durationSeconds,
-                            duration: `${Math.floor(item.durationSeconds / 60)}m`,
-                            channelId: '',
-                            description: '',
-                            publishedAt: '',
-                            viewCount: 0,
-                            likeCount: 0,
-                            position: 1,
-                            topic: '',
-                            examTags: [],
-                            isActive: true,
-                            importedAt: ''
-                          };
-                          setSelectedVideo(partialVideo);
+                          setSelectedVideo(vid);
                         }}
                         className="w-[280px] shrink-0 snap-start bg-transparent rounded-xl overflow-hidden cursor-pointer flex flex-col group text-left"
                       >
                         <motion.div
                           whileHover={{ scale: 1.04 }}
                           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                          className="relative aspect-video rounded-xl overflow-hidden bg-neutral-900 shadow"
+                          className="relative aspect-video bg-neutral-955 overflow-hidden shadow rounded-xl"
                         >
                           <YoutubeThumbnailImg
-                            videoId={item.videoId}
-                            alt={item.title}
+                            videoId={vid.videoId}
+                            alt={vid.title}
                             className="w-full h-full object-cover"
+                            loading={idx < 3 ? "eager" : "lazy"}
                           />
-                          <div className="absolute bottom-0 left-0 w-full h-1 bg-neutral-800 z-10">
-                            <div className="h-full bg-white" style={{ width: `${progressPercent}%` }} />
+                          <div className="absolute top-2 left-2 bg-white text-black text-[8px] font-mono font-black uppercase px-2 py-0.5 rounded tracking-wider shadow z-10">
+                            NEW
+                          </div>
+                          <div className="absolute right-2 bottom-2 px-1.5 py-0.5 bg-black/80 border border-neutral-800 text-[10px] font-mono font-bold text-zinc-350 z-10">
+                            {vid.duration || 'Class'}
                           </div>
                         </motion.div>
-                        <div className="pt-3 pb-1 min-w-0 space-y-1 text-left">
-                          <span className="text-[9.5px] font-mono text-[#A0A0A0] uppercase block font-semibold">{item.subject}</span>
-                          <h4 className="text-xs font-bold text-white leading-tight line-clamp-2 uppercase">{item.title}</h4>
-                          <div className="flex justify-between items-center text-[10px] text-zinc-500 font-mono mt-1">
-                            <span>{item.channelName}</span>
-                            <span className="text-[9px] text-[#EEEEEE] font-extrabold">{progressPercent}% done</span>
+                        <div className="pt-3 pb-1 flex flex-col justify-between items-start space-y-1.5">
+                          <h4 className="text-xs font-extrabold text-white line-clamp-2 uppercase leading-tight font-sans">{vid.title}</h4>
+                          <div className="flex justify-between items-center w-full text-[10px] text-zinc-500 font-mono pt-1">
+                            <span className="truncate max-w-[130px]">{vid.channelName}</span>
+                            <span className="text-[#A0A0A0] font-extrabold uppercase text-[9px]">{vid.subject}</span>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* C. NEW THIS WEEK IMPORTED VIDEOS ROW */}
-            <div className="space-y-4">
-              <div>
-                <span className="text-[9px] font-mono text-[#EEEEEE] tracking-widest font-extrabold uppercase block">FRESH CLASSES</span>
-                <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display uppercase">New This Week</h3>
-              </div>
-
-              {(recentWeekVideos || []).length === 0 ? (
-                <div className="text-center py-8 rounded-xl border border-neutral-900 bg-neutral-955/20">
-                  <p className="text-xs text-zinc-650 font-mono uppercase tracking-wider">No new classes imported in past 7 days. Sync channels via Content Manager.</p>
-                </div>
-              ) : (
-                <div 
-                  tabIndex={0}
-                  onKeyDown={handleRowKeyDown}
-                  className="flex gap-5 overflow-x-auto pb-4 scrollbar-none snap-x scroll-smooth outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
-                >
-                  {(recentWeekVideos || []).slice(0, 10).map((vid) => (
-                    <div
-                      key={vid.videoId}
-                      onClick={() => {
-                        const matchedPlay = (playlists || []).find(p => p.id === vid.playlistId);
-                        if (matchedPlay) setSelectedPlaylist(matchedPlay);
-                        setSelectedVideo(vid);
-                      }}
-                      className="w-[280px] shrink-0 snap-start bg-transparent rounded-xl overflow-hidden cursor-pointer flex flex-col group text-left"
-                    >
-                      <motion.div
-                        whileHover={{ scale: 1.04 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="relative aspect-video bg-neutral-955 overflow-hidden shadow rounded-xl"
-                      >
-                        <YoutubeThumbnailImg
-                          videoId={vid.videoId}
-                          alt={vid.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-2 left-2 bg-white text-black text-[8px] font-mono font-black uppercase px-2 py-0.5 rounded tracking-wider shadow z-10">
-                          NEW
-                        </div>
-                        <div className="absolute right-2 bottom-2 px-1.5 py-0.5 bg-black/80 border border-neutral-800 text-[10px] font-mono font-bold text-zinc-350 z-10">
-                          {vid.duration || 'Class'}
-                        </div>
-                      </motion.div>
-                      <div className="pt-3 pb-1 flex flex-col justify-between items-start space-y-1.5">
-                        <h4 className="text-xs font-extrabold text-white line-clamp-2 uppercase leading-tight font-sans">{vid.title}</h4>
-                        <div className="flex justify-between items-center w-full text-[10px] text-zinc-500 font-mono pt-1">
-                          <span className="truncate max-w-[130px]">{vid.channelName}</span>
-                          <span className="text-[#A0A0A0] font-extrabold uppercase text-[9px]">{vid.subject}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* D. TOP RECOGNIZED ACCREDITED CHANNELS ROW */}
             <div className="space-y-4">
@@ -1200,9 +1306,9 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
                 </div>
               )}
             </div>
-
           </div>
-        )}
+        )
+      )}
 
         {/* ==========================================
             PLAYLIST LAYOUT DETAILS PAGE
@@ -1216,11 +1322,12 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel }: VideoLib
             {/* Playlist Header card */}
             <div className="p-6 rounded-2xl bg-[#09090A] border border-neutral-910 flex flex-col md:flex-row gap-6 items-start md:items-center">
               <div className="w-full md:w-56 aspect-video bg-neutral-950 rounded-xl overflow-hidden shrink-0 border border-neutral-800 shadow">
-                <img
+                <SafeImage
                   src={getPlaylistThumbnail(selectedPlaylist)}
                   alt={selectedPlaylist.title}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
+                  variant="thumbnail"
+                  imageClassName="object-cover"
+                  priority={true}
                 />
               </div>
               <div className="flex-1 space-y-3.5 text-left">

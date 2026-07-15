@@ -1,4 +1,4 @@
-import { Home, Users, PlaySquare, ClipboardCheck, Layers, Video, Building2 } from 'lucide-react';
+import { Home, Users, PlaySquare, ClipboardCheck, GraduationCap, Video, Building2 } from 'lucide-react';
 
 interface FooterProps {
   currentView: string;
@@ -16,10 +16,11 @@ export default function Footer({
     { id: 'teachers', label: 'Teachers', icon: Users },
     { id: 'playlists', label: 'Playlist', icon: PlaySquare },
     { id: 'tests', label: 'Tests', icon: ClipboardCheck },
-    { id: 'batches', label: 'One Shot', icon: Layers },
+    { id: 'batches', label: 'Batches', icon: GraduationCap },
     { id: 'lecture', label: 'Lecture', icon: Video },
     { id: 'institutes', label: 'Institutes', icon: Building2 }
   ] as const;
+
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0D0D0C]/98 border-t border-[#1A1A1A] shadow-2xl h-[64px] xs:h-[76px] px-1 xs:px-4 md:px-8 flex justify-around items-center backdrop-blur-md select-none font-sans">

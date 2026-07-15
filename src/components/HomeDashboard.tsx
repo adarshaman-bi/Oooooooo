@@ -105,6 +105,8 @@ export default function HomeDashboard({
   const [institutes, setInstitutes] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
 
+  const [isLoadingAux, setIsLoadingAux] = useState(true);
+
   useEffect(() => {
     const loadAuxiliaryData = async () => {
       try {
@@ -114,10 +116,17 @@ export default function HomeDashboard({
         if (cachedInst) setInstitutes(JSON.parse(cachedInst));
         if (cachedBatches) setBatches(JSON.parse(cachedBatches));
 
-        if (!cachedInst || JSON.parse(cachedInst).length === 0) {
-          const { data } = await supabase.from('institutes').select('*').order('name');
-          if (data && data.length > 0) {
-            const mapped = data.map(inst => ({
+        const needsInst = !cachedInst || JSON.parse(cachedInst).length === 0;
+        const needsBatches = !cachedBatches || JSON.parse(cachedBatches).length === 0;
+
+        if (needsInst || needsBatches) {
+          const [instRes, batchesRes] = await Promise.all([
+            needsInst ? supabase.from('institutes').select('*').order('name') : Promise.resolve({ data: null }),
+            needsBatches ? supabase.from('batches').select('*') : Promise.resolve({ data: null })
+          ]);
+
+          if (instRes.data && instRes.data.length > 0) {
+            const mapped = instRes.data.map((inst: any) => ({
               id: inst.id,
               name: inst.name,
               logo: inst.logo || '',
@@ -133,16 +142,15 @@ export default function HomeDashboard({
             }));
             setInstitutes(mapped);
           }
-        }
 
-        if (!cachedBatches || JSON.parse(cachedBatches).length === 0) {
-          const { data } = await supabase.from('batches').select('*');
-          if (data && data.length > 0) {
-            setBatches(data);
+          if (batchesRes.data && batchesRes.data.length > 0) {
+            setBatches(batchesRes.data);
           }
         }
       } catch (e) {
         console.warn('Error loading auxiliary home data:', e);
+      } finally {
+        setIsLoadingAux(false);
       }
     };
     loadAuxiliaryData();
@@ -154,7 +162,7 @@ export default function HomeDashboard({
   const { data: rawVideoData, isLoading: videosLoading } = useSWR(SWR_KEYS.VIDEOS, fetchActiveVideos, swrOptions);
   const { data: dbTeachers } = useSWR(SWR_KEYS.TEACHERS, fetchActiveTeachers, swrOptions);
 
-  const loading = channelsLoading || playlistsLoading || videosLoading;
+  const loading = channelsLoading || playlistsLoading || videosLoading || isLoadingAux;
   const hasCache = playlists.length > 0 && channels.length > 0;
   const showSkeleton = loading && !hasCache;
 

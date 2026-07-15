@@ -16,6 +16,7 @@ import {
 import { TeacherProfile, InstituteProfile, Review, EntityTrustScoreBreakdown as TrustScoreBreakdown, Lecture, Playlist, Batch } from '../types';
 import { getLectureThumbnail, getPlaylistThumbnail } from '../services/thumbnailHelper';
 import ChannelProfile from './ChannelProfile';
+import BatchDetail from './BatchDetail';
 import {
   fetchReviews,
   submitReview,
@@ -23,7 +24,8 @@ import {
   submitReport,
   fetchLectures,
   fetchPlaylists,
-  fetchBatches
+  fetchBatches,
+  fetchBatchById
 } from '../services/dbService';
 
 interface DetailsModalProps {
@@ -150,20 +152,10 @@ export default function DetailsModal({
         } else if (targetType === 'batch') {
           const b = await dbService.fetchBatchById(targetId);
           if (!b) {
-            setErrorMsg('Batch cohort program details not found.');
+            setErrorMsg('Batch not found.');
             setIsLoading(false);
             return;
           }
-          setProfile({
-            id: b.id,
-            name: b.name,
-            description: b.description || 'Comprehensive class batch curated with study guides.',
-            isVerified: b.verified !== false,
-            officialLinks: [],
-            rating: 4.8,
-            reviewCount: 0
-          });
-
           setBatches([b]);
         }
         setIsLoading(false);
@@ -270,23 +262,25 @@ export default function DetailsModal({
         <div className="w-full max-w-5xl h-[85vh] bg-brand-dark border border-brand-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
           
           {/* Modal Top Header container */}
-          <div className="p-4 border-b border-brand-border bg-brand-black flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-wider bg-white/10 text-brand-accent px-2 py-0.5 rounded font-mono">
-                {targetType} Verification Detail
-              </span>
-              <ShieldCheck className="w-5 h-5 text-white" />
+          {targetType !== 'batch' && (
+            <div className="p-4 border-b border-brand-border bg-brand-black flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase tracking-wider bg-white/10 text-brand-accent px-2 py-0.5 rounded font-mono">
+                  {targetType} Verification Detail
+                </span>
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1 text-brand-gray hover:text-brand-accent transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 text-brand-gray hover:text-brand-accent transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+          )}
 
           {/* Primary split scroll layout */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+          <div className={targetType === 'batch' ? "flex-1 overflow-hidden" : "flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8"}>
             
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 space-y-4">
@@ -349,56 +343,24 @@ export default function DetailsModal({
                 </div>
               </div>
             ) : targetType === 'batch' ? (
-              <div className="space-y-6 max-w-3xl mx-auto">
-                {batches.map((b) => (
-                  <div key={b.id} className="p-6 bg-[#0A0A0A] border border-[#1F1F1F] rounded-2xl space-y-4 text-left">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <span className="text-[9px] font-mono uppercase bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full">
-                          {b.examType} BATCH COHORT
-                        </span>
-                        <h2 className="text-xl font-display font-medium text-brand-accent mt-2">{b.name}</h2>
-                      </div>
-                      {b.price && (
-                        <div className="text-right">
-                          <span className="text-xs text-zinc-500 line-through block">₹{b.price * 1.2}</span>
-                          <span className="text-xl font-bold font-mono text-white">₹{b.price}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-brand-gray leading-relaxed">{b.description || 'Comprehensive learning path including lectures, mock papers and structured mentorship.'}</p>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 border-t border-b border-brand-border/45 font-mono text-xs">
-                      <div>
-                        <span className="text-zinc-500 block">SUBJECT EXPERTISE</span>
-                        <span className="text-white font-medium">{b.subject}</span>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500 block">LAUNCH DATE</span>
-                        <span className="text-white font-medium">{b.startDate}</span>
-                      </div>
-                      {b.couponCode && (
-                        <div>
-                          <span className="text-zinc-500 block">COUPON CODE</span>
-                          <span className="text-emerald-400 font-bold tracking-wider">{b.couponCode}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-4 flex justify-end">
-                      <a
-                        href={b.link || '#'}
-                        target="_blank"
-                        referrerPolicy="no-referrer"
-                        className="bg-white hover:bg-zinc-200 text-black text-xs font-bold py-2.5 px-6 rounded-lg transition-all cursor-pointer whitespace-nowrap uppercase tracking-wider"
-                      >
-                        Enroll in Cohort
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              // Render BatchDetail directly — full-height, no wrapper padding
+              batches.length > 0 ? (
+                <div className="h-full">
+                  <BatchDetail
+                    batch={batches[0]}
+                    onClose={onClose}
+                    onPlayLecture={(lec) => {
+                      onSelectLecture(lec);
+                      onClose();
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
+                  <AlertOctagon className="w-10 h-10 text-rose-500" />
+                  <p className="text-xs font-mono text-zinc-400">Batch details unavailable.</p>
+                </div>
+              )
             ) : (
               <>
                 {targetType !== 'teacher' ? (

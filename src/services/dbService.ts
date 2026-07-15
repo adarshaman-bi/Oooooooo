@@ -5,6 +5,7 @@ import {
   Lecture,
   Playlist,
   Batch,
+  BatchSubject,
   Review,
   EntityTrustScoreBreakdown as TrustScoreBreakdown,
   WatchHistoryItem,
@@ -513,7 +514,7 @@ export async function fetchPlaylistById(id: string): Promise<Playlist | null> {
 // BATCHES SERVICE
 export async function fetchBatches(instituteId?: string): Promise<Batch[]> {
   try {
-    let query = supabase.from('batches').select('*');
+    let query = supabase.from('batches').select('*').eq('is_active', true);
     if (instituteId) {
       query = query.eq('institute_id', instituteId);
     }
@@ -524,25 +525,53 @@ export async function fetchBatches(instituteId?: string): Promise<Batch[]> {
       return {
         id: b.id,
         name: b.name || '',
-        description: feat.description || '',
+        description: b.description || feat.description || '',
+        channelName: b.channel_name || feat.channelName || '',
+        examType: (b.exam_type || feat.examType || 'Both') as 'JEE' | 'NEET' | 'Both',
+        isActive: b.is_active !== false,
+        price: Number(b.price) || 0,
+        imageUrl: b.image_url || feat.imageUrl || '',
+        createdAt: b.created_at || new Date().toISOString(),
+        // Legacy compat
         instituteId: b.institute_id || '',
         instituteName: b.institute_name || '',
         teachers: Array.isArray(feat.teachers) ? feat.teachers : (b.teacher_name ? [b.teacher_name] : []),
         subject: b.subject || '',
-        examType: feat.examType || 'Both',
         startDate: feat.startDate || b.created_at || new Date().toISOString(),
         endDate: feat.endDate || b.created_at || new Date().toISOString(),
-        price: Number(b.price) || 0,
-        discountPrice: Number(b.discount_price) || 0,
         couponCode: feat.couponCode || '',
         link: feat.link || '',
         verified: feat.verified || false,
-        createdAt: b.created_at || new Date().toISOString(),
-        imageUrl: feat.imageUrl || ''
       } as Batch;
     });
   } catch (error) {
     console.error('Supabase fetchBatches error:', error);
+    return [];
+  }
+}
+
+export async function fetchBatchSubjects(batchId: string): Promise<BatchSubject[]> {
+  try {
+    const { data, error } = await supabase
+      .from('batch_subjects')
+      .select('*')
+      .eq('batch_id', batchId)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      batchId: row.batch_id,
+      subject: row.subject,
+      teacherId: row.teacher_id || null,
+      teacherName: row.teacher_name || null,
+      playlistId: row.playlist_id || null,
+      playlistTitle: row.playlist_title || null,
+      examType: (row.exam_type || 'Both') as 'JEE' | 'NEET' | 'Both',
+      sortOrder: row.sort_order || 0,
+      createdAt: row.created_at || new Date().toISOString(),
+    } as BatchSubject));
+  } catch (error) {
+    console.error(`Supabase fetchBatchSubjects error [${batchId}]:`, error);
     return [];
   }
 }
@@ -557,27 +586,30 @@ export async function fetchBatchById(id: string): Promise<Batch | null> {
     return {
       id: data.id,
       name: data.name || '',
-      description: feat.description || '',
+      description: data.description || feat.description || '',
+      channelName: data.channel_name || feat.channelName || '',
+      examType: (data.exam_type || feat.examType || 'Both') as 'JEE' | 'NEET' | 'Both',
+      isActive: data.is_active !== false,
+      price: Number(data.price) || 0,
+      imageUrl: data.image_url || feat.imageUrl || '',
+      createdAt: data.created_at || new Date().toISOString(),
+      // Legacy compat
       instituteId: data.institute_id || '',
       instituteName: data.institute_name || '',
       teachers: Array.isArray(feat.teachers) ? feat.teachers : (data.teacher_name ? [data.teacher_name] : []),
       subject: data.subject || '',
-      examType: feat.examType || 'Both',
       startDate: feat.startDate || data.created_at || new Date().toISOString(),
       endDate: feat.endDate || data.created_at || new Date().toISOString(),
-      price: Number(data.price) || 0,
-      discountPrice: Number(data.discount_price) || 0,
       couponCode: feat.couponCode || '',
       link: feat.link || '',
       verified: feat.verified || false,
-      createdAt: data.created_at || new Date().toISOString(),
-      imageUrl: feat.imageUrl || ''
     } as Batch;
   } catch (error) {
     console.error(`Supabase fetchBatchById error [${id}]:`, error);
     return null;
   }
 }
+
 
 // REVIEWS & TRUST SCORE SERVICE
 export async function fetchReviews(targetId: string): Promise<Review[]> {

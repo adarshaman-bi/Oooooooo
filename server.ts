@@ -503,6 +503,69 @@ function parseISODuration(duration: string): string {
   const minutes = match[2] ? `${match[2]}m` : '';
   return `${hours}${minutes}`.trim() || '30m';
 }
+// ─── BATCH ENDPOINTS ────────────────────────────────────────────────────────
+
+// GET /api/batches — return all active batches (card list)
+app.get('/api/batches', async (_req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('batches')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    const batches = (data || []).map((b: any) => {
+      const feat = b.features || {};
+      return {
+        id: b.id,
+        name: b.name || '',
+        description: b.description || feat.description || '',
+        channelName: b.channel_name || feat.channelName || '',
+        examType: b.exam_type || feat.examType || 'Both',
+        isActive: b.is_active !== false,
+        price: Number(b.price) || 0,
+        imageUrl: b.image_url || feat.imageUrl || '',
+        createdAt: b.created_at || new Date().toISOString(),
+      };
+    });
+    res.json(batches);
+  } catch (err: any) {
+    console.error('[/api/batches] error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch batches.' });
+  }
+});
+
+// GET /api/batches/:id/subjects — return subjects for a batch with teacher + playlist info
+app.get('/api/batches/:id/subjects', async (req, res) => {
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ error: 'Missing batch id.' });
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('batch_subjects')
+      .select('*')
+      .eq('batch_id', id)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    const subjects = (data || []).map((row: any) => ({
+      id: row.id,
+      batchId: row.batch_id,
+      subject: row.subject,
+      teacherId: row.teacher_id || null,
+      teacherName: row.teacher_name || null,
+      playlistId: row.playlist_id || null,
+      playlistTitle: row.playlist_title || null,
+      examType: row.exam_type || 'Both',
+      sortOrder: row.sort_order || 0,
+      createdAt: row.created_at,
+    }));
+    res.json(subjects);
+  } catch (err: any) {
+    console.error(`[/api/batches/${id}/subjects] error:`, err.message);
+    res.status(500).json({ error: 'Failed to fetch batch subjects.' });
+  }
+});
+
+// ─── END BATCH ENDPOINTS ────────────────────────────────────────────────────
 
 // API Endpoint: Proxy to retrieve lists from YouTube Data API v3
 app.get('/api/youtube/playlists', async (req, res) => {

@@ -248,24 +248,42 @@ export interface IngestionControl {
   nextPhaseStart: string | null;
 }
 
+export interface BatchSubject {
+  id: string;
+  batchId: string;
+  subject: string;
+  teacherId: string | null;
+  teacherName: string | null;
+  playlistId: string | null;
+  playlistTitle: string | null;
+  examType: 'JEE' | 'NEET' | 'Both';
+  sortOrder: number;
+  createdAt: string;
+}
+
 export interface Batch {
   id: string;
   name: string;
   description: string;
-  instituteId: string;
-  instituteName: string;
-  teachers: string[]; // Teacher Names or IDs
-  subject: string; // "Physics", "Full Course", etc.
   examType: 'JEE' | 'NEET' | 'Both' | string;
-  startDate: string;
-  endDate: string;
+  channelName: string;
+  isActive: boolean;
   price?: number;
+  createdAt: string;
+  imageUrl?: string;
+  // Legacy / DetailsModal-compat fields
+  instituteId?: string;
+  instituteName?: string;
+  teachers?: string[];
+  subject?: string;
+  startDate?: string;
+  endDate?: string;
   discountCode?: string;
   couponCode?: string;
   link?: string;
   verified?: boolean;
-  createdAt: string;
-  imageUrl?: string;
+  // Hydrated subjects (populated by fetchBatchSubjects)
+  subjects?: BatchSubject[];
 }
 
 export interface Review {

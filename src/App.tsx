@@ -40,6 +40,7 @@ import {
   fetchLectures,
   fetchPlaylists,
   fetchBatches,
+  fetchBatchSubjects,
   toggleFollow,
   fetchFollowingList,
   addRealNotification,
@@ -560,6 +561,13 @@ function AppContent() {
   const [currentView, setCurrentView] = useState<ViewName>('explore');
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
   const [activeExploreTab, setActiveExploreTab] = useState<ExploreTab>('home');
+  const [visitedTabs, setVisitedTabs] = useState<Record<string, boolean>>({ home: true });
+
+  useEffect(() => {
+    if (activeExploreTab) {
+      setVisitedTabs(prev => prev[activeExploreTab] ? prev : { ...prev, [activeExploreTab]: true });
+    }
+  }, [activeExploreTab]);
   
   // Search history state for previous 15 days
   const [searchHistory, setSearchHistory] = useState<Array<{ query: string; ts: number }>>([]);
@@ -584,6 +592,8 @@ function AppContent() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [batchSubjectCounts, setBatchSubjectCounts] = useState<Record<string, number>>({});
+  const [batchExamFilter, setBatchExamFilter] = useState<'All' | 'JEE' | 'NEET' | 'Both'>('All');
 
   // Safely restore cached datasets on initial client-only mount
   useEffect(() => {
@@ -1406,6 +1416,16 @@ function AppContent() {
         }
         if (auxiliaryBatches && auxiliaryBatches.length > 0) {
           setBatches(auxiliaryBatches);
+          // Fetch subject counts for each batch (non-blocking)
+          Promise.all(
+            auxiliaryBatches.map((b) =>
+              fetchBatchSubjects(b.id).then((subs) => ({ id: b.id, count: subs.length }))
+            )
+          ).then((results) => {
+            const counts: Record<string, number> = {};
+            results.forEach(({ id, count }) => { counts[id] = count; });
+            setBatchSubjectCounts(counts);
+          }).catch(() => {/* non-fatal */});
         }
 
         // 7. Save mapped state profiles to client local fallback cache
@@ -1687,16 +1707,15 @@ function AppContent() {
     return (searchActive
       ? serverSearchResults.filter(r => r.type === 'batch')
       : batches.filter(b => {
-          const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.description.toLowerCase().includes(searchQuery.toLowerCase());
-          const currentExam = examFilter !== 'All' ? examFilter : (user?.examType || 'Both');
-          if (currentExam !== 'Both' && currentExam !== 'All' && b.examType && b.examType !== 'Both' && b.examType !== 'All' && b.examType !== currentExam) {
-            return false;
-          }
-          const matchesExam = examFilter === 'All' || b.examType === examFilter || b.examType === 'Both';
-          const matchesSubject = subjectFilter === 'All' || b.subject === subjectFilter;
-          return matchesSearch && matchesExam && matchesSubject;
-        })).filter(b => !verifiedOnly || (b.verified !== false));
-  }, [searchActive, serverSearchResults, batches, searchQuery, examFilter, user, subjectFilter, verifiedOnly]);
+          const matchesSearch = !searchQuery ||
+            b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            b.description.toLowerCase().includes(searchQuery.toLowerCase());
+          const matchesExam = batchExamFilter === 'All' ||
+            b.examType === batchExamFilter ||
+            b.examType === 'Both';
+          return matchesSearch && matchesExam;
+        }));
+  }, [searchActive, serverSearchResults, batches, searchQuery, batchExamFilter]);
 
   const filteredTestSeries = useMemo(() => {
     return (TEST_SERIES_CATALOG || []).filter(ts => {
@@ -2203,25 +2222,27 @@ function AppContent() {
                 <>
 
               {/* Main Tab Controller Content */}
-                  {activeExploreTab === 'home' && (
-                    <HomeDashboard
-                      onFocusSearch={() => {
-                        setCurrentView('search');
-                        setIsSearchFocused(true);
-                      }}
-                      setActiveExploreTab={setActiveExploreTab}
-                      onPlayVideo={(lec) => {
-                        setActiveLecture(lec);
-                        setCurrentView('explore');
-                      }}
-                      onSelectChannel={(id, type) => setDetailModal({ id, type })}
-                      followedIds={followedIds}
-                      handleFollowToggle={handleFollowToggle}
-                    />
-                  )}
+              {visitedTabs.home && (
+                <div style={{ display: activeExploreTab === 'home' ? 'block' : 'none' }}>
+                  <HomeDashboard
+                    onFocusSearch={() => {
+                      setCurrentView('search');
+                      setIsSearchFocused(true);
+                    }}
+                    setActiveExploreTab={setActiveExploreTab}
+                    onPlayVideo={(lec) => {
+                      setActiveLecture(lec);
+                      setCurrentView('explore');
+                    }}
+                    onSelectChannel={(id, type) => setDetailModal({ id, type })}
+                    followedIds={followedIds}
+                    handleFollowToggle={handleFollowToggle}
+                  />
+                </div>
+              )}
 
-              {activeExploreTab === 'lecture' && (
-                <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 pb-24 text-left">
+              {visitedTabs.lecture && (
+                <div style={{ display: activeExploreTab === 'lecture' ? 'block' : 'none' }} className="max-w-7xl mx-auto px-4 py-8 space-y-8 pb-24 text-left">
                   {/* Search Video Lectures list results */}
                   <section className="space-y-6">
                     <div className="flex justify-between items-center pb-3 border-b border-[#1A1A1A]">
@@ -2272,8 +2293,8 @@ function AppContent() {
                 </div>
               )}
 
-              {activeExploreTab === 'teachers' && (
-                <div className="max-w-7xl mx-auto px-4 py-4 space-y-4 pb-24 text-left">
+              {visitedTabs.teachers && (
+                <div style={{ display: activeExploreTab === 'teachers' ? 'block' : 'none' }} className="max-w-7xl mx-auto px-4 py-4 space-y-4 pb-24 text-left">
                   {/* Banner deleted per UI/UX Refactor */}
 
                   {isInitialLoading ? (
@@ -2317,35 +2338,56 @@ function AppContent() {
                 </div>
               )}
 
-              {activeExploreTab === 'playlists' && (
-                <VideoLibrary
-                  onBackToHome={() => setActiveExploreTab('home')}
-                  onSelectChannel={(id, type) => setDetailModal({ id, type })}
-                />
+              {visitedTabs.playlists && (
+                <div style={{ display: activeExploreTab === 'playlists' ? 'block' : 'none' }}>
+                  <VideoLibrary
+                    isActive={activeExploreTab === 'playlists'}
+                    onBackToHome={() => setActiveExploreTab('home')}
+                    onSelectChannel={(id, type) => setDetailModal({ id, type })}
+                  />
+                </div>
               )}
 
-              {activeExploreTab === 'batches' && (
-                <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 pb-24 text-left">
-                  <div className="flex justify-between items-center pb-3 border-b border-[#1A1A1A]">
+              {visitedTabs.batches && (
+                <div style={{ display: activeExploreTab === 'batches' ? 'block' : 'none' }} className="max-w-7xl mx-auto px-4 py-8 space-y-6 pb-24 text-left">
+                  {/* Section header */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-3 border-b border-[#1A1A1A]">
                     <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-zinc-400" /> REGISTERED LIVE COURSE BATCHES ({filteredBatches.length})
+                      <GraduationCap className="w-4 h-4 text-zinc-400" /> FREE YOUTUBE BATCHES ({filteredBatches.length})
                     </h3>
+                    {/* Exam filter pills */}
+                    <div className="flex items-center gap-2">
+                      {(['All', 'JEE', 'NEET', 'Both'] as const).map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setBatchExamFilter(f)}
+                          className={`text-[10px] font-mono font-bold px-3 py-1 rounded-full border uppercase tracking-wide transition-all ${
+                            batchExamFilter === f
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-700/60'
+                              : 'text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {isInitialLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6 animate-fade-in">
                       {Array.from({ length: 4 }).map((_, idx) => (
                         <BatchCardSkeleton key={idx} />
                       ))}
                     </div>
                   ) : filteredBatches.length === 0 ? (
-                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#111111] rounded-2xl">No live student cohorts or batches match the selected criteria.</p>
+                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#111111] rounded-2xl">No verified free batches match the selected filter.</p>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 p-0.5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6">
                       {filteredBatches.map((b) => (
                         <BatchCard
                           key={b.id}
                           batch={b}
+                          subjectCount={batchSubjectCounts[b.id]}
                           onClick={() => setDetailModal({ id: b.id, type: 'batch' as any })}
                         />
                       ))}
@@ -2354,24 +2396,26 @@ function AppContent() {
                 </div>
               )}
 
-              {activeExploreTab === 'tests' && (
-                <TestSeriesDirectory 
-                  searchQuery={searchQuery}
-                  selectedExamTag={testExamTag}
-                  setSelectedExamTag={setTestExamTag}
-                  selectedDelivery={testDelivery}
-                  setSelectedDelivery={setTestDelivery}
-                  selectedVerification={testVerification}
-                  setSelectedVerification={setTestVerification}
-                  minRating={testMinRating}
-                  setMinRating={setTestMinRating}
-                  sortBy={testSortBy}
-                  setSortBy={setTestSortBy}
-                />
+              {visitedTabs.tests && (
+                <div style={{ display: activeExploreTab === 'tests' ? 'block' : 'none' }}>
+                  <TestSeriesDirectory 
+                    searchQuery={searchQuery}
+                    selectedExamTag={testExamTag}
+                    setSelectedExamTag={setTestExamTag}
+                    selectedDelivery={testDelivery}
+                    setSelectedDelivery={setTestDelivery}
+                    selectedVerification={testVerification}
+                    setSelectedVerification={setTestVerification}
+                    minRating={testMinRating}
+                    setMinRating={setTestMinRating}
+                    sortBy={testSortBy}
+                    setSortBy={setTestSortBy}
+                  />
+                </div>
               )}
 
-              {activeExploreTab === 'institutes' && (
-                <div id="institutes-directory-root" className="max-w-7xl mx-auto px-4 py-8 space-y-6 pb-24 text-left font-sans">
+              {visitedTabs.institutes && (
+                <div style={{ display: activeExploreTab === 'institutes' ? 'block' : 'none' }} id="institutes-directory-root" className="max-w-7xl mx-auto px-4 py-8 space-y-6 pb-24 text-left font-sans">
                   <div className="flex justify-between items-center pb-3 border-b border-[#1A1A1A]">
                     <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-zinc-400" /> NEET & JEE VERIFIED ACADEMIC CHANNELS ({filteredInstitutes.length})
