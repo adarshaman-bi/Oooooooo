@@ -1475,6 +1475,11 @@ function AppContent() {
           validatedBatches.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
           setBatches(validatedBatches);
           setBatchSubjectCounts(counts);
+          try {
+            localStorage.setItem('biovised_cached_batches', JSON.stringify(validatedBatches));
+          } catch (e) {
+            console.warn('[Storage Cache Batch Sync Error]:', e);
+          }
         }
 
 
@@ -1485,9 +1490,6 @@ function AppContent() {
           localStorage.setItem('biovised_cached_lectures', JSON.stringify(sanitizedVideos));
           if (auxiliaryInstitutes && auxiliaryInstitutes.length > 0) {
             localStorage.setItem('biovised_cached_institutes', JSON.stringify(auxiliaryInstitutes));
-          }
-          if (auxiliaryBatches && auxiliaryBatches.length > 0) {
-            localStorage.setItem('biovised_cached_batches', JSON.stringify(auxiliaryBatches));
           }
         } catch (e) {
           console.warn('[Storage Cache Sync Error]:', e);
