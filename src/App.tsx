@@ -2285,6 +2285,9 @@ function AppContent() {
                       setCurrentView('explore');
                     }}
                     onSelectChannel={(id, type) => setDetailModal({ id, type })}
+                    onOpenBatch={(batchId) => setDetailModal({ id: batchId, type: 'batch' as any })}
+                    validatedBatches={batches}
+                    batchSubjectCounts={batchSubjectCounts}
                     followedIds={followedIds}
                     handleFollowToggle={handleFollowToggle}
                   />

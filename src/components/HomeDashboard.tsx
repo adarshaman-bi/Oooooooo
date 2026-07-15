@@ -30,6 +30,9 @@ interface HomeDashboardProps {
   setActiveExploreTab: (tab: any) => void;
   onPlayVideo: (video: any) => void;
   onSelectChannel?: (id: string, type: 'teacher' | 'institute') => void;
+  onOpenBatch?: (batchId: string) => void;
+  validatedBatches?: any[];
+  batchSubjectCounts?: Record<string, number>;
   followedIds?: string[];
   handleFollowToggle?: (teacher: any) => any;
 }
@@ -39,6 +42,9 @@ export default function HomeDashboard({
   setActiveExploreTab, 
   onPlayVideo, 
   onSelectChannel,
+  onOpenBatch,
+  validatedBatches,
+  batchSubjectCounts = {},
   followedIds = [],
   handleFollowToggle
 }: HomeDashboardProps) {
@@ -103,7 +109,10 @@ export default function HomeDashboard({
   const [watchHistory, setWatchHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'playlist' | 'one_shot' | 'institute'>('playlist');
   const [institutes, setInstitutes] = useState<any[]>([]);
-  const [batches, setBatches] = useState<any[]>([]);
+  // Use validated batches from App.tsx if provided (they have subjects + ratings hydrated).
+  // Fall back to local cache/fetch only when parent hasn't supplied them yet.
+  const [localBatches, setLocalBatches] = useState<any[]>([]);
+  const displayBatches = (validatedBatches && validatedBatches.length > 0) ? validatedBatches : localBatches;
 
   const [isLoadingAux, setIsLoadingAux] = useState(true);
 
@@ -111,20 +120,18 @@ export default function HomeDashboard({
     const loadAuxiliaryData = async () => {
       try {
         const cachedInst = localStorage.getItem('biovised_cached_institutes');
-        const cachedBatches = localStorage.getItem('biovised_cached_batches');
-        
         if (cachedInst) setInstitutes(JSON.parse(cachedInst));
-        if (cachedBatches) setBatches(JSON.parse(cachedBatches));
 
-        const needsInst = !cachedInst || JSON.parse(cachedInst).length === 0;
-        const needsBatches = !cachedBatches || JSON.parse(cachedBatches).length === 0;
+        // Only fetch batches locally if App.tsx hasn't provided validated ones
+        if (!validatedBatches || validatedBatches.length === 0) {
+          const cachedBatches = localStorage.getItem('biovised_cached_batches');
+          if (cachedBatches) setLocalBatches(JSON.parse(cachedBatches));
+        }
 
-        if (needsInst || needsBatches) {
-          const [instRes, batchesRes] = await Promise.all([
-            needsInst ? supabase.from('institutes').select('*').order('name') : Promise.resolve({ data: null }),
-            needsBatches ? supabase.from('batches').select('*') : Promise.resolve({ data: null })
-          ]);
+        const needsInst = !cachedInst || JSON.parse(cachedInst || '[]').length === 0;
 
+        if (needsInst) {
+          const instRes = await supabase.from('institutes').select('*').order('name');
           if (instRes.data && instRes.data.length > 0) {
             const mapped = instRes.data.map((inst: any) => ({
               id: inst.id,
@@ -141,10 +148,6 @@ export default function HomeDashboard({
               isVerified: inst.is_verified || inst.isVerified || false
             }));
             setInstitutes(mapped);
-          }
-
-          if (batchesRes.data && batchesRes.data.length > 0) {
-            setBatches(batchesRes.data);
           }
         }
       } catch (e) {
@@ -724,20 +727,26 @@ export default function HomeDashboard({
           )}
 
           {/* 5. Coaching Batches */}
-          {(batches || []).length > 0 && (
+          {displayBatches.length > 0 && (
             <HorizontalRow
               title="Coaching Batches"
               icon={<GraduationCap className="w-5 h-5 text-indigo-400" />}
               onSeeAllClick={() => setActiveExploreTab('batches')}
             >
-              {(batches || []).map((batch) => (
+              {displayBatches.map((batch) => (
                 <div key={batch.id} className="w-[300px] sm:w-[420px]">
                   <CardPop className="w-full">
                     <BatchCard
                       batch={batch}
+                      subjectCount={batchSubjectCounts[batch.id] ?? batch.subjectCount}
                       onClick={() => {
-                        sessionStorage.setItem('biovised_selected_batch_id', batch.id);
-                        setActiveExploreTab('batches');
+                        if (onOpenBatch) {
+                          // Open the batch detail modal directly (same as tapping from the full batch-list page)
+                          onOpenBatch(batch.id);
+                        } else {
+                          // Fallback: navigate to batches tab
+                          setActiveExploreTab('batches');
+                        }
                       }}
                     />
                   </CardPop>
