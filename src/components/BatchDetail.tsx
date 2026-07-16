@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   BookOpen,
-  Star,
   ChevronRight,
   AlertCircle,
   Loader2,
@@ -213,8 +212,6 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
             {subjects.map((sub) => {
               const media = getSubjectMedia(sub.subject);
               const SubIcon = media.Icon;
-              const subRating = (sub as any).rating || 4.7;
-              const subTrust = (sub as any).trustScore || 9.3;
 
               return (
                 <button
@@ -267,8 +264,6 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
             {(() => {
               const media = getSubjectMedia(selectedSubject.subject);
               const SubIcon = media.Icon;
-              const subRating = (selectedSubject as any).rating || 4.7;
-              const subTrust = (selectedSubject as any).trustScore || 9.3;
 
               return (
                 <div className="p-5 rounded-2xl bg-[#0B0B0A] border border-[#1A1A1A] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.8)]">

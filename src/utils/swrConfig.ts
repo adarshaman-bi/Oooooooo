@@ -21,7 +21,9 @@ export const fetchActivePlaylists = async () => {
     .from('playlists')
     .select('*')
     .eq('is_active', true)
-    .gt('lectures_count', 0);
+    .gt('lectures_count', 0)
+    .order('updated_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false });
   if (error) throw error;
   return data || [];
 };
@@ -29,7 +31,8 @@ export const fetchActivePlaylists = async () => {
 export const fetchActiveTeachers = async () => {
   const { data, error } = await supabase
     .from('teachers')
-    .select('*');
+    .select('*')
+    .order('name', { ascending: true });
   if (error) throw error;
   return data || [];
 };
@@ -37,7 +40,8 @@ export const fetchActiveTeachers = async () => {
 export const fetchActiveChannels = async () => {
   const { data, error } = await supabase
     .from('channels')
-    .select('*');
+    .select('*')
+    .order('name', { ascending: true });
   if (error) throw error;
   return data || [];
 };
@@ -46,7 +50,9 @@ export const fetchActiveVideos = async () => {
   const { data, error } = await supabase
     .from('videos')
     .select('*')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .order('created_at', { ascending: false, nullsFirst: false });
   if (error) throw error;
   return data || [];
 };
+

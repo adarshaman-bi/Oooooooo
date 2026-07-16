@@ -51,7 +51,7 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
             <div className="text-right">
               <span className="block text-[8px] font-mono font-bold text-zinc-500 uppercase tracking-widest leading-none mb-1">Trust Score</span>
               <span className="text-[10px] font-mono font-extrabold bg-zinc-905 border border-zinc-800 px-2.5 py-0.5 rounded text-white leading-none">
-                {institute.trustScore || 85}/100
+                {institute.trustScore != null ? `${institute.trustScore}/100` : 'N/A'}
               </span>
             </div>
           </div>
@@ -85,8 +85,8 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
         <div className="space-y-3 pt-3 border-t border-zinc-900/60 font-mono">
           <div className="flex justify-between items-center text-[10px]">
             <span className="text-amber-400 font-bold flex items-center gap-1">
-              <Star className="w-3 h-3 fill-current text-amber-400" />
-              <span>{institute.rating || "4.5"}</span>
+              {institute.rating != null && <Star className="w-3 h-3 fill-current text-amber-400" />}
+              <span>{institute.rating != null ? Number(institute.rating).toFixed(1) : 'Not yet rated'}</span>
             </span>
             <span className="text-zinc-500 uppercase text-[9px]">
               {institute.reviewCount || 0} reviews

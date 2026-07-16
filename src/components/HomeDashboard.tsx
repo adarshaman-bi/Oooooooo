@@ -99,7 +99,7 @@ export default function HomeDashboard({
             createdAt: p?.created_at || new Date().toISOString(),
             updatedAt: p?.updated_at || p?.created_at || new Date().toISOString()
           };
-        });
+        }).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
       }
     } catch (e) {
       console.warn("Failed to load initial cached playlists:", e);
@@ -163,9 +163,9 @@ export default function HomeDashboard({
               logo: inst.logo || '',
               bannerUrl: inst.banner_url || inst.bannerUrl || '',
               description: inst.description || '',
-              rating: inst.rating || 4.5,
+              rating: inst.rating ?? null,
               reviewCount: inst.review_count || inst.reviewCount || 0,
-              trustScore: inst.trust_score || inst.trustScore || 85,
+              trustScore: inst.trust_score ?? inst.trustScore ?? null,
               followersCount: inst.followers_count || inst.followersCount || 0,
               officialLinks: inst.official_links || inst.officialLinks || [],
               exams: inst.exams || ['NEET'],

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 
 export const scrollParentVertically = (element: HTMLElement | null, amount: number) => {
@@ -110,6 +110,7 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   // Drag-to-scroll state
@@ -121,7 +122,10 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
     const el = containerRef.current;
     if (!el) return;
     
-    // Right limit only (left button removed)
+    // Check left scroll limit
+    setShowLeftArrow(el.scrollLeft > 5);
+    
+    // Check right scroll limit
     const maxScroll = el.scrollWidth - el.clientWidth;
     setShowRightArrow(el.scrollLeft < maxScroll - 5);
   };
@@ -135,7 +139,7 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
     window.addEventListener('resize', checkScrollLimits);
 
     const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > 0) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         const canScrollLeft = el.scrollLeft > 0;
         const canScrollRight = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
         if ((e.deltaY > 0 && canScrollRight) || (e.deltaY < 0 && canScrollLeft)) {
@@ -267,6 +271,17 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
 
       {/* Row Body / Scroller Wrapper */}
       <div className="group/row relative w-full overflow-visible">
+        {/* Left Scroll Button */}
+        {showLeftArrow && (
+          <button
+            onClick={() => scrollByAmount(-400)}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-[60] hidden md:flex w-10 h-10 items-center justify-center rounded-full bg-black/80 hover:bg-black border border-zinc-850 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+            aria-label={`Scroll ${title} left`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+
         {/* Right Scroll Button */}
         {showRightArrow && (
           <button

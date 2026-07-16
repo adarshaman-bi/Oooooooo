@@ -1735,4 +1735,18 @@ export async function fetchReviewScorecards(entityIds: string[]): Promise<Record
   return result;
 }
 
+export async function fetchPlaylistStats(playlistId: string): Promise<{ rating: number | null; count: number } | null> {
+  try {
+    const scorecards = await fetchReviewScorecards([playlistId]);
+    const scorecard = scorecards[playlistId];
+    return {
+      rating: scorecard?.rating ?? null,
+      count: scorecard?.reviewCount ?? 0
+    };
+  } catch (error) {
+    console.error(`Error in fetchPlaylistStats for ${playlistId}:`, error);
+    return null;
+  }
+}
+
 

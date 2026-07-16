@@ -136,15 +136,16 @@ export default function DetailsModal({
             setIsLoading(false);
             return;
           }
+          const stats = await dbService.fetchPlaylistStats(pl.id);
           setProfile({
             id: pl.id,
             name: pl.title,
             description: pl.description || 'Curated series of core academic lectures',
             isVerified: true,
             officialLinks: [],
-            rating: 4.5,
-            reviewCount: 0
-          });
+            rating: stats?.rating ?? null,
+            reviewCount: stats?.count ?? 0
+          } as any);
 
           const allLecs = await dbService.fetchLectures();
           const plLecs = allLecs.filter(l => l.playlistId === targetId);
