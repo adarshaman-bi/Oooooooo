@@ -1426,7 +1426,7 @@ function AppContent() {
             playlist_id: v?.playlist_id || v?.playlistId || '',
             viewsCount: v?.views || v?.viewsCount || v?.views_count || 0,
             likesCount: v?.likesCount || v?.likes_count || 0,
-            thumbnailUrl: v?.thumbnailUrl || matchedPlaylist?.thumbnailUrl || '',
+            thumbnailUrl: v?.thumbnail_url || v?.thumbnailUrl || matchedPlaylist?.thumbnailUrl || '',
             subject: v?.subject || matchedPlaylist?.subject || '',
             examType: v?.examType || matchedPlaylist?.examType || 'Both',
             contentType: v?.contentType || v?.category || 'lecture',

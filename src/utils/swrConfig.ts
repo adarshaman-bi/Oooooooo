@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, fetchPaginatedData } from './supabaseClient';
 
 export const SWR_KEYS = {
   PLAYLISTS: 'active_playlists',
@@ -47,12 +47,8 @@ export const fetchActiveChannels = async () => {
 };
 
 export const fetchActiveVideos = async () => {
-  const { data, error } = await supabase
-    .from('videos')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false, nullsFirst: false });
-  if (error) throw error;
-  return data || [];
+  return fetchPaginatedData('videos', (query) =>
+    query.eq('is_active', true).order('created_at', { ascending: false, nullsFirst: false })
+  );
 };
 

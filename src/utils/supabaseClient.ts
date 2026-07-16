@@ -29,3 +29,22 @@ export const supabase = createClient(
     },
   }
 );
+
+export async function fetchPaginatedData<T = any>(
+  table: string,
+  buildQuery: (query: any) => any,
+  pageSize = 1000
+): Promise<T[]> {
+  let allRows: T[] = [];
+  let from = 0;
+  while (true) {
+    let query = supabase.from(table).select('*').range(from, from + pageSize - 1);
+    query = buildQuery(query);
+    const { data, error } = await query;
+    if (error) throw error;
+    allRows = allRows.concat(data || []);
+    if (!data || data.length < pageSize) break;
+    from += pageSize;
+  }
+  return allRows;
+}

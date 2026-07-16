@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabaseClient';
+import { supabase, fetchPaginatedData } from '../utils/supabaseClient';
 import {
   TeacherProfile,
   InstituteProfile,
@@ -382,13 +382,14 @@ export async function fetchLectures(filters?: {
   includeUnverified?: boolean;
 }): Promise<Lecture[]> {
   try {
-    // Apply server-side filters where possible
-    let query = supabase.from('videos').select('*').limit(DATA_DEFAULTS.DB_FETCH_LIMIT);
-    if (filters?.teacherId) query = query.eq('teacher_id', filters.teacherId);
-    if (filters?.instituteId) query = query.eq('institute_id', filters.instituteId);
-    if (filters?.subject && filters.subject !== 'All') query = query.eq('subject', filters.subject);
-    const { data, error } = await query;
-    if (error) throw error;
+    const data = await fetchPaginatedData('videos', (q) => {
+      let query = q;
+      if (filters?.teacherId) query = query.eq('teacher_id', filters.teacherId);
+      if (filters?.instituteId) query = query.eq('institute_id', filters.instituteId);
+      if (filters?.subject && filters.subject !== 'All') query = query.eq('subject', filters.subject);
+      query = query.order('created_at', { ascending: false, nullsFirst: false });
+      return query;
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let lectures = (data || []).map((v: Record<string, any>) => ({
@@ -1477,15 +1478,17 @@ function parseDurationToSeconds(duration: string): number {
 
 export async function fetchAllVideos(filters?: { playlistId?: string; subject?: string }): Promise<YouTubeVideo[]> {
   try {
-    let query = supabase.from('videos').select('*');
-    if (filters?.playlistId) {
-      query = query.eq('playlist_id', filters.playlistId);
-    }
-    if (filters?.subject) {
-      query = query.eq('subject', filters.subject);
-    }
-    const { data, error } = await query;
-    if (error) throw error;
+    const data = await fetchPaginatedData('videos', (q) => {
+      let query = q;
+      if (filters?.playlistId) {
+        query = query.eq('playlist_id', filters.playlistId);
+      }
+      if (filters?.subject) {
+        query = query.eq('subject', filters.subject);
+      }
+      query = query.order('created_at', { ascending: false, nullsFirst: false });
+      return query;
+    });
     return (data || []).map((v: any) => ({
       id: v.id,
       videoId: v.id,
