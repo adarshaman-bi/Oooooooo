@@ -117,6 +117,18 @@ export interface LectureWithChannelDTO {
     subscriberCountRaw: number;
     subscriberCountFormatted: string;
   };
+  rating?: number | null;
+  trustScore?: number | null;
+  reviewCount?: number;
+  scorecard?: RatingScorecard;
+}
+
+export interface RatingScorecard {
+  rating: number | null;
+  trustScore: number | null;
+  reviewCount: number;
+  positiveReviewCount: number;
+  sourceEntityIds: string[];
 }
 
 export interface Lecture {
@@ -146,6 +158,10 @@ export interface Lecture {
   source?: 'youtube' | 'platform';
   verificationStatus?: VerificationStatus;
   exams?: string[];
+  rating?: number | null;
+  trustScore?: number | null;
+  reviewCount?: number;
+  scorecard?: RatingScorecard;
 }
 
 export interface Playlist {
@@ -170,6 +186,10 @@ export interface Playlist {
   instituteName?: string;
   contentType?: 'playlist' | 'one_shot' | 'institute';
   showOnHome?: boolean;
+  rating?: number | null;
+  trustScore?: number | null;
+  reviewCount?: number;
+  scorecard?: RatingScorecard;
 }
 
 
@@ -259,6 +279,12 @@ export interface BatchSubject {
   examType: 'JEE' | 'NEET' | 'Both';
   sortOrder: number;
   createdAt: string;
+  rating?: number | null;
+  trustScore?: number | null;
+  reviewCount?: number;
+  scorecard?: RatingScorecard;
+  lectureCount?: number;
+  lectures?: Lecture[];
 }
 
 export interface Batch {
@@ -284,6 +310,8 @@ export interface Batch {
   verified?: boolean;
   rating?: number;
   trustScore?: number;
+  reviewCount?: number;
+  scorecard?: RatingScorecard;
   totalLectureCount?: number;
   // Hydrated subjects (populated by fetchBatchSubjects)
   subjects?: BatchSubject[];
@@ -294,7 +322,7 @@ export interface Review {
   userId: string;
   userDisplayName: string;
   targetId: string; // Teacher ID or Institute ID
-  targetType: 'teacher' | 'institute' | 'testSeries';
+  targetType: 'teacher' | 'institute' | 'testSeries' | 'video' | 'playlist' | 'batch';
   rating: number;
   comment: string;
   trustImpact: number;
@@ -427,4 +455,3 @@ export interface TestSeriesEntry {
 
 export type TestSeries = TestSeriesEntry;
 export type TestSeriesReview = ReviewSnippet;
-

@@ -4,6 +4,7 @@ import { Lecture, LectureWithChannelDTO } from '../types';
 import { SafeImage } from './SafeImage';
 import YoutubeThumbnailImg from './YoutubeThumbnailImg';
 import { formatViews } from '../utils/youtubeUtils';
+import { ScorecardSummary } from './ScorecardSummary';
 
 interface LectureCardProps {
   lecture: Lecture | LectureWithChannelDTO;
@@ -18,6 +19,13 @@ export default function LectureCard({ lecture, onClick, onChannelClick, isActive
   const isDto = 'channel' in lecture;
   
   const id = lecture.id;
+  const scorecard = lecture.scorecard || {
+    rating: lecture.rating || null,
+    trustScore: lecture.trustScore || null,
+    reviewCount: lecture.reviewCount || 0,
+    positiveReviewCount: 0,
+    sourceEntityIds: [id]
+  };
   const title = lecture.title;
   
   // Use explicit key={url} to prevent cache-lock or bleeding
@@ -30,7 +38,9 @@ export default function LectureCard({ lecture, onClick, onChannelClick, isActive
 
   // Extract channel properties correctly
   const channelName = isDto ? lecture.channel.name : ('teacherName' in lecture ? lecture.teacherName : ('teacher_name' in lecture ? (lecture as any).teacher_name : 'Verified Educator'));
-  const channelAvatar = isDto ? lecture.channel.avatarUrl : undefined;
+  const channelAvatar = isDto 
+    ? lecture.channel.avatarUrl 
+    : ((lecture as any).teacherAvatar || (lecture as any).channelAvatar || (lecture as any).avatarUrl || (lecture as any).avatar);
   const subscriberText = isDto ? lecture.channel.subscriberCountFormatted : undefined;
 
   // Extract YouTube ID if valid
@@ -177,6 +187,8 @@ export default function LectureCard({ lecture, onClick, onChannelClick, isActive
             <Eye className="w-3 h-3 text-zinc-600" />
             {formatViews(viewsCount).toUpperCase()}
           </span>
+
+          <ScorecardSummary scorecard={scorecard} variant="inline" />
 
           {isPending && (
             <span className="bg-indigo-950/30 text-indigo-400 border border-indigo-500/10 text-[7px] font-mono px-1 rounded uppercase tracking-wider scale-95 shrink-0">

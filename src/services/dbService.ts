@@ -17,7 +17,8 @@ import {
   YouTubeChannel,
   YouTubeVideo,
   YouTubeSyncLog,
-  TEACHER_TO_CHANNEL
+  TEACHER_TO_CHANNEL,
+  RatingScorecard
 } from '../types';
 import { DATA_DEFAULTS } from '../config/constants';
 
@@ -579,27 +580,28 @@ export async function fetchBatchSubjects(batchId: string): Promise<BatchSubject[
 export async function fetchBatchById(id: string): Promise<Batch | null> {
   if (!id) return null;
   try {
-    const { data, error } = await supabase.from('batches').select('*').eq('id', id).single();
+    const { data, error } = await supabase.from('batches').select('*').eq('id', id);
     if (error) throw error;
-    if (!data) return null;
-    const feat = data.features || {};
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    const feat = row.features || {};
     return {
-      id: data.id,
-      name: data.name || '',
-      description: data.description || feat.description || '',
-      channelName: data.channel_name || feat.channelName || '',
-      examType: (data.exam_type || feat.examType || 'Both') as 'JEE' | 'NEET' | 'Both',
-      isActive: data.is_active !== false,
-      price: Number(data.price) || 0,
-      imageUrl: data.image_url || feat.imageUrl || '',
-      createdAt: data.created_at || new Date().toISOString(),
+      id: row.id,
+      name: row.name || '',
+      description: row.description || feat.description || '',
+      channelName: row.channel_name || feat.channelName || '',
+      examType: (row.exam_type || feat.examType || 'Both') as 'JEE' | 'NEET' | 'Both',
+      isActive: row.is_active !== false,
+      price: Number(row.price) || 0,
+      imageUrl: row.image_url || feat.imageUrl || '',
+      createdAt: row.created_at || new Date().toISOString(),
       // Legacy compat
-      instituteId: data.institute_id || '',
-      instituteName: data.institute_name || '',
-      teachers: Array.isArray(feat.teachers) ? feat.teachers : (data.teacher_name ? [data.teacher_name] : []),
-      subject: data.subject || '',
-      startDate: feat.startDate || data.created_at || new Date().toISOString(),
-      endDate: feat.endDate || data.created_at || new Date().toISOString(),
+      instituteId: row.institute_id || '',
+      instituteName: row.institute_name || '',
+      teachers: Array.isArray(feat.teachers) ? feat.teachers : (row.teacher_name ? [row.teacher_name] : []),
+      subject: row.subject || '',
+      startDate: feat.startDate || row.created_at || new Date().toISOString(),
+      endDate: feat.endDate || row.created_at || new Date().toISOString(),
       couponCode: feat.couponCode || '',
       link: feat.link || '',
       verified: feat.verified || false,
@@ -1632,4 +1634,105 @@ export async function fetchTeacherStats(teacherId: string, videoIds: string[]): 
 
   return { followerCount, reviewStats };
 }
+
+export function createEmptyScorecard(sourceEntityIds: string[] = []): RatingScorecard {
+  return {
+    rating: null,
+    trustScore: null,
+    reviewCount: 0,
+    positiveReviewCount: 0,
+    sourceEntityIds: Array.from(new Set(sourceEntityIds.filter(Boolean))),
+  };
+}
+
+export function calculateRatingScorecard(
+  ratings: Array<number | string | null | undefined>,
+  sourceEntityIds: string[] = []
+): RatingScorecard {
+  const numericRatings = ratings
+    .map((rating) => Number(rating))
+    .filter((rating) => Number.isFinite(rating) && rating > 0);
+
+  if (numericRatings.length === 0) {
+    return createEmptyScorecard(sourceEntityIds);
+  }
+
+  const total = numericRatings.reduce((sum, rating) => sum + rating, 0);
+  const positiveReviewCount = numericRatings.filter((rating) => rating >= 4).length;
+
+  return {
+    rating: Math.round((total / numericRatings.length) * 10) / 10,
+    trustScore: Math.round((positiveReviewCount / numericRatings.length) * 100),
+    reviewCount: numericRatings.length,
+    positiveReviewCount,
+    sourceEntityIds: Array.from(new Set(sourceEntityIds.filter(Boolean))),
+  };
+}
+
+export function mergeRatingScorecards(
+  scorecards: Array<RatingScorecard | null | undefined>,
+  sourceEntityIds: string[] = []
+): RatingScorecard {
+  const valid = scorecards.filter((s): s is RatingScorecard => !!s && s.reviewCount > 0);
+  if (valid.length === 0) {
+    return createEmptyScorecard(sourceEntityIds);
+  }
+
+  let totalRatingSum = 0;
+  let totalReviews = 0;
+  let totalPositiveReviews = 0;
+  const allSourceIds = new Set<string>(sourceEntityIds);
+
+  for (const s of valid) {
+    totalRatingSum += (s.rating || 0) * s.reviewCount;
+    totalReviews += s.reviewCount;
+    totalPositiveReviews += s.positiveReviewCount;
+    if (s.sourceEntityIds) {
+      s.sourceEntityIds.forEach(id => allSourceIds.add(id));
+    }
+  }
+
+  return {
+    rating: totalReviews > 0 ? Math.round((totalRatingSum / totalReviews) * 10) / 10 : null,
+    trustScore: totalReviews > 0 ? Math.round((totalPositiveReviews / totalReviews) * 100) : null,
+    reviewCount: totalReviews,
+    positiveReviewCount: totalPositiveReviews,
+    sourceEntityIds: Array.from(allSourceIds).filter(Boolean)
+  };
+}
+
+export async function fetchReviewScorecards(entityIds: string[]): Promise<Record<string, RatingScorecard>> {
+  const result: Record<string, RatingScorecard> = {};
+  for (const id of entityIds) {
+    result[id] = createEmptyScorecard([id]);
+  }
+  if (entityIds.length === 0) return result;
+
+  try {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('entity_id, rating')
+      .in('entity_id', entityIds);
+    
+    if (error) throw error;
+    
+    const ratingsMap: Record<string, number[]> = {};
+    for (const row of (data || [])) {
+      if (!row.entity_id || row.rating == null) continue;
+      if (!ratingsMap[row.entity_id]) {
+        ratingsMap[row.entity_id] = [];
+      }
+      ratingsMap[row.entity_id].push(Number(row.rating));
+    }
+
+    for (const id of entityIds) {
+      const ratings = ratingsMap[id] || [];
+      result[id] = calculateRatingScorecard(ratings, [id]);
+    }
+  } catch (error) {
+    console.error('Error fetching review scorecards:', error);
+  }
+  return result;
+}
+
 

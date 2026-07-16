@@ -134,9 +134,23 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
     el.addEventListener('scroll', checkScrollLimits);
     window.addEventListener('resize', checkScrollLimits);
 
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > 0) {
+        const canScrollLeft = el.scrollLeft > 0;
+        const canScrollRight = el.scrollLeft < el.scrollWidth - el.clientWidth - 5;
+        if ((e.deltaY > 0 && canScrollRight) || (e.deltaY < 0 && canScrollLeft)) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY;
+        }
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+
     return () => {
       el.removeEventListener('scroll', checkScrollLimits);
       window.removeEventListener('resize', checkScrollLimits);
+      el.removeEventListener('wheel', handleWheel);
     };
   }, [children]);
 
@@ -273,10 +287,8 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
           onMouseMove={handleMouseMove}
           onKeyDown={handleKeyDown}
           tabIndex={0}
-          className="w-full flex gap-4 sm:gap-6 overflow-x-auto overflow-y-visible px-4 sm:px-8 py-4 scrollbar-none no-scrollbar snap-x scroll-smooth outline-none cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
+          className="w-full flex gap-4 sm:gap-6 overflow-x-auto overflow-y-visible px-4 sm:px-8 py-4 horizontal-scrollbar-pc snap-x scroll-smooth outline-none cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-2xl"
           style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',
           }}
         >

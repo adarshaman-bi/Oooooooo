@@ -6,6 +6,7 @@ import { PlayerProvider, usePlayer } from './context/PlayerContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Sidebar from './components/Sidebar';
 import SearchView from './components/SearchView';
 import LectureCard from './components/LectureCard';
 import TestSeriesDirectory from './components/TestSeriesDirectory';
@@ -48,9 +49,11 @@ import {
   markNotificationAsRead,
   isStrategyOrHypeContent,
   isDurationBelow30Minutes,
-  fetchTeacherStats
+  fetchTeacherStats,
+  fetchReviewScorecards,
+  mergeRatingScorecards
 } from './services/dbService';
-import { TeacherProfile, InstituteProfile, Lecture, Playlist, Batch, AppNotification, YouTubeVideo } from './types';
+import { TeacherProfile, InstituteProfile, Lecture, Playlist, Batch, AppNotification, YouTubeVideo, RatingScorecard } from './types';
 import { ViewName, ExploreTab } from './config/constants';
 import YoutubeThumbnailImg from './components/YoutubeThumbnailImg';
 import VideoLibrary from './components/VideoLibrary';
@@ -1102,6 +1105,12 @@ function AppContent() {
   }, [debouncedSearchQuery, examFilter]);
 
   useEffect(() => {
+    if (debouncedSearchQuery.trim() !== '') {
+      executeSearch(debouncedSearchQuery);
+    }
+  }, [debouncedSearchQuery]);
+
+  useEffect(() => {
     return () => {
       if (searchAbortRef.current) searchAbortRef.current.abort();
       if (suggestionsAbortRef.current) suggestionsAbortRef.current.abort();
@@ -1309,6 +1318,20 @@ function AppContent() {
           console.warn('[Auxiliary Services Resolution Error]:', auxErr);
         }
 
+        // Fetch all review scorecards for teachers, lectures, playlists, and batches in a single batch query
+        const teacherIds = (dbTeachers || []).map((t: any) => t?.id).filter(Boolean);
+        const videoIds = (dbVideos || []).map((v: any) => v?.id).filter(Boolean);
+        const playlistIds = (dbPlaylists || []).map((p: any) => p?.id).filter(Boolean);
+        const batchIds = (auxiliaryBatches || []).map((b: any) => b?.id).filter(Boolean);
+        const allEntityIds = [...teacherIds, ...videoIds, ...playlistIds, ...batchIds];
+
+        let scorecards: Record<string, RatingScorecard> = {};
+        try {
+          scorecards = await fetchReviewScorecards(allEntityIds);
+        } catch (err) {
+          console.warn('[Scorecards Hydration Error]:', err);
+        }
+
         // 1. Process & Map Teachers
         const rawTeachers = dbTeachers || [];
         const sanitizedTeachers = rawTeachers.map((t: any) => ({
@@ -1346,6 +1369,14 @@ function AppContent() {
           }
           const resolvedShowOnHome = p.show_on_home !== undefined ? p.show_on_home : true;
 
+          const scorecard = scorecards[p.id] || {
+            rating: null,
+            trustScore: null,
+            reviewCount: 0,
+            positiveReviewCount: 0,
+            sourceEntityIds: [p.id]
+          };
+
           return {
             id: p?.id,
             title: p?.title || '',
@@ -1361,7 +1392,13 @@ function AppContent() {
             examTags: p?.examTags || p?.exam_tags || ['JEE', 'NEET'],
             createdAt: p?.createdAt || p?.created_at || new Date().toISOString(),
             contentType: resolvedContentType,
-            showOnHome: resolvedShowOnHome
+            showOnHome: resolvedShowOnHome,
+            scorecard,
+            rating: scorecard.rating,
+            trustScore: scorecard.trustScore,
+            reviewCount: scorecard.reviewCount,
+            teacherAvatar: matchedTeacher?.avatar || p?.channel_avatar || p?.channelAvatar || '',
+            channelAvatar: matchedTeacher?.avatar || p?.channel_avatar || p?.channelAvatar || ''
           };
         });
         setPlaylists(sanitizedPlaylists);
@@ -1371,6 +1408,14 @@ function AppContent() {
         const sanitizedVideos = rawVideos.map((v: any) => {
           const matchedPlaylist = sanitizedPlaylists.find((p: any) => p.id === v.playlist_id || p.id === v.playlistId);
           const matchedTeacher = sanitizedTeachers.find((t: any) => t.id === (v.teacher_id || v.teacherId || matchedPlaylist?.teacherId));
+          const scorecard = scorecards[v.id] || {
+            rating: null,
+            trustScore: null,
+            reviewCount: 0,
+            positiveReviewCount: 0,
+            sourceEntityIds: [v.id]
+          };
+
           return {
             id: v?.id,
             title: v?.title || '',
@@ -1388,7 +1433,13 @@ function AppContent() {
             teacherId: v?.teacherId || v?.teacher_id || matchedPlaylist?.teacherId || '',
             teacherName: v?.teacherName || matchedTeacher?.name || '',
             description: v?.description || 'Verified course chapter lecture.',
-            createdAt: v?.createdAt || v?.created_at || new Date().toISOString()
+            createdAt: v?.createdAt || v?.created_at || new Date().toISOString(),
+            scorecard,
+            rating: scorecard.rating,
+            trustScore: scorecard.trustScore,
+            reviewCount: scorecard.reviewCount,
+            teacherAvatar: matchedTeacher?.avatar || matchedPlaylist?.teacherAvatar || v?.channel_avatar || '',
+            channelAvatar: matchedTeacher?.avatar || matchedPlaylist?.teacherAvatar || v?.channel_avatar || ''
           };
         });
         setVideos(sanitizedVideos);
@@ -1424,25 +1475,25 @@ function AppContent() {
                 const subs = await fetchBatchSubjects(b.id);
                 if (subs.length === 0) return;
                 
-                let isComplete = true;
                 let totalLecs = 0;
                 const validatedSubjects: any[] = [];
                 
                 for (const sub of subs) {
-                  if (!sub.playlistId) {
-                    isComplete = false;
-                    break;
-                  }
-                  
-                  const subjectLecs = sanitizedVideos.filter(v => v.playlistId === sub.playlistId);
-                  if (subjectLecs.length === 0) {
-                    isComplete = false;
-                    break;
-                  }
+                  const subjectLecs = sub.playlistId 
+                    ? sanitizedVideos.filter(v => v.playlistId === sub.playlistId)
+                    : [];
                   
                   totalLecs += subjectLecs.length;
                   const uniqueTeachers = Array.from(new Set(subjectLecs.map(l => l.teacherName).filter(Boolean)));
                   
+                  // Aggregate scorecard rating/trust for the subject's lectures & playlist
+                  const playlistScorecard = sub.playlistId ? scorecards[sub.playlistId] : null;
+                  const lectureScorecards = subjectLecs.map(l => l.scorecard).filter(Boolean);
+                  const subjectScorecard = mergeRatingScorecards(
+                    [playlistScorecard, ...lectureScorecards].filter(Boolean),
+                    sub.playlistId ? [sub.playlistId] : []
+                  );
+
                   validatedSubjects.push({
                     ...sub,
                     name: sub.subject,
@@ -1450,18 +1501,30 @@ function AppContent() {
                     lectures: subjectLecs,
                     teacherCount: uniqueTeachers.length || 1,
                     teachers: uniqueTeachers,
-                    trustScore: 9.0 + (sub.id.charCodeAt(0) % 10) / 10,
-                    rating: 4.6 + (sub.id.charCodeAt(0) % 5) / 10
+                    rating: subjectScorecard.rating,
+                    trustScore: subjectScorecard.trustScore,
+                    reviewCount: subjectScorecard.reviewCount,
+                    scorecard: subjectScorecard
                   });
                 }
-                
-                if (isComplete && validatedSubjects.length > 0) {
+
+                if (validatedSubjects.length > 0) {
+                  // Aggregate batch self review and all its subjects' scorecards
+                  const batchSelfScorecard = scorecards[b.id];
+                  const subjectScorecards = validatedSubjects.map(s => s.scorecard).filter(Boolean);
+                  const batchScorecard = mergeRatingScorecards(
+                    [batchSelfScorecard, ...subjectScorecards].filter(Boolean),
+                    [b.id]
+                  );
+
                   validatedBatches.push({
                     ...b,
                     subjectCount: validatedSubjects.length,
                     totalLectureCount: totalLecs,
-                    rating: b.rating || 4.8,
-                    trustScore: b.trustScore || 9.5,
+                    rating: batchScorecard.rating ?? undefined,
+                    trustScore: batchScorecard.trustScore ?? undefined,
+                    reviewCount: batchScorecard.reviewCount,
+                    scorecard: batchScorecard,
                     subjects: validatedSubjects
                   } as any);
                   counts[b.id] = validatedSubjects.length;
@@ -1933,7 +1996,9 @@ function AppContent() {
           onSearchChange={(q) => {
             setSearchQuery(q);
           }}
-          onSearchSubmit={() => {}}
+          onSearchSubmit={() => {
+            executeSearch(searchQuery);
+          }}
           onViewDashboard={(view) => {
             setCurrentView(view);
             if (view === 'explore') {
@@ -2175,7 +2240,22 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      <main className={`flex-1 ${activeLecture ? 'pb-0' : 'pb-32'}`}>
+      <div className="flex-1 flex flex-row relative min-w-0">
+        {!activeLecture && (
+          <Sidebar
+            currentView={currentView}
+            activeExploreTab={activeExploreTab}
+            onTabSelect={(tabId) => {
+              setCurrentView('explore');
+              setActiveExploreTab(tabId);
+              setSearchQuery('');
+              setShowFilters(false);
+              setIsSearchFocused(false);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+        <main className={`flex-1 ${activeLecture ? 'pb-0' : 'pb-32'} min-w-0`}>
           
           {/* Main conditional views manager */}
           {currentView === 'search' ? (
@@ -2529,6 +2609,7 @@ function AppContent() {
           )}
 
         </main>
+      </div>
 
       {/* Structured details review modal view */}
       {detailModal && (

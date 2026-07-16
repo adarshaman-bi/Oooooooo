@@ -962,6 +962,36 @@ input, textarea, video, canvas, iframe, img, svg {
   scrollbar-width: none;
 }
 
+/* PC custom horizontal scrollbar utility */
+.horizontal-scrollbar-pc {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.horizontal-scrollbar-pc::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .horizontal-scrollbar-pc {
+    scrollbar-width: thin;
+    scrollbar-color: #27272a transparent;
+  }
+  .horizontal-scrollbar-pc::-webkit-scrollbar {
+    display: block;
+    height: 6px;
+  }
+  .horizontal-scrollbar-pc::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .horizontal-scrollbar-pc::-webkit-scrollbar-thumb {
+    background: #1f1f22;
+    border-radius: 9999px;
+  }
+  .horizontal-scrollbar-pc::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
+  }
+}
+
 /* Cache bust: 1782553033 */
 /* Force rebuild: Sat Jun 27 10:11:29 UTC 2026 */
 

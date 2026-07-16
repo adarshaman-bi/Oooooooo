@@ -663,6 +663,8 @@ export default function ReviewsAndRatingsScreen({
             onDelete={handleDeleteReview}
             fetchTrust={fetchTrustScore}
             trustScores={trustScores}
+            setShowComposer={setShowComposer}
+            flashToast={flashToast}
           />
         )}
       </div>
@@ -705,6 +707,8 @@ function OverviewAndList({
   onDelete,
   fetchTrust,
   trustScores,
+  setShowComposer,
+  flashToast,
 }: {
   rootReviews: Review[];
   allRootReviewsCount: number;
@@ -723,6 +727,8 @@ function OverviewAndList({
   onDelete: (id: string) => void;
   fetchTrust: (userId: string) => void;
   trustScores: Record<string, TrustScore>;
+  setShowComposer: (val: boolean) => void;
+  flashToast: (msg: string) => void;
 }) {
   const [visibleCount, setVisibleCount] = useState(10);
   const totalStarReviews = Object.values(distribution).reduce((a, b) => a + b, 0) || 1;
@@ -859,7 +865,7 @@ function OverviewAndList({
                 <div key={n} className="p-4 bg-white/[0.01] border border-white/5 rounded-xl h-28" />
               ))}
             </div>
-          ) : reviewsList.length === 0 ? (
+          ) : allRootReviewsCount === 0 ? (
             <div className="py-16 px-4 text-center border border-white/5 bg-white/[0.01] rounded-2xl flex flex-col items-center justify-center">
               <MessageSquare size={28} className="text-white/20 mb-3" />
               <p className="font-bold text-sm text-white/80">No reviews yet</p>
@@ -1225,6 +1231,7 @@ function ThreadNodeComponent({
   const upvoted = node.upvoted_users?.includes(currentUserId || "");
   const currentDepth = node.depth || 1;
   const trustScore = trustScores[node.user_id];
+  const [showFullTimestamp, setShowFullTimestamp] = useState(false);
 
   useEffect(() => {
     fetchTrust(node.user_id);

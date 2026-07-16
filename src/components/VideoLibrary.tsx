@@ -469,18 +469,21 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
   // Loading latest videos list for secondary categories
   useEffect(() => {
     setIsLoadingVideos(true);
-    supabase.from('videos').select('*').order('publish_date', { ascending: false }).limit(15).then(({ data, error }) => {
-      if (error) {
-        console.warn(error);
-      } else {
-        const vids = (data || []).map(mapVideoRow);
-        setVideosState(vids);
+    supabase.from('videos').select('*').order('publish_date', { ascending: false }).limit(15).then(
+      ({ data, error }) => {
+        if (error) {
+          console.warn(error);
+        } else {
+          const vids = (data || []).map(mapVideoRow);
+          setVideosState(vids);
+        }
+        setIsLoadingVideos(false);
+      },
+      (err) => {
+        console.warn("Failed fetching recent videos:", err);
+        setIsLoadingVideos(false);
       }
-      setIsLoadingVideos(false);
-    }).catch(err => {
-      console.warn("Failed fetching recent videos:", err);
-      setIsLoadingVideos(false);
-    });
+    );
   }, []);
 
   // Filtered Playlists for Homepage Feed Carousel
@@ -815,11 +818,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                 isActive: true,
                 position: 0,
                 viewCount: (lec as any).viewsCount || 0,
-                likeCount: (lec as any).likesCount || 0,
-                viewsCount: (lec as any).viewsCount || 0,
-                likesCount: (lec as any).likesCount || 0,
-                examType: lec.examType || 'Both',
-                verified: true
+                likeCount: (lec as any).likesCount || 0
               };
               setSelectedVideo(mappedVideo);
             }

@@ -2700,9 +2700,16 @@ class InMemorySearchIndex {
       }
 
       if (filters.activeTab && filters.activeTab !== 'home') {
-        const tabType = filters.activeTab.substring(0, filters.activeTab.length - 1);
-        let resolvedTabType = tabType;
-        if (tabType === 'lesson') resolvedTabType = 'lecture';
+        let resolvedTabType = filters.activeTab;
+        if (resolvedTabType === 'teachers') resolvedTabType = 'teacher';
+        else if (resolvedTabType === 'playlists') resolvedTabType = 'playlist';
+        else if (resolvedTabType === 'batches') resolvedTabType = 'batch';
+        else if (resolvedTabType === 'lecture') resolvedTabType = 'lecture';
+        else if (resolvedTabType === 'lectures') resolvedTabType = 'lecture';
+        else if (resolvedTabType === 'institutes') resolvedTabType = 'institute';
+        else if (resolvedTabType === 'tests') resolvedTabType = 'test';
+        else if (resolvedTabType === 'test') resolvedTabType = 'test';
+        
         if (doc.type !== resolvedTabType) return false;
       }
 

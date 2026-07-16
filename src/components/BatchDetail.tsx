@@ -20,6 +20,7 @@ import { Batch, BatchSubject, Lecture } from '../types';
 import { getSubjectMedia } from './BatchCard';
 import { formatViews } from '../utils/youtubeUtils';
 import BiovisedPlayer from './BiovisedPlayer';
+import { ScorecardSummary } from './ScorecardSummary';
 
 // ─── Exam pill ─────────────────────────────────────────────────────────────
 const EXAM_PILL: Record<string, string> = {
@@ -28,32 +29,7 @@ const EXAM_PILL: Record<string, string> = {
   Both: 'bg-violet-950/60 text-violet-300 border-violet-800/50',
 };
 
-// ─── Deterministic Metrics Helper ──────────────────────────────────────────
-export function getLectureMetrics(lec: Lecture) {
-  const views = Number(lec.viewsCount || (lec as any).views) || 0;
-  const likes = Number(lec.likesCount || (lec as any).likes_count) || 0;
-  
-  let hash = 0;
-  const idStr = lec.id || '';
-  for (let i = 0; i < idStr.length; i++) {
-    hash = idStr.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  hash = Math.abs(hash);
-  
-  let trustVal = 9.0 + (hash % 10) / 10;
-  let ratingVal = 4.6 + (hash % 5) / 10;
-  
-  if (views > 0 && likes > 0) {
-    const ratio = likes / views;
-    trustVal = Math.min(10.0, Math.max(8.0, 8.2 + ratio * 20));
-    ratingVal = Math.min(5.0, Math.max(4.0, 4.3 + ratio * 8));
-  }
-  
-  return {
-    trustScore: trustVal.toFixed(1),
-    rating: ratingVal.toFixed(1)
-  };
-}
+
 
 // ─── Avatar initials ring ─────────────────────────────────────────────────
 function AvatarInitials({ name, color = '#A1A1AA' }: { name: string; color?: string }) {
@@ -132,8 +108,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
 
   // Calculate cumulative stats
   const totalLectures = batch.totalLectureCount || 0;
-  const overallRating = batch.rating || 4.8;
-  const overallTrust = batch.trustScore || 9.5;
+
 
   return (
     <div className="flex flex-col h-full bg-[#070707] font-sans text-left">
@@ -217,16 +192,9 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
             <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">{batch.description}</p>
             
             {/* Metadata Grid */}
-            <div className="flex items-center gap-3 pt-2 text-[10px] font-mono font-semibold flex-wrap">
-              <span className="bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-lg text-zinc-300 flex items-center gap-1.5 shadow-sm">
-                <Award className="w-3.5 h-3.5 text-amber-500" />
-                Trust Score: {overallTrust}/10
-              </span>
-              <span className="bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-lg text-zinc-300 flex items-center gap-1.5 shadow-sm">
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                Rating: {overallRating} ★
-              </span>
-              <span className="bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-lg text-zinc-300 flex items-center gap-1.5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+              <ScorecardSummary scorecard={batch.scorecard} variant="panel" trustScale="ten" />
+              <span className="bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-lg text-zinc-300 flex items-center gap-1.5 shadow-sm text-[10px] font-mono font-semibold">
                 <Clock className="w-3.5 h-3.5 text-amber-500" />
                 {totalLectures} lectures
               </span>
@@ -275,12 +243,8 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 mt-2 text-[9px] font-mono font-bold text-zinc-400">
-                      <span className="flex items-center gap-0.5 text-amber-500/90">
-                        <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                        {subRating.toFixed(1)} ★
-                      </span>
-                      <span>Trust: {subTrust.toFixed(1)}/10</span>
+                    <div className="flex items-center gap-3 mt-2">
+                      <ScorecardSummary scorecard={sub.scorecard} variant="inline" trustScale="ten" />
                     </div>
                   </div>
 
@@ -327,14 +291,8 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                           {lectures.length} Total lectures
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 mt-2 text-[9px] font-mono font-bold">
-                        <span className="text-amber-500/90 flex items-center gap-0.5">
-                          <Star className="w-3 h-3 fill-amber-500" />
-                          Avg Rating {subRating.toFixed(1)} ★
-                        </span>
-                        <span className="text-zinc-400">
-                          Trust Score {subTrust.toFixed(1)}/10
-                        </span>
+                      <div className="flex items-center gap-3 mt-2">
+                        <ScorecardSummary scorecard={selectedSubject.scorecard} variant="inline" trustScale="ten" />
                       </div>
                     </div>
                   </div>
@@ -359,7 +317,6 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
               <div className="space-y-3">
                 {lectures.map((lec, idx) => {
                   const num = String(idx + 1).padStart(2, '0');
-                  const metrics = getLectureMetrics(lec);
                   const thumb = lec.thumbnailUrl || (lec.id ? `https://i.ytimg.com/vi/${lec.id}/mqdefault.jpg` : '');
 
                   return (
@@ -402,11 +359,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                               {lec.duration}
                             </span>
                           )}
-                          <span className="flex items-center gap-0.5 text-amber-500/80">
-                            <Star className="w-2.5 h-2.5 fill-amber-500" />
-                            {metrics.rating} ★
-                          </span>
-                          <span>Trust {metrics.trustScore}</span>
+                          <ScorecardSummary scorecard={lec.scorecard} variant="inline" trustScale="ten" />
                         </div>
                       </div>
                     </button>
@@ -456,20 +409,9 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                   </div>
                   
                   {/* Rating / Trust scores */}
-                  {(() => {
-                    const metrics = getLectureMetrics(activeLecture);
-                    return (
-                      <div className="text-right font-mono font-bold flex flex-col items-end gap-0.5">
-                        <span className="text-amber-500/90 text-[11px] flex items-center gap-0.5">
-                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                          {metrics.rating} ★
-                        </span>
-                        <span className="text-zinc-500 text-[9px] uppercase tracking-wider border border-zinc-900 bg-zinc-950 px-1.5 py-0.5 rounded-lg">
-                          Trust {metrics.trustScore}/10
-                        </span>
-                      </div>
-                    );
-                  })()}
+                  <div className="flex-shrink-0">
+                    <ScorecardSummary scorecard={activeLecture.scorecard} variant="panel" trustScale="ten" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -490,7 +432,6 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
               <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2 pb-10">
                 {lectures.map((lec, idx) => {
                   const num = String(idx + 1).padStart(2, '0');
-                  const metrics = getLectureMetrics(lec);
                   const isPlaying = lec.id === activeLecture.id;
                   const thumb = lec.thumbnailUrl || (lec.id ? `https://i.ytimg.com/vi/${lec.id}/mqdefault.jpg` : '');
 
@@ -532,7 +473,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                         </p>
                         <div className="flex items-center gap-2 mt-1 text-[8px] font-mono font-semibold text-zinc-500">
                           {lec.duration && <span>{lec.duration}</span>}
-                          <span className="text-amber-500/80">{metrics.rating} ★</span>
+                          <ScorecardSummary scorecard={lec.scorecard} variant="inline" trustScale="ten" />
                         </div>
                       </div>
                     </button>

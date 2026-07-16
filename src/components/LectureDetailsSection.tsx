@@ -1563,7 +1563,7 @@ function ReviewsSheet({
             <div key={r.id} className="border-b border-white/[0.03] pb-3 last:border-0 last:pb-0 text-left">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-[13px]">{r.user_display_name || "Student"}</span>
-                <Stars value={r.rating} size={11} />
+                <StaggeredStars value={r.rating} size={11} />
               </div>
               {r.comment && <p className="text-white/70 text-[13px] mt-1 leading-relaxed">{r.comment}</p>}
             </div>

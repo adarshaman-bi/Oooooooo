@@ -156,7 +156,61 @@ export default function DetailsModal({
             setIsLoading(false);
             return;
           }
-          setBatches([b]);
+          
+          // Hydrate the batch object with its subjects, lectures and ratings
+          const subs = await dbService.fetchBatchSubjects(targetId);
+          const allVideos = await dbService.fetchLectures();
+          const teachersList = await dbService.fetchTeachers();
+          
+          // Fetch ratings & scorecards for batch and its playlists
+          const playlistIds = subs.map(s => s.playlistId).filter(Boolean);
+          const allEntityIds = [targetId, ...playlistIds];
+          const scorecards = await dbService.fetchReviewScorecards(allEntityIds);
+
+          const mappedSubjects = subs.map(sub => {
+            const subjectLecs = allVideos.filter(v => v.playlistId === sub.playlistId);
+            const matchedTeacher = teachersList.find(t => t.id === sub.teacherId || t.name === sub.teacherName);
+            
+            // Map ratings & scorecards for subject
+            const playlistScorecard = sub.playlistId ? scorecards[sub.playlistId] : null;
+            const lectureScorecards = subjectLecs.map(l => (l as any).scorecard).filter(Boolean);
+            const subjectScorecard = dbService.mergeRatingScorecards(
+              [playlistScorecard, ...lectureScorecards].filter(Boolean),
+              sub.playlistId ? [sub.playlistId] : []
+            );
+
+            return {
+              ...sub,
+              name: sub.subject,
+              lectureCount: subjectLecs.length,
+              lectures: subjectLecs,
+              teacherCount: sub.teacherName ? 1 : 0,
+              teachers: sub.teacherName ? [sub.teacherName] : [],
+              rating: subjectScorecard.rating,
+              trustScore: subjectScorecard.trustScore,
+              reviewCount: subjectScorecard.reviewCount,
+              scorecard: subjectScorecard
+            };
+          });
+
+          // Aggregate batch self review and all its subjects' scorecards
+          const batchSelfScorecard = scorecards[targetId];
+          const subjectScorecards = mappedSubjects.map(s => s.scorecard).filter(Boolean);
+          const batchScorecard = dbService.mergeRatingScorecards(
+            [batchSelfScorecard, ...subjectScorecards].filter(Boolean),
+            [targetId]
+          );
+
+          setBatches([{
+            ...b,
+            subjectCount: mappedSubjects.length,
+            totalLectureCount: mappedSubjects.reduce((acc, s) => acc + s.lectureCount, 0),
+            rating: batchScorecard.rating ?? undefined,
+            trustScore: batchScorecard.trustScore ?? undefined,
+            reviewCount: batchScorecard.reviewCount,
+            scorecard: batchScorecard,
+            subjects: mappedSubjects
+          } as any]);
         }
         setIsLoading(false);
       } catch (err: unknown) {

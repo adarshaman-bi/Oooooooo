@@ -1,7 +1,8 @@
 import React from 'react';
-import { GraduationCap, BookOpen, Atom, TestTube, Binary, Leaf, Microscope, Star, ChevronRight } from 'lucide-react';
+import { GraduationCap, BookOpen, Atom, TestTube, Binary, Leaf, Microscope, ChevronRight } from 'lucide-react';
 import { Batch } from '../types';
 import { SafeImage } from './SafeImage';
+import ScorecardSummary from './ScorecardSummary';
 
 interface BatchCardProps {
   batch: Batch;
@@ -51,6 +52,13 @@ export function BatchCard({ batch, subjectCount, onClick }: BatchCardProps) {
     batch_pw_prachand:        '#34D399',
   };
   const iconColor = iconColors[batch.id] || '#A1A1AA';
+  const scorecard = batch.scorecard || {
+    rating: batch.rating || null,
+    trustScore: batch.trustScore || null,
+    reviewCount: batch.reviewCount || 0,
+    positiveReviewCount: 0,
+    sourceEntityIds: [batch.id]
+  };
 
   return (
     <div
@@ -116,16 +124,7 @@ export function BatchCard({ batch, subjectCount, onClick }: BatchCardProps) {
                 <BookOpen className="w-3.5 h-3.5 text-zinc-500" />
                 {subjectCount ?? '—'} subjects
               </span>
-              {/* Rating */}
-              <span className="flex items-center gap-0.5 text-[10px] font-mono text-amber-500/90 font-semibold">
-                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                {batch.rating ? `${Number(batch.rating).toFixed(1)} ★` : '4.8 ★'}
-              </span>
-              {batch.trustScore && (
-                <span className="text-[9px] font-mono text-zinc-400 font-semibold border border-zinc-900 bg-zinc-950 px-1.5 py-0.5 rounded">
-                  Trust: {Number(batch.trustScore).toFixed(1)}
-                </span>
-              )}
+              <ScorecardSummary scorecard={scorecard} variant="inline" />
             </div>
             <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" />
           </div>

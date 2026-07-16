@@ -14,6 +14,7 @@ import { InstituteCard } from './InstituteCard';
 import { Batch } from '../types';
 import TeacherCard from './TeacherCard';
 import teachersData from '../config/teachersData.json';
+import { ScorecardSummary } from './ScorecardSummary';
 
 function formatDuration(seconds: number): string {
   if (!seconds || isNaN(seconds) || seconds <= 0) return '';
@@ -108,11 +109,34 @@ export default function HomeDashboard({
 
   const [watchHistory, setWatchHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'playlist' | 'one_shot' | 'institute'>('playlist');
-  const [institutes, setInstitutes] = useState<any[]>([]);
+  const [institutes, setInstitutes] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('biovised_cached_institutes');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   // Use validated batches from App.tsx if provided (they have subjects + ratings hydrated).
   // Fall back to local cache/fetch only when parent hasn't supplied them yet.
-  const [localBatches, setLocalBatches] = useState<any[]>([]);
+  const [localBatches, setLocalBatches] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('biovised_cached_batches');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const displayBatches = (validatedBatches && validatedBatches.length > 0) ? validatedBatches : localBatches;
+
+  const [localVideos, setLocalVideos] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('biovised_cached_lectures');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [isLoadingAux, setIsLoadingAux] = useState(true);
 
@@ -164,6 +188,7 @@ export default function HomeDashboard({
   const { data: playData, isLoading: playlistsLoading } = useSWR(SWR_KEYS.PLAYLISTS, fetchActivePlaylists, swrOptions);
   const { data: rawVideoData, isLoading: videosLoading } = useSWR(SWR_KEYS.VIDEOS, fetchActiveVideos, swrOptions);
   const { data: dbTeachers } = useSWR(SWR_KEYS.TEACHERS, fetchActiveTeachers, swrOptions);
+  const displayVideos = rawVideoData || localVideos;
 
   const loading = channelsLoading || playlistsLoading || videosLoading || isLoadingAux;
   const hasCache = playlists.length > 0 && channels.length > 0;
@@ -347,7 +372,7 @@ export default function HomeDashboard({
   });
 
   // Map raw videos and prepare content rows
-  const videos = (rawVideoData || []).map(mapVideoRow);
+  const videos = (displayVideos || []).map(mapVideoRow);
 
   // Group videos for player card rows
   const recentlyAddedVideos = [...videos]
@@ -623,26 +648,36 @@ export default function HomeDashboard({
                                 <h4 className="text-xs font-semibold text-zinc-200 line-clamp-2 leading-snug group-hover:text-white transition-colors uppercase tracking-tight">
                                   {play.title}
                                 </h4>
-                                <div className="flex items-center justify-between mt-1">
-                                  <p
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (play.channelId) {
-                                        onSelectChannel?.(play.channelId, 'institute');
-                                      } else if (play.teacherId) {
-                                        onSelectChannel?.(play.teacherId, 'teacher');
-                                      }
-                                    }}
-                                    className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest hover:text-[#f3b093] hover:underline cursor-pointer"
-                                  >
-                                    {play.teacherName || 'Verified Educator'}
-                                  </p>
+                                <div className="flex items-center justify-between mt-1 gap-2">
+                                  <div className="flex items-center gap-1.5 min-w-0 max-w-[45%]">
+                                    {play.channelAvatar && (
+                                      <img
+                                        src={play.channelAvatar}
+                                        alt={play.teacherName}
+                                        className="w-4 h-4 rounded-full border border-zinc-800 flex-shrink-0 object-cover"
+                                      />
+                                    )}
+                                    <p
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (play.channelId) {
+                                          onSelectChannel?.(play.channelId, 'institute');
+                                        } else if (play.teacherId) {
+                                          onSelectChannel?.(play.teacherId, 'teacher');
+                                        }
+                                      }}
+                                      className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest hover:text-[#f3b093] hover:underline cursor-pointer truncate"
+                                    >
+                                      {play.teacherName || 'Verified Educator'}
+                                    </p>
+                                  </div>
+                                  <ScorecardSummary scorecard={play.scorecard} variant="inline" />
                                   {play.totalDurationSeconds > 0 && (
-                                    <div className="flex items-center gap-1 text-[9px] font-mono text-zinc-500">
+                                    <div className="flex items-center gap-1 text-[9px] font-mono text-zinc-500 shrink-0">
                                       <Clock className="w-3 h-3 text-zinc-750" />
                                       <span>{formatDuration(play.totalDurationSeconds)}</span>
                                     </div>
-                                  ) || <div className="text-[9px] font-mono text-[#00D4AA] font-bold">VERIFIED</div>}
+                                  ) || <div className="text-[9px] font-mono text-[#00D4AA] font-bold shrink-0">VERIFIED</div>}
                                 </div>
                               </div>
                             </div>
@@ -693,7 +728,7 @@ export default function HomeDashboard({
                       <TeacherCard
                         t={t}
                         dbTeacher={dbTeacher}
-                        videos={rawVideoData || []}
+                        videos={displayVideos || []}
                         followedIds={followedIds}
                         handleFollowToggle={handleFollowToggle}
                         setDetailModal={(modal) => onSelectChannel?.(modal.id, modal.type)}
