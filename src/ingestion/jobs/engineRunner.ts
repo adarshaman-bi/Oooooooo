@@ -1,7 +1,9 @@
 import { supabase } from '../../utils/supabaseClient';
 import { ALLOWED_CHANNELS } from '../config/channels';
 import { CrawlQueueManager } from '../queue/crawlQueueManager';
-import { fetchAllChannelPlaylists, fetchAllPlaylistItems, fetchVideoDetailsBatch } from '../api/youtubeClient';
+import { ChannelCollector } from '../collectors/channelCollector';
+import { PlaylistCollector } from '../collectors/playlistCollector';
+import { VideoCollector } from '../collectors/videoCollector';
 import { DbSeeder } from '../db/dbSeeder';
 import { canonicalizeText } from '../normalizers/textNormalizer';
 import { classifyDimensions } from '../classifiers/dimensions';
@@ -9,6 +11,9 @@ import { detectSubject } from '../classifiers/subjectDetector';
 import { detectChapters } from '../classifiers/chapterDetector';
 import { detectTeacher } from '../classifiers/teacherDetector';
 import { validateAcademicQuality } from '../validators/qualityGate';
+import { fetchVideoDetailsBatch } from '../api/youtubeClient';
+
+
 // Simple locally inline Duration helper in case durationNormalizer isn't fully set up
 export function parseISO8601DurationToSeconds(isoDuration: string): number {
   if (!isoDuration) return 0;
@@ -56,11 +61,13 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
 
       try {
         if (item.entityType === 'channel') {
+          // Fetch channel metadata
+          await ChannelCollector.collectChannelMetadata(runId, item.entityId);
+
           // Fetch channel playlists
-          const playlists = await fetchAllChannelPlaylists(item.entityId);
+          const playlists = await PlaylistCollector.collectChannelPlaylists(runId, item.entityId);
           console.log(`   - Found ${playlists.length} playlists for channel.`);
 
-          // Snapshot channel payload
           const snapshotId = await DbSeeder.saveSourceSnapshot(runId, item.entityId, 'channel', playlists);
 
           for (const pl of playlists) {
@@ -88,10 +95,9 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
 
         } else if (item.entityType === 'playlist') {
           // Fetch playlist items (videos)
-          const videoItems = await fetchAllPlaylistItems(item.entityId);
+          const videoItems = await VideoCollector.collectPlaylistVideos(runId, item.entityId);
           console.log(`   - Found ${videoItems.length} videos inside playlist.`);
 
-          // Snapshot playlist items payload
           const snapshotId = await DbSeeder.saveSourceSnapshot(runId, item.entityId, 'playlist', videoItems);
 
           // Get details batch
