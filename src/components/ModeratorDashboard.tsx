@@ -1564,7 +1564,7 @@ export default function ModeratorDashboard() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`group flex flex-col items-center justify-between p-3.5 rounded-xl border transition-all duration-300 text-center cursor-pointer min-h-[96px] ${
                   isActive
-                    ? 'bg-[#0E0E0E] border-zinc-800 text-white shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
+                    ? 'bg-[#0D0D0C] border-zinc-800 text-white shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
                     : 'bg-transparent border-transparent text-zinc-450 hover:text-white hover:bg-[#0A0A0B]/50'
                 }`}
               >
@@ -2292,23 +2292,23 @@ export default function ModeratorDashboard() {
         <div className="space-y-6">
           {/* Header block with stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-[#101011] border border-[#1b1c1d] p-4 rounded-xl text-left">
+            <div className="bg-[#0D0D0C] border border-[#1b1c1d] p-4 rounded-xl text-left">
               <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-500">Total System Lectures</span>
               <p className="text-2xl font-semibold font-mono text-zinc-100 mt-1">{lecturesForApproval.length}</p>
             </div>
-            <div className="bg-[#101011] border border-[#1b1c1d] p-4 rounded-xl text-left">
+            <div className="bg-[#0D0D0C] border border-[#1b1c1d] p-4 rounded-xl text-left">
               <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-emerald-500">Verified & Approved</span>
               <p className="text-2xl font-semibold font-mono text-emerald-400 mt-1">
                 {lecturesForApproval.filter(l => l.verificationStatus === 'verified').length}
               </p>
             </div>
-            <div className="bg-[#101011] border border-[#1b1c1d] p-4 rounded-xl text-left">
+            <div className="bg-[#0D0D0C] border border-[#1b1c1d] p-4 rounded-xl text-left">
               <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-amber-500">Pending Review</span>
               <p className="text-2xl font-semibold font-mono text-amber-400 mt-1">
                 {lecturesForApproval.filter(l => !l.verificationStatus || l.verificationStatus === 'pending').length}
               </p>
             </div>
-            <div className="bg-[#101011] border border-[#1b1c1d] p-4 rounded-xl text-left">
+            <div className="bg-[#0D0D0C] border border-[#1b1c1d] p-4 rounded-xl text-left">
               <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-rose-500">Rejected / Blocked</span>
               <p className="text-2xl font-semibold font-mono text-rose-400 mt-1">
                 {lecturesForApproval.filter(l => l.verificationStatus === 'rejected').length}
@@ -2330,7 +2330,7 @@ export default function ModeratorDashboard() {
           )}
 
           {/* Filters and search tools */}
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-[#101011] border border-neutral-900 p-4 rounded-xl">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-[#0D0D0C] border border-neutral-900 p-4 rounded-xl">
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
               {(['all', 'pending', 'verified', 'rejected'] as const).map((mode) => (
                 <button
@@ -2416,7 +2416,7 @@ export default function ModeratorDashboard() {
                       return (
                         <div
                           key={item.id}
-                          className="bg-[#101011] border border-neutral-900 hover:border-zinc-800 transition-all rounded-xl p-5 flex flex-col md:flex-row gap-5 items-start text-left"
+                          className="bg-[#0D0D0C] border border-neutral-900 hover:border-zinc-800 transition-all rounded-xl p-5 flex flex-col md:flex-row gap-5 items-start text-left"
                         >
                           {/* Miniature Video Aspect Ratio Frame */}
                           <div className="relative aspect-video w-full md:w-44 bg-zinc-950 rounded-lg overflow-hidden shrink-0 border border-neutral-900">
@@ -2572,7 +2572,7 @@ export default function ModeratorDashboard() {
           {/* Video Preview Overlay Modal */}
           {previewLectureUrl && (
             <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-              <div className="bg-[#101011] border border-neutral-900 rounded-xl max-w-2xl w-full p-4 space-y-4">
+              <div className="bg-[#0D0D0C] border border-neutral-900 rounded-xl max-w-2xl w-full p-4 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest">Lecture Quality Inspector</span>
                   <button
@@ -2601,7 +2601,7 @@ export default function ModeratorDashboard() {
         <div className="space-y-8 animate-fade-in text-zinc-100">
           
           {/* Top Banner introducing Phase 4 Edge Architecture */}
-          <div className="bg-[#101011] border border-neutral-900 rounded-xl p-6 relative overflow-hidden text-left">
+          <div className="bg-[#0D0D0C] border border-neutral-900 rounded-xl p-6 relative overflow-hidden text-left">
             <div className="absolute top-0 right-0 p-8 opacity-[0.02]">
               <Database className="w-48 h-48 text-pink-500" />
             </div>
@@ -2630,7 +2630,7 @@ export default function ModeratorDashboard() {
             <h3 className="text-base font-medium text-zinc-100 flex items-center gap-2">
               <Layers className="w-4.5 h-4.5 text-zinc-400" /> HTTP Header Specification Matrix
             </h3>
-            <div className="overflow-x-auto bg-[#101011] border border-neutral-900 rounded-xl">
+            <div className="overflow-x-auto bg-[#0D0D0C] border border-neutral-900 rounded-xl">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-neutral-900 bg-neutral-950/40 font-mono text-[10px] uppercase tracking-wider text-zinc-400">
@@ -2706,7 +2706,7 @@ export default function ModeratorDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left">
             
             {/* Control Panel Card */}
-            <div className="bg-[#101011] border border-neutral-900 rounded-xl p-5 space-y-4 flex flex-col justify-between">
+            <div className="bg-[#0D0D0C] border border-neutral-900 rounded-xl p-5 space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
                 <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-pink-400 flex items-center gap-1">
                   <Terminal className="w-3 h-3" /> Testing Scope Details

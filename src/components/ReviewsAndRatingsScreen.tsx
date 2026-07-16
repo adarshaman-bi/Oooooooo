@@ -7,7 +7,7 @@ import {
 import { supabase } from "../utils/supabaseClient";
 
 const TURMERIC = "#e0a527";   // Rating stars color
-const ACCENT_BLUE = "#3B82F6"; // Theme blue accent
+const ACCENT_BLUE = "#FFFFFF"; // Grayscale upvote highlight
 
 interface Review {
   id: string;
@@ -583,7 +583,7 @@ export default function ReviewsAndRatingsScreen({
   }, [fetchAllReviews, flashToast]);
 
   return (
-    <div className="fixed inset-0 z-55 bg-[#08080A] text-white flex flex-col font-sans">
+    <div className="fixed inset-0 z-55 bg-[#000000] text-white flex flex-col font-sans">
       {/* Toast Alert */}
       <AnimatePresence>
         {toast && (
@@ -599,7 +599,7 @@ export default function ReviewsAndRatingsScreen({
       </AnimatePresence>
 
       {/* Header bar */}
-      <header className="h-14 border-b border-white/5 flex items-center justify-between px-4 md:px-6 shrink-0 bg-[#0E0E0F]">
+      <header className="h-14 border-b border-white/5 flex items-center justify-between px-4 md:px-6 shrink-0 bg-[#0F0F0F]">
         <div className="flex items-center gap-3">
           <button onClick={onClose} className="p-1 rounded-full hover:bg-white/5 transition-colors cursor-pointer text-zinc-400 hover:text-white">
             <ArrowLeft size={20} />
@@ -614,14 +614,14 @@ export default function ReviewsAndRatingsScreen({
             if (!currentUserId) flashToast("Sign in to review");
             else setShowComposer(true);
           }}
-          className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors cursor-pointer animate-none"
+          className="px-4 py-1.5 rounded-full text-xs font-bold text-black bg-white hover:bg-zinc-200 transition-colors cursor-pointer animate-none"
         >
           Write a Review
         </button>
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 overflow-y-auto min-h-0 bg-[#08080A] flex flex-col md:flex-row">
+      <div className="flex-1 overflow-y-auto min-h-0 bg-[#000000] flex flex-col md:flex-row">
         {activeThreadRoot ? (
           /* SCREEN 3: Threaded Replies View */
           <ThreadView
@@ -740,7 +740,7 @@ function OverviewAndList({
   return (
     <div className="w-full flex flex-col md:flex-row flex-1">
       {/* Analytics Panel */}
-      <div className="w-full md:w-80 border-r border-white/5 bg-[#0E0E0F] p-5 flex flex-col gap-6 shrink-0 text-left">
+      <div className="w-full md:w-80 border-r border-white/5 bg-[#0F0F0F] p-5 flex flex-col gap-6 shrink-0 text-left">
         <div>
           <h3 className="text-white/40 text-[11px] font-mono uppercase tracking-wider">Audience Rating</h3>
           <div className="mt-3 flex items-center gap-4">
@@ -805,7 +805,7 @@ function OverviewAndList({
       </div>
 
       {/* Reviews List Column */}
-      <div className="flex-1 flex flex-col p-5 bg-[#08080A]">
+      <div className="flex-1 flex flex-col p-5 bg-[#000000]">
         {/* Filters and sorting toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/5 text-left shrink-0">
           {/* Star Filter Chips */}
@@ -814,7 +814,7 @@ function OverviewAndList({
               onClick={() => setFilterStar(null)}
               className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                 filterStar === null
-                  ? "bg-blue-600/10 border-blue-500/30 text-blue-400"
+                  ? "bg-white/10 border-white/20 text-white"
                   : "bg-zinc-900/60 border-zinc-800/80 text-zinc-400 hover:text-white"
               }`}
             >
@@ -829,7 +829,7 @@ function OverviewAndList({
                   onClick={() => setFilterStar(active ? null : s)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                     active
-                      ? "bg-blue-600/10 border-blue-500/30 text-blue-400"
+                      ? "bg-white/10 border-white/20 text-white"
                       : "bg-zinc-900/60 border-zinc-800/80 text-zinc-400 hover:text-white"
                   }`}
                 >
@@ -877,7 +877,7 @@ function OverviewAndList({
                   if (!currentUserId) flashToast("Sign in to review");
                   else setShowComposer(true);
                 }}
-                className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors cursor-pointer"
+                className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-black bg-white hover:bg-zinc-200 transition-colors cursor-pointer"
               >
                 Write a Review
               </button>
@@ -951,7 +951,7 @@ function ReviewCard({
     <div className="p-4 border border-white/5 bg-white/[0.01] rounded-xl text-left hover:bg-white/[0.02] transition-colors relative">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center text-xs font-bold text-blue-400 shrink-0">
+          <div className="w-8 h-8 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center text-xs font-bold text-zinc-350 shrink-0">
             {getInitials(review.user_display_name)}
           </div>
           <div className="min-w-0">
@@ -1013,7 +1013,7 @@ function ReviewCard({
           animate={{ scale: upvoted ? [1, 1.25, 1] : 1 }}
           transition={{ duration: 0.2 }}
           className={`flex items-center gap-1.5 text-[11px] font-bold cursor-pointer transition-colors ${
-            upvoted ? "text-blue-500" : "text-white/50 hover:text-white"
+            upvoted ? "text-white" : "text-white/50 hover:text-white"
           }`}
         >
           <ThumbsUp size={12} fill={upvoted ? ACCENT_BLUE : "transparent"} />
@@ -1115,9 +1115,9 @@ function ThreadView({
   };
 
   return (
-    <div className="flex-grow flex flex-col bg-[#08080A] h-full w-full relative">
+    <div className="flex-grow flex flex-col bg-[#000000] h-full w-full relative">
       {/* Sub Header for Thread navigation */}
-      <div className="h-10 border-b border-white/5 flex items-center px-4 shrink-0 bg-[#0E0E0F]">
+      <div className="h-10 border-b border-white/5 flex items-center px-4 shrink-0 bg-[#0F0F0F]">
         <button onClick={onBack} className="text-zinc-500 hover:text-white text-xs font-bold flex items-center gap-1 cursor-pointer">
           <ArrowLeft size={12} /> Back to all reviews
         </button>
@@ -1171,7 +1171,7 @@ function ThreadView({
       </div>
 
       {/* Sticky Bottom Reply Composer */}
-      <div className="absolute bottom-0 inset-x-0 bg-[#0E0E0F] border-t border-white/5 px-4 py-3 shrink-0 flex flex-col gap-1.5 z-10">
+      <div className="absolute bottom-0 inset-x-0 bg-[#0F0F0F] border-t border-white/5 px-4 py-3 shrink-0 flex flex-col gap-1.5 z-10">
         {replyTarget && (
           <div className="flex items-center justify-between text-xs text-zinc-400 bg-white/[0.02] px-3 py-1 rounded">
             <span>Replying to <span className="font-semibold text-white">@{replyTarget.user_display_name}</span></span>
@@ -1246,7 +1246,7 @@ function ThreadNodeComponent({
       <div className="pl-4 mt-2">
         <button
           onClick={() => onSubThread(node)}
-          className="text-xs text-blue-400 hover:underline flex items-center gap-1.5 py-1.5 cursor-pointer font-semibold"
+          className="text-xs text-zinc-300 hover:underline flex items-center gap-1.5 py-1.5 cursor-pointer font-semibold"
         >
           <CornerDownRight size={12} /> Continue this thread
         </button>
@@ -1302,7 +1302,7 @@ function ThreadNodeComponent({
           animate={{ scale: upvoted ? [1, 1.25, 1] : 1 }}
           transition={{ duration: 0.2 }}
           className={`flex items-center gap-1 text-[10px] font-bold cursor-pointer transition-colors ${
-            upvoted ? "text-blue-500" : "text-white/40 hover:text-white"
+            upvoted ? "text-white" : "text-white/40 hover:text-white"
           }`}
         >
           <ThumbsUp size={10} fill={upvoted ? ACCENT_BLUE : "transparent"} />
@@ -1367,7 +1367,7 @@ function WriteReviewComposer({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: "100%" }}
       transition={{ type: "spring", damping: 25, stiffness: 220 }}
-      className="fixed inset-0 z-[60] bg-[#08080A] text-white flex flex-col"
+      className="fixed inset-0 z-[60] bg-[#000000] text-white flex flex-col"
     >
       <header className="h-14 border-b border-white/5 flex items-center justify-between px-4">
         <button onClick={onClose} className="p-1 text-zinc-400 hover:text-white cursor-pointer">
@@ -1377,7 +1377,7 @@ function WriteReviewComposer({
         <button
           onClick={handlePost}
           disabled={submitting || !text.trim()}
-          className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-40 transition-colors cursor-pointer"
+          className="px-4 py-1.5 rounded-full text-xs font-bold text-black bg-white hover:bg-zinc-200 disabled:opacity-40 transition-colors cursor-pointer"
         >
           {submitting ? "Posting..." : "Post Review"}
         </button>
@@ -1410,7 +1410,7 @@ function WriteReviewComposer({
             type="button"
             onClick={() => setHelpfulToggle(!helpfulToggle)}
             className={`w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer focus:outline-none flex items-center ${
-              helpfulToggle ? "bg-[#3B82F6] justify-end" : "bg-zinc-800 justify-start"
+              helpfulToggle ? "bg-zinc-300 justify-end" : "bg-zinc-800 justify-start"
             }`}
           >
             <motion.div layout className="w-5 h-5 rounded-full bg-white shadow" />

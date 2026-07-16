@@ -16,7 +16,8 @@
   --color-muted-accent: #FFFFFF;
   --color-neutral-structure: #1A1A1A;
   --color-secondary-accent: #FFFFFF;
-  --color-ratings: #FFEFD5;
+  --color-ratings: #FFB800;
+  --color-trust: #22D3EE;
 
   --color-brand-dark: #000000;
   --color-brand-black: #000000;
@@ -213,9 +214,9 @@
   --color-amber-200: #1A1A1A;
   --color-amber-300: #A0A0A0;
   --color-amber-400: #EEEEEE;
-  --color-amber-500: #FFEFD5; /* ratings papaya whip! */
-  --color-amber-600: #FFEFD5;
-  --color-amber-700: #FFEFD5;
+  --color-amber-500: #FFB800;
+  --color-amber-600: #D97706;
+  --color-amber-700: #B45309;
   --color-amber-800: #1A1A1A;
   --color-amber-900: #101010;
   --color-amber-950: #0F0F0F;
@@ -225,15 +226,23 @@
   --color-yellow-200: #1A1A1A;
   --color-yellow-300: #A0A0A0;
   --color-yellow-400: #EEEEEE;
-  --color-yellow-500: #FFEFD5; /* ratings papaya whip! */
-  --color-yellow-600: #FFEFD5;
-  --color-yellow-700: #FFEFD5;
-  --color-yellow-800: #1A1A1A;
-  --color-yellow-900: #101010;
+  --color-yellow-500: #FFB800;
+  --color-yellow-600: #D97706;
+  --color-yellow-700: #B45309;
+  --color-yellow-950: #0F0F0F;
   --color-yellow-950: #0F0F0F;
 }
 
 /* Base custom styles with theme support */
+.text-ratings {
+  color: var(--color-ratings, #FFB800) !important;
+}
+.text-trust {
+  color: var(--color-trust, #22D3EE) !important;
+}
+.fill-ratings {
+  fill: var(--color-ratings, #FFB800) !important;
+}
 body, html, #root {
   font-family: var(--font-sans);
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -457,6 +466,7 @@ body, html, #root {
 .light-theme .text-yellow-500,
 .light-theme .text-\[\#FFEFD5\],
 .light-theme .text-amber-500,
+.light-theme .text-ratings,
 .light-theme .rating-stars {
   color: var(--rating-gold) !important;
 }

@@ -42,7 +42,11 @@ export function ScorecardSummary({
         </span>
         <span className="bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-lg text-zinc-300 flex items-center gap-1.5 shadow-sm">
           <ShieldCheck className={`w-3.5 h-3.5 ${hasReviews ? 'text-emerald-400' : 'text-zinc-600'}`} />
-          {hasReviews ? `Trust: ${formatTrust(stats.trustScore!, trustScale)}` : 'Trust pending'}
+          {hasReviews ? (
+            <>
+              Trust: <span className="text-trust">{formatTrust(stats.trustScore!, trustScale)}</span>
+            </>
+          ) : 'Trust pending'}
         </span>
         <span className="bg-zinc-900 border border-zinc-850 px-2.5 py-1 rounded-lg text-zinc-300 flex items-center gap-1.5 shadow-sm">
           <MessageSquare className="w-3.5 h-3.5 text-zinc-500" />
@@ -59,7 +63,7 @@ export function ScorecardSummary({
           <Star className={`w-3 h-3 ${hasReviews ? 'fill-amber-500 text-amber-500' : 'text-zinc-600'}`} />
           {hasReviews ? stats.rating!.toFixed(1) : 'No ratings'}
         </span>
-        <span className={hasReviews ? 'text-zinc-400' : 'text-zinc-600'}>
+        <span className={hasReviews ? 'text-trust' : 'text-zinc-600'}>
           {hasReviews ? `Trust ${formatTrust(stats.trustScore!, trustScale)}` : 'Trust pending'}
         </span>
       </span>
@@ -72,7 +76,7 @@ export function ScorecardSummary({
         <Star className={`w-3.5 h-3.5 ${hasReviews ? 'fill-amber-500 text-amber-500' : 'text-zinc-600'}`} />
         {hasReviews ? stats.rating!.toFixed(1) : 'No ratings'}
       </span>
-      <span className={`border border-zinc-900 bg-zinc-950 px-1.5 py-0.5 rounded ${hasReviews ? 'text-zinc-400' : 'text-zinc-600'}`}>
+      <span className={`border border-zinc-900 bg-zinc-950 px-1.5 py-0.5 rounded ${hasReviews ? 'text-trust' : 'text-zinc-600'}`}>
         {hasReviews ? `Trust ${formatTrust(stats.trustScore!, trustScale)}` : 'Trust pending'}
       </span>
       <span className="text-zinc-500">

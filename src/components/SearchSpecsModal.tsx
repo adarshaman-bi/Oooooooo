@@ -95,7 +95,7 @@ export default function SearchSpecsModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative w-full max-w-lg bg-[#0E0E0E] border border-[#1F1F1F] shadow-[0_12px_45px_rgba(0,0,0,0.9)] rounded-2xl p-6 overflow-hidden z-10 text-left space-y-6"
+          className="relative w-full max-w-lg bg-[#0D0D0C] border border-[#1F1F1F] shadow-[0_12px_45px_rgba(0,0,0,0.9)] rounded-2xl p-6 overflow-hidden z-10 text-left space-y-6"
         >
           {/* Header */}
           <div className="flex items-start justify-between border-b border-[#1A1A1A] pb-4">
@@ -157,7 +157,7 @@ export default function SearchSpecsModal({
                     <select
                       value={testDelivery}
                       onChange={(e) => setTestDelivery && setTestDelivery(e.target.value)}
-                      className="w-full bg-[#030303] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-3 py-2 text-xs text-white outline-none transition-all cursor-pointer font-sans"
+                      className="w-full bg-[#0D0D0C] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-3 py-2 text-xs text-white outline-none transition-all cursor-pointer font-sans"
                     >
                       <option value="ALL">All Delivery Modes</option>
                       <option value="ONLINE">Online CBT Format</option>
@@ -172,7 +172,7 @@ export default function SearchSpecsModal({
                     <select
                       value={testVerification}
                       onChange={(e) => setTestVerification && setTestVerification(e.target.value)}
-                      className="w-full bg-[#030303] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-3 py-2 text-xs text-white outline-none transition-all cursor-pointer font-sans"
+                      className="w-full bg-[#0D0D0C] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-3 py-2 text-xs text-white outline-none transition-all cursor-pointer font-sans"
                     >
                       <option value="ALL">All Providers</option>
                       <option value="VERIFIED">Verified / Certified Providers</option>
@@ -186,7 +186,7 @@ export default function SearchSpecsModal({
                   <div className="space-y-2">
                     <label className="block text-[10.5px] uppercase font-mono font-bold text-zinc-400 tracking-wider flex items-center justify-between">
                       <span>Minimum Rating</span>
-                      <span className="text-[#FFEFD5] font-mono">{testMinRating ? `${testMinRating}★+` : 'Any rating'}</span>
+                      <span className="text-ratings font-mono">{testMinRating ? `${testMinRating}★+` : 'Any rating'}</span>
                     </label>
                     <input
                       type="range"
@@ -210,7 +210,7 @@ export default function SearchSpecsModal({
                     <select
                       value={testSortBy}
                       onChange={(e) => setTestSortBy && setTestSortBy(e.target.value as any)}
-                      className="w-full bg-[#030303] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-3 py-2 text-xs text-white outline-none transition-all cursor-pointer font-sans"
+                      className="w-full bg-[#0D0D0C] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-3 py-2 text-xs text-white outline-none transition-all cursor-pointer font-sans"
                     >
                       <option value="trustScore">Verified Trust Score</option>
                       <option value="rating">Stars Rating (High to Low)</option>
@@ -254,7 +254,7 @@ export default function SearchSpecsModal({
                   <select
                     value={examFilter}
                     onChange={(e) => setExamFilter(e.target.value)}
-                    className="w-full bg-[#030303] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition-all cursor-pointer font-sans"
+                    className="w-full bg-[#0D0D0C] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition-all cursor-pointer font-sans"
                   >
                     <option value="All">All Exams & Goals</option>
                     <option value="JEE">JEE Main & Advanced</option>
@@ -297,7 +297,7 @@ export default function SearchSpecsModal({
                     <select
                       value={sortBy}
                       onChange={(e: any) => setSortBy(e.target.value)}
-                      className="w-full bg-[#030303] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition-all cursor-pointer font-sans"
+                      className="w-full bg-[#0D0D0C] border border-[#1C1C1C] focus:border-zinc-550 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition-all cursor-pointer font-sans"
                     >
                       <option value="trustScore">Verified Trust Score</option>
                       <option value="rating">Student stars rating</option>

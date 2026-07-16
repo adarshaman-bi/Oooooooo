@@ -11,7 +11,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, showLiveBadge = false }) =
   const thumbnail = video.thumbnail_url || 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=800&q=80';
 
   return (
-    <div className="bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden shadow-lg">
+    <div className="bg-[#0D0D0C] border border-zinc-800 rounded-2xl overflow-hidden shadow-lg">
       <div className="relative aspect-video">
         <img src={thumbnail} alt={title} className="h-full w-full object-cover" />
         {showLiveBadge && (

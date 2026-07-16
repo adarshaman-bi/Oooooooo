@@ -252,7 +252,7 @@ export async function fetchTeachers(filters?: {
 }): Promise<TeacherProfile[]> {
   try {
     // Build server-side filters where possible to avoid full-table scans
-    let query = supabase.from('teachers').select('*');
+    let query = supabase.from('teachers').select('id, name, avatar, subject, subjects, rating, followers_count, bio, exams, is_verified, created_at, features');
     if (filters?.subject && filters.subject !== 'All') {
       query = query.eq('subject', filters.subject);
     }
@@ -294,7 +294,7 @@ export async function fetchTeacherById(id: string): Promise<TeacherProfile | nul
 // INSTITUTES SERVICE
 export async function fetchInstitutes(): Promise<InstituteProfile[]> {
   try {
-    const { data, error } = await supabase.from('institutes').select('*');
+    const { data, error } = await supabase.from('institutes').select('id, name, logo, description, rating, review_count, trust_score, followers_count, official_links, exams, is_verified, created_at');
     if (error) throw error;
     return (data || []).map(mapInstituteRow);
   } catch (error: unknown) {
@@ -379,6 +379,8 @@ export async function fetchLectures(filters?: {
   contentType?: 'lecture' | 'oneshot' | 'playlist';
   teacherId?: string;
   instituteId?: string;
+  playlistId?: string;
+  playlistIds?: string[];
   includeUnverified?: boolean;
 }): Promise<Lecture[]> {
   try {
@@ -386,10 +388,12 @@ export async function fetchLectures(filters?: {
       let query = q;
       if (filters?.teacherId) query = query.eq('teacher_id', filters.teacherId);
       if (filters?.instituteId) query = query.eq('institute_id', filters.instituteId);
+      if (filters?.playlistId) query = query.eq('playlist_id', filters.playlistId);
+      if (filters?.playlistIds && filters.playlistIds.length > 0) query = query.in('playlist_id', filters.playlistIds);
       if (filters?.subject && filters.subject !== 'All') query = query.eq('subject', filters.subject);
       query = query.order('created_at', { ascending: false, nullsFirst: false });
       return query;
-    });
+    }, 1000, 'id, title, video_url, duration, category, playlist_id, views, thumbnail_url, subject, exam_type, content_type, teacher_id, teacher_name, likes_count, duration_seconds, is_active, created_at, updated_at');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let lectures = (data || []).map((v: Record<string, any>) => ({
@@ -442,7 +446,7 @@ export async function fetchPlaylists(filters?: {
   teacherId?: string;
 }): Promise<Playlist[]> {
   try {
-    const { data, error } = await supabase.from('playlists').select('*').gt('lectures_count', 0);
+    const { data, error } = await supabase.from('playlists').select('id, title, category, thumbnail, description, teacher_id, lectures_count, exam_type, cover_thumbnail_url, channel_title, channel_id, channel_thumbnail_url, content_type, total_duration_seconds, subject_tags, exam_tags, created_at, updated_at').gt('lectures_count', 0);
     if (error) throw error;
     
     let playlists = (data || []).map((p: any) => {
@@ -516,7 +520,7 @@ export async function fetchPlaylistById(id: string): Promise<Playlist | null> {
 // BATCHES SERVICE
 export async function fetchBatches(instituteId?: string): Promise<Batch[]> {
   try {
-    let query = supabase.from('batches').select('*').eq('is_active', true);
+    let query = supabase.from('batches').select('id, name, institute_id, institute_name, subject, teacher_id, teacher_name, price, discount_price, features, created_at, exam_type, description, image_url, is_active, channel_name, youtube_channel_id').eq('is_active', true);
     if (instituteId) {
       query = query.eq('institute_id', instituteId);
     }
@@ -556,7 +560,7 @@ export async function fetchBatchSubjects(batchId: string): Promise<BatchSubject[
   try {
     const { data, error } = await supabase
       .from('batch_subjects')
-      .select('*')
+      .select('id, batch_id, subject, teacher_id, teacher_name, playlist_id, playlist_title, exam_type, sort_order, created_at')
       .eq('batch_id', batchId)
       .order('sort_order', { ascending: true });
     if (error) throw error;
@@ -619,7 +623,7 @@ export async function fetchReviews(targetId: string): Promise<Review[]> {
   try {
     const { data, error } = await supabase
       .from('reviews')
-      .select('*')
+      .select('id, entity_id, entity_type, user_id, user_display_name, rating, comment, is_flagged, features, created_at')
       .eq('entity_id', targetId)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -888,7 +892,7 @@ export async function fetchWatchLaterLectures(): Promise<Lecture[]> {
   try {
     const ids = await fetchWatchLaterIds();
     if (ids.length === 0) return [];
-    const { data, error } = await supabase.from('videos').select('*').in('id', ids);
+    const { data, error } = await supabase.from('videos').select('id, title, video_url, duration, category, playlist_id, views, thumbnail_url, subject, exam_type, content_type, teacher_id, teacher_name, likes_count, duration_seconds, is_active, created_at, updated_at').in('id', ids);
     if (error) throw error;
     return (data || []).map((v: any) => ({
       id: v.id,
@@ -1350,7 +1354,7 @@ export async function updateLectureVerification(
 
 export async function fetchAllChannels(): Promise<YouTubeChannel[]> {
   try {
-    const { data, error } = await supabase.from('channels').select('*').order('added_at', { ascending: false });
+    const { data, error } = await supabase.from('channels').select('id, name, avatar, subscribers, description, exams, added_at, is_active').order('added_at', { ascending: false });
     if (error) throw error;
     return (data || []).map((ch: any) => {
       const meta = typeof ch.exams === 'object' && ch.exams !== null && !Array.isArray(ch.exams) ? ch.exams : {};
@@ -1423,7 +1427,7 @@ export async function deleteChannel(channelId: string): Promise<void> {
 
 export async function fetchPlaylistsForAdmin(filters?: { channelId?: string; importStatus?: string }): Promise<Playlist[]> {
   try {
-    let query = supabase.from('playlists').select('*');
+    let query = supabase.from('playlists').select('id, title, category, thumbnail, description, teacher_id, lectures_count, exam_type, cover_thumbnail_url, channel_title, channel_id, channel_thumbnail_url, content_type, total_duration_seconds, subject_tags, exam_tags, created_at, updated_at');
     if (filters?.channelId) {
       const teacherIds = Object.keys(TEACHER_TO_CHANNEL).filter(tId => TEACHER_TO_CHANNEL[tId] === filters.channelId);
       if (teacherIds.length > 0) {
@@ -1488,7 +1492,7 @@ export async function fetchAllVideos(filters?: { playlistId?: string; subject?: 
       }
       query = query.order('created_at', { ascending: false, nullsFirst: false });
       return query;
-    });
+    }, 1000, 'id, playlist_id, teacher_id, teacher_name, title, thumbnail_url, duration, publish_date, created_at, views, likes_count, subject, exam_type, is_active');
     return (data || []).map((v: any) => ({
       id: v.id,
       videoId: v.id,

@@ -173,7 +173,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
         className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-5"
       >
         {/* Batch Info Card */}
-        <div className="p-5 rounded-2xl bg-[#0B0B0A] border border-[#1A1A1A] flex flex-col sm:flex-row gap-5 items-start sm:items-center relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
+        <div className="p-5 rounded-2xl bg-[#0D0D0C] border border-[#1A1A1A] flex flex-col sm:flex-row gap-5 items-start sm:items-center relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-amber-500/5 to-transparent blur-2xl pointer-events-none" />
           
           <div className="w-20 h-20 rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 flex-shrink-0 shadow-lg">
@@ -217,7 +217,10 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                 <button
                   key={sub.id}
                   onClick={() => handleSubjectClick(sub)}
-                  className="group bg-[#0B0B0A] border border-[#1C1C1C] hover:border-zinc-700/60 rounded-2xl p-4 flex items-center gap-4 transition-all duration-350 hover:shadow-[0_4px_24px_rgba(0,0,0,0.6)] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                  style={{
+                    ['--subject-color' as any]: media.color,
+                  }}
+                  className="group bg-[#0D0D0C] border border-[#1C1C1C] hover:border-[var(--subject-color)] rounded-2xl p-4 flex items-center gap-4 transition-all duration-350 hover:shadow-[0_4px_24px_rgba(0,0,0,0.6)] focus:outline-none"
                 >
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${media.gradient} shadow-lg shadow-black/40`}>
                     <SubIcon className="w-5 h-5 text-white" />
@@ -266,7 +269,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
               const SubIcon = media.Icon;
 
               return (
-                <div className="p-5 rounded-2xl bg-[#0B0B0A] border border-[#1A1A1A] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
+                <div className="p-5 rounded-2xl bg-[#0D0D0C] border border-[#1A1A1A] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.8)]">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-zinc-800/10 to-transparent blur-2xl pointer-events-none" />
                   
                   <div className="flex items-center gap-4 min-w-0">
@@ -318,7 +321,10 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                     <button
                       key={lec.id}
                       onClick={() => handlePlayLecture(lec)}
-                      className="group w-full bg-[#0B0B0A] border border-[#1C1C1C] hover:border-zinc-700/60 rounded-xl p-3 flex items-center gap-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-amber-500/40"
+                      style={{
+                        ['--subject-color' as any]: media.color,
+                      }}
+                      className="group w-full bg-[#0D0D0C] border border-[#1C1C1C] hover:border-[var(--subject-color)] rounded-xl p-3 flex items-center gap-3 transition-all duration-200 focus:outline-none"
                     >
                       {/* Monospace lecture index */}
                       <span className="text-[11px] font-mono font-bold text-zinc-500 w-6 text-center group-hover:text-amber-400 transition-colors">
@@ -396,7 +402,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                 </div>
 
                 {/* Teacher profile summary */}
-                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0B0B0A] border border-[#1A1A1A]">
+                <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0D0D0C] border border-[#1A1A1A]">
                   <AvatarInitials name={activeLecture.teacherName || 'Verified Educator'} color="#F59E0B" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-bold text-white truncate">{activeLecture.teacherName || 'Verified Educator'}</p>
@@ -413,7 +419,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
 
             {/* Right/Bottom Playlist Panel Column */}
             <div className="flex-1 flex flex-col bg-[#090909] overflow-hidden">
-              <div className="px-5 py-4 border-b border-[#1A1A1A] flex items-center justify-between flex-shrink-0 bg-[#0A0A0A]">
+              <div className="px-5 py-4 border-b border-[#1A1A1A] flex items-center justify-between flex-shrink-0 bg-[#0D0D0C]">
                 <h4 className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   ALL LECTURES ({lectures.length})
@@ -437,7 +443,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                       className={`w-full text-left rounded-xl p-2.5 flex items-center gap-3 transition-all border duration-200 focus:outline-none ${
                         isPlaying
                           ? 'bg-amber-500/[0.04] border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.04)]'
-                          : 'bg-[#0B0B0A]/80 border-[#1C1C1C] hover:border-zinc-700/60'
+                          : 'bg-[#0D0D0C]/80 border-[#1C1C1C] hover:border-zinc-700/60'
                       }`}
                     >
                       <span className={`text-[10px] font-mono font-bold w-5 text-center ${isPlaying ? 'text-amber-400' : 'text-zinc-500'}`}>

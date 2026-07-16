@@ -44,16 +44,17 @@ export const supabaseAdmin = serviceRoleKey
 export async function fetchPaginatedData<T = any>(
   table: string,
   buildQuery: (query: any) => any,
-  pageSize = 1000
+  pageSize = 1000,
+  selectQuery = '*'
 ): Promise<T[]> {
   let allRows: T[] = [];
   let from = 0;
   while (true) {
-    let query = supabase.from(table).select('*').range(from, from + pageSize - 1);
+    let query = supabase.from(table).select(selectQuery).range(from, from + pageSize - 1);
     query = buildQuery(query);
     const { data, error } = await query;
     if (error) throw error;
-    allRows = allRows.concat(data || []);
+    allRows = allRows.concat((data as any) || []);
     if (!data || data.length < pageSize) break;
     from += pageSize;
   }

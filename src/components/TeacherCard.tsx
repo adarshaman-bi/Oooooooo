@@ -33,8 +33,8 @@ const TrustRing = ({ score, size = 'large' }: { score: number; size?: 'small' | 
       <svg width={ringSize} height={ringSize} viewBox={`0 0 ${ringSize} ${ringSize}`} style={{ transform: 'rotate(-90deg)' }} className="ring-pulse">
         <defs>
           <linearGradient id={`mantisGrad-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#60A5FA" />
-            <stop offset="100%" stopColor="#3B82F6" />
+            <stop offset="0%" stopColor="#22D3EE" />
+            <stop offset="100%" stopColor="#00acc1" />
           </linearGradient>
           <filter id={`ringGlow-${size}`} x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation={isSmall ? "1.5" : "3"} result="blur" />
@@ -44,7 +44,7 @@ const TrustRing = ({ score, size = 'large' }: { score: number; size?: 'small' | 
             </feMerge>
           </filter>
         </defs>
-        <circle cx={cxCy} cy={cxCy} r={radius} fill="none" stroke="rgba(59,130,246,0.1)" strokeWidth={strokeWidthBg} />
+        <circle cx={cxCy} cy={cxCy} r={radius} fill="none" stroke="rgba(34,211,238,0.1)" strokeWidth={strokeWidthBg} />
         <circle cx={cxCy} cy={cxCy} r={radius} fill="none" stroke="#FFFDF1" strokeWidth={strokeWidthFg} opacity="0.12" />
         <circle cx={cxCy} cy={cxCy} r={radius} fill="none" stroke={`url(#mantisGrad-${size})`} strokeWidth={strokeWidthFg} strokeLinecap="round"
           strokeDasharray={circumference}
@@ -58,7 +58,7 @@ const TrustRing = ({ score, size = 'large' }: { score: number; size?: 'small' | 
           style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className={`${fontSizeClass} font-bold text-[#FFFDF1]`}>{score}%</span>
+        <span className={`${fontSizeClass} font-bold text-trust`}>{score}%</span>
       </div>
     </div>
   );

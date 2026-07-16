@@ -1,4 +1,5 @@
 import express from 'express';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -2480,6 +2481,14 @@ class InMemorySearchIndex {
       supabaseAdmin.from('institutes').select('*')
     ]);
 
+    if (teachersRes.error) console.error('[Search Index] Teachers fetch error:', teachersRes.error);
+    if (playlistsRes.error) console.error('[Search Index] Playlists fetch error:', playlistsRes.error);
+    if (videosRes.error) console.error('[Search Index] Videos fetch error:', videosRes.error);
+    if (batchesRes.error) console.error('[Search Index] Batches fetch error:', batchesRes.error);
+    if (institutesRes.error) console.error('[Search Index] Institutes fetch error:', institutesRes.error);
+
+    console.log(`[Search Index] Fetched: ${teachersRes.data?.length || 0} teachers, ${playlistsRes.data?.length || 0} playlists, ${videosRes.data?.length || 0} videos, ${batchesRes.data?.length || 0} batches, ${institutesRes.data?.length || 0} institutes.`);
+
     if (teachersRes.data) {
       this.teachers = teachersRes.data.map((t: any) => {
         const feat = t.features || {};
@@ -2538,7 +2547,7 @@ class InMemorySearchIndex {
         likesCount: v.like_count !== undefined ? v.like_count : (v.likes_count || 0),
         publishDate: v.published_at || v.publish_date || v.created_at || new Date().toISOString(),
         createdAt: v.created_at || new Date().toISOString(),
-        verified: v.verified || false,
+        verified: v.is_active !== false,
         verificationStatus: v.verification_status || 'verified',
         chapter: v.category || ''
       }));

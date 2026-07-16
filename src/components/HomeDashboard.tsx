@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, BookOpen, Clock, Youtube, Sparkles, CheckCircle2, ChevronRight, GraduationCap, Play, CheckCircle, Building2, Users } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuth } from '../context/AuthContext';
 import useSWR from 'swr';
 import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveChannels, fetchActiveVideos } from '../utils/swrConfig';
 import { supabase } from '../utils/supabaseClient';
@@ -36,6 +37,11 @@ interface HomeDashboardProps {
   batchSubjectCounts?: Record<string, number>;
   followedIds?: string[];
   handleFollowToggle?: (teacher: any) => any;
+  videos: any[];
+  playlists: any[];
+  teachers: any[];
+  channels: any[];
+  institutes: any[];
 }
 
 export default function HomeDashboard({ 
@@ -47,215 +53,22 @@ export default function HomeDashboard({
   validatedBatches,
   batchSubjectCounts = {},
   followedIds = [],
-  handleFollowToggle
+  handleFollowToggle,
+  videos,
+  playlists,
+  teachers,
+  channels,
+  institutes
 }: HomeDashboardProps) {
-  const [channels, setChannels] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem('biovised_cached_teachers');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        return parsed.map((ch: any) => ({
-          channelId: ch?.id || '',
-          channelName: ch?.name || 'Verified Educator',
-          channelThumbnail: ch?.avatar || '',
-          subscriberCount: parseInt(ch?.subscribers, 10) || 120000,
-          description: ch?.description || 'Verified JEE & NEET Educator'
-        }));
-      }
-    } catch (e) {
-      console.warn("Failed to load initial cached channels:", e);
-    }
-    return [];
-  });
-
-  const [playlists, setPlaylists] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem('biovised_cached_playlists');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        return parsed.map((p: any) => {
-          const titleLower = (p?.title || '').toLowerCase();
-          let resolvedContentType = p?.content_type || 'playlist';
-          if (!p?.content_type) {
-            if (titleLower.includes('one shot') || titleLower.includes('oneshot') || titleLower.includes('complete revision')) {
-              resolvedContentType = 'one_shot';
-            } else if (titleLower.includes('allen') || titleLower.includes('pw') || titleLower.includes('unacademy') || titleLower.includes('competishun')) {
-              resolvedContentType = 'institute';
-            }
-          }
-          return {
-            id: p?.id || '',
-            title: p?.title || '',
-            description: p?.description || '',
-            thumbnailUrl: p?.cover_thumbnail_url || p?.thumbnail || '',
-            lecturesCount: p?.lectures_count || 0,
-            subject: p?.category || '',
-            examType: p?.exam_type || 'Both',
-            teacherId: p?.teacher_id || '',
-            teacherName: p?.channel_title || '',
-            channelId: p?.channel_id || '',
-            contentType: resolvedContentType,
-            totalDurationSeconds: p?.total_duration_seconds || 0,
-            createdAt: p?.created_at || new Date().toISOString(),
-            updatedAt: p?.updated_at || p?.created_at || new Date().toISOString()
-          };
-        }).sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      }
-    } catch (e) {
-      console.warn("Failed to load initial cached playlists:", e);
-    }
-    return [];
-  });
-
   const [watchHistory, setWatchHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'playlist' | 'one_shot' | 'institute'>('playlist');
-  const [institutes, setInstitutes] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem('biovised_cached_institutes');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-  // Use validated batches from App.tsx if provided (they have subjects + ratings hydrated).
-  // Fall back to local cache/fetch only when parent hasn't supplied them yet.
-  const [localBatches, setLocalBatches] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem('biovised_cached_batches');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-  const displayBatches = (validatedBatches && validatedBatches.length > 0) ? validatedBatches : localBatches;
+  const { user } = useAuth();
+  const examText = user?.examType ? (user.examType === 'Both' ? 'JEE & NEET' : user.examType) : null;
+  const targetYear = user?.appearingYear ? `Class of ${user.appearingYear}` : null;
 
-  const [localVideos, setLocalVideos] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem('biovised_cached_lectures');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [isLoadingAux, setIsLoadingAux] = useState(true);
-
-  useEffect(() => {
-    const loadAuxiliaryData = async () => {
-      try {
-        const cachedInst = localStorage.getItem('biovised_cached_institutes');
-        if (cachedInst) setInstitutes(JSON.parse(cachedInst));
-
-        // Only fetch batches locally if App.tsx hasn't provided validated ones
-        if (!validatedBatches || validatedBatches.length === 0) {
-          const cachedBatches = localStorage.getItem('biovised_cached_batches');
-          if (cachedBatches) setLocalBatches(JSON.parse(cachedBatches));
-        }
-
-        const needsInst = !cachedInst || JSON.parse(cachedInst || '[]').length === 0;
-
-        if (needsInst) {
-          const instRes = await supabase.from('institutes').select('*').order('name');
-          if (instRes.data && instRes.data.length > 0) {
-            const mapped = instRes.data.map((inst: any) => ({
-              id: inst.id,
-              name: inst.name,
-              logo: inst.logo || '',
-              bannerUrl: inst.banner_url || inst.bannerUrl || '',
-              description: inst.description || '',
-              rating: inst.rating ?? null,
-              reviewCount: inst.review_count || inst.reviewCount || 0,
-              trustScore: inst.trust_score ?? inst.trustScore ?? null,
-              followersCount: inst.followers_count || inst.followersCount || 0,
-              officialLinks: inst.official_links || inst.officialLinks || [],
-              exams: inst.exams || ['NEET'],
-              isVerified: inst.is_verified || inst.isVerified || false
-            }));
-            setInstitutes(mapped);
-          }
-        }
-      } catch (e) {
-        console.warn('Error loading auxiliary home data:', e);
-      } finally {
-        setIsLoadingAux(false);
-      }
-    };
-    loadAuxiliaryData();
-  }, []);
-
-  // SWR Caching Layer
-  const { data: chanData, isLoading: channelsLoading } = useSWR(SWR_KEYS.CHANNELS, fetchActiveChannels, swrOptions);
-  const { data: playData, isLoading: playlistsLoading } = useSWR(SWR_KEYS.PLAYLISTS, fetchActivePlaylists, swrOptions);
-  const { data: rawVideoData, isLoading: videosLoading } = useSWR(SWR_KEYS.VIDEOS, fetchActiveVideos, swrOptions);
-  const { data: dbTeachers } = useSWR(SWR_KEYS.TEACHERS, fetchActiveTeachers, swrOptions);
-  const displayVideos = rawVideoData || localVideos;
-
-  const loading = channelsLoading || playlistsLoading || videosLoading || isLoadingAux;
-  const hasCache = playlists.length > 0 && channels.length > 0;
-  const showSkeleton = loading && !hasCache;
-
-  // Process Channels
-  useEffect(() => {
-    if (chanData) {
-      setChannels(chanData.map(ch => ({
-        channelId: ch?.id || '',
-        channelName: ch?.name || 'Verified Educator',
-        channelThumbnail: ch?.avatar || '',
-        subscriberCount: parseInt(ch?.subscribers, 10) || 120000,
-        description: ch?.description || 'Verified JEE & NEET Educator'
-      })));
-    }
-  }, [chanData]);
-
-  // Process Playlists
-  useEffect(() => {
-    if (playData) {
-      const mapped = playData.map((p: any) => {
-        const titleLower = (p?.title || '').toLowerCase();
-        let resolvedContentType = p?.content_type || 'playlist';
-        if (!p?.content_type) {
-          if (titleLower.includes('one shot') || titleLower.includes('oneshot') || titleLower.includes('complete revision')) {
-            resolvedContentType = 'one_shot';
-          } else if (titleLower.includes('allen') || titleLower.includes('pw') || titleLower.includes('unacademy') || titleLower.includes('competishun')) {
-            resolvedContentType = 'institute';
-          }
-        }
-        return {
-          id: p?.id || '',
-          title: p?.title || '',
-          description: p?.description || '',
-          thumbnailUrl: p?.cover_thumbnail_url || p?.thumbnail || '',
-          lecturesCount: p?.lectures_count || 0,
-          subject: p?.category || '',
-          examType: p?.exam_type || 'Both',
-          teacherId: p?.teacher_id || '',
-          teacherName: p?.channel_title || '',
-          channelId: p?.channel_id || '',
-          contentType: resolvedContentType,
-          totalDurationSeconds: p?.total_duration_seconds || 0,
-          createdAt: p?.created_at || new Date().toISOString(),
-          updatedAt: p?.updated_at || p?.created_at || new Date().toISOString()
-        };
-      });
-
-      // Build teacher map synchronously from SWR active teachers cache to eliminate async block
-      const teacherMap = new Map();
-      if (dbTeachers) {
-        for (const t of dbTeachers) {
-          teacherMap.set(t.id, t.name);
-        }
-      }
-
-      for (const m of mapped) {
-        if (!m.teacherName && m.teacherId) {
-          m.teacherName = teacherMap.get(m.teacherId) || 'Verified Educator';
-        }
-      }
-
-      const sorted = mapped.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      setPlaylists(sorted);
-    }
-  }, [playData, dbTeachers]);
+  const displayBatches = validatedBatches || [];
+  const dbTeachers = teachers || [];
+  const showSkeleton = (videos || []).length === 0 && (playlists || []).length === 0;
 
   // Load Watch History from localStorage safely
   useEffect(() => {
@@ -363,30 +176,35 @@ export default function HomeDashboard({
     return count.toString();
   };
 
-  const filteredPlaylists = (playlists || []).filter(p => {
-    if (!p) return false;
-    if (activeTab === 'playlist') {
-      return p.contentType === 'playlist' || p.contentType === 'one_shot';
-    }
-    return p.contentType === activeTab;
-  });
+  // Memoize filtered and sorted datasets to prevent heavy mappings and sorts on every render
+  const filteredPlaylists = useMemo(() => {
+    return (playlists || []).filter(p => {
+      if (!p) return false;
+      if (activeTab === 'playlist') {
+        return p.contentType === 'playlist' || p.contentType === 'one_shot';
+      }
+      return p.contentType === activeTab;
+    });
+  }, [playlists, activeTab]);
 
-  // Map raw videos and prepare content rows
-  const videos = (displayVideos || []).map(mapVideoRow);
+  const recentlyAddedVideos = useMemo(() => {
+    return [...videos]
+      .sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime())
+      .slice(0, 10);
+  }, [videos]);
 
-  // Group videos for player card rows
-  const recentlyAddedVideos = [...videos]
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-    .slice(0, 10);
+  const trendingBiologyVideos = useMemo(() => {
+    return [...videos]
+      .filter(v => (v.subject || '').toLowerCase() === 'biology' || (v.title || '').toLowerCase().includes('biology'))
+      .sort((a, b) => (b.viewsCount || b.viewCount || 0) - (a.viewsCount || a.viewCount || 0))
+      .slice(0, 10);
+  }, [videos]);
 
-  const trendingBiologyVideos = [...videos]
-    .filter(v => (v.subject || '').toLowerCase() === 'biology' || (v.title || '').toLowerCase().includes('biology'))
-    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
-    .slice(0, 10);
-
-  const finalTrendingVideos = trendingBiologyVideos.length > 0
-    ? trendingBiologyVideos
-    : [...videos].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0)).slice(0, 10);
+  const finalTrendingVideos = useMemo(() => {
+    return trendingBiologyVideos.length > 0
+      ? trendingBiologyVideos
+      : [...videos].sort((a, b) => (b.viewsCount || b.viewCount || 0) - (a.viewsCount || a.viewCount || 0)).slice(0, 10);
+  }, [videos, trendingBiologyVideos]);
 
   const handleTestSeriesClick = (testSeriesId: string) => {
     sessionStorage.setItem('biovised_selected_test_series_id', testSeriesId);
@@ -401,7 +219,7 @@ export default function HomeDashboard({
 
       {/* 1. Curated Apple TV Style Branding Header */}
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-4 z-10">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0A0A0C] to-zinc-950 border border-zinc-900/80 px-6 py-6 sm:py-8 shadow-[0_15px_35px_rgba(0,0,0,0.9)]">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0D0D0C] to-zinc-950 border border-zinc-900/80 px-6 py-6 sm:py-8 shadow-[0_15px_35px_rgba(0,0,0,0.9)]">
           {/* Subtle warm ambient glow behind text */}
           <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-32 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
@@ -410,17 +228,20 @@ export default function HomeDashboard({
             {/* Curated Flag */}
             <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-[9px] font-mono tracking-widest text-zinc-300 uppercase">
               <Sparkles className="w-3 h-3 text-amber-400" />
-              <span>BIOVISED Editorial Curation</span>
+              <span>{examText ? `TARGET: ${examText} ${targetYear ? `(${targetYear})` : ''}` : 'BIOVISED Editorial Curation'}</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white uppercase font-sans leading-none flex flex-wrap items-center gap-x-3 gap-y-1 select-none">
               <span>Discover.</span>
               <span className="text-zinc-500">Learn.</span>
-              <span className="text-[#00D4AA]">Grow.</span>
+              <span className="text-[#00D4AA]">{examText ? 'Succeed.' : 'Grow.'}</span>
             </h1>
 
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-2xl font-sans">
-              Track and master curriculum topics with validated, high-yield playlists, structured test series, verified Kota educator classes, and NEET/JEE strategic mock sets. Free from brand-funded bias.
+              {examText 
+                ? `Track and master your ${examText} curriculum topics with validated, high-yield playlists, structured test series, verified Kota educator classes, and strategic mock sets.`
+                : 'Track and master curriculum topics with validated, high-yield playlists, structured test series, verified Kota educator classes, and NEET/JEE strategic mock sets. Free from brand-funded bias.'
+              }
             </p>
           </div>
         </div>
@@ -492,7 +313,7 @@ export default function HomeDashboard({
 
                   return (
                     <div key={historyItem.id} className="w-[280px] sm:w-[320px] shrink-0 snap-start flex flex-col group cursor-pointer" onClick={() => onPlayVideo(historyItem.video)}>
-                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#0A0A0A] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] transition-all">
+                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#0D0D0C] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] transition-all">
                         <img 
                           src={historyItem.thumbnail} 
                           alt={historyItem.title} 
@@ -516,7 +337,7 @@ export default function HomeDashboard({
                       <div className="pt-2.5 pb-0.5 flex flex-col justify-between text-left space-y-1">
                         {/* Subject Pill & Lectures remaining */}
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-extrabold text-zinc-300 font-mono tracking-wider bg-[#1C1C1E] border border-zinc-800 px-2 py-0.5 rounded-md uppercase">
+                          <span className="text-[10px] font-extrabold text-zinc-300 font-mono tracking-wider bg-[#0D0D0C] border border-zinc-800 px-2 py-0.5 rounded-md uppercase">
                             {historyItem.subject}
                           </span>
                           <span className="text-[10px] font-medium text-zinc-500 font-sans">
@@ -540,7 +361,7 @@ export default function HomeDashboard({
                             <span>PROGRESS</span>
                             <span className="text-[#FFFFFF]">{historyItem.progressPercent}%</span>
                           </div>
-                          <div className="w-full h-1 bg-[#1C1C1E] rounded-full overflow-hidden">
+                          <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
                             <div 
                               className="h-full bg-white transition-all duration-300"
                               style={{ width: `${historyItem.progressPercent}%` }}
@@ -598,7 +419,7 @@ export default function HomeDashboard({
               </div>
 
               {filteredPlaylists.length === 0 ? (
-                <div className="text-center py-16 rounded-xl border border-neutral-900 bg-[#09090A]">
+                <div className="text-center py-16 rounded-xl border border-neutral-900 bg-[#0D0D0C]">
                   <BookOpen className="w-10 h-10 text-neutral-800 mx-auto mb-2" />
                   <p className="text-xs font-mono text-zinc-500">No curations matched this preparation filter type yet.</p>
                 </div>
@@ -728,7 +549,7 @@ export default function HomeDashboard({
                       <TeacherCard
                         t={t}
                         dbTeacher={dbTeacher}
-                        videos={displayVideos || []}
+                        videos={videos || []}
                         followedIds={followedIds}
                         handleFollowToggle={handleFollowToggle}
                         setDetailModal={(modal) => onSelectChannel?.(modal.id, modal.type)}

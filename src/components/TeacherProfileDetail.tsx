@@ -824,8 +824,8 @@ export default function TeacherProfileDetail({
 
           {/* Trust Score */}
           <div className="flex flex-col items-center justify-center pt-4 md:pt-0">
-            <ShieldCheck size={18} className="text-[#00D4AA] mb-2" />
-            <span className="text-2xl md:text-3xl font-extrabold text-[#00D4AA] tracking-tight">
+            <ShieldCheck size={18} className="text-trust mb-2" />
+            <span className="text-2xl md:text-3xl font-extrabold text-trust tracking-tight">
               {loadingReviews ? '...' : displayTrustScore}%
             </span>
             <span className="text-zinc-500 text-[10px] uppercase font-mono tracking-wider mt-1">Trust Score</span>
@@ -864,7 +864,7 @@ export default function TeacherProfileDetail({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <h2 style={{ color: TEXT_PRIMARY }} className="text-lg font-bold">Student Reviews</h2>
-                  <div style={{ background: "#F5A62314", border: "1px solid #F5A62325" }} className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold text-amber-500">
+                  <div style={{ background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.2)" }} className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold text-ratings">
                     <Star size={11} className="fill-amber-500" />
                     <span>{displayRating}</span>
                     <span className="text-zinc-500 font-normal">· {displayReviewsCount}</span>

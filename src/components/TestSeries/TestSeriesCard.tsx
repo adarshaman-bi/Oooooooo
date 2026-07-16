@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TestSeriesEntry } from '../../types';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -39,6 +39,22 @@ const getTrustBadgeStyle = (score: number | null | undefined) => {
 export const TestSeriesCard: React.FC<TestSeriesCardProps> = ({ id, item, onClick }) => {
   const initials = getInitials(item.provider);
   const [logoError, setLogoError] = useState(false);
+
+  // Mock countdown timer that decrements every second to look authentic
+  const [secondsLeft, setSecondsLeft] = useState(() => 3600 * 14 + 60 * 23 + 10);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 3600 * 14));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatCountdown = (secs: number) => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
 
   return (
     <motion.div
@@ -117,6 +133,24 @@ export const TestSeriesCard: React.FC<TestSeriesCardProps> = ({ id, item, onClic
         <p className="text-xs text-zinc-400 line-clamp-3 font-sans leading-relaxed mb-3">
           {item.shortDescription || item.description || "No description available."}
         </p>
+
+        {/* Live mock timer and aspirants attempt progress bar */}
+        <div className="space-y-2 mt-2 pt-2 border-t border-zinc-900/40">
+          <div className="flex justify-between items-center text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+            <span>Aspirants Attempted</span>
+            <span className="text-zinc-300">8.2k (94%)</span>
+          </div>
+          <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+            <div className="h-full bg-emerald-500 rounded-full" style={{ width: '94%' }} />
+          </div>
+          <div className="flex justify-between items-center text-[9px] font-mono text-zinc-400">
+            <span className="flex items-center gap-1 select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+              LIVE TEST ACTIVE
+            </span>
+            <span className="font-bold text-zinc-300">Ends in: {formatCountdown(secondsLeft)}</span>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -129,7 +163,7 @@ export const TestSeriesCard: React.FC<TestSeriesCardProps> = ({ id, item, onClic
             <DynamicRating 
               targetId={item.id}
               className="flex items-center gap-1 h-5 text-xs text-zinc-400 font-mono"
-              starClassName="w-3 h-3 text-[#FFEFD5] fill-[#FFEFD5] shrink-0 font-sans"
+              starClassName="w-3 h-3 text-ratings fill-ratings shrink-0 font-sans"
               textClassName="text-[10px] text-zinc-500"
             />
           </div>

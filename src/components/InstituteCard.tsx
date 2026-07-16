@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Star, ExternalLink, Building2 } from 'lucide-react';
 import { InstituteProfile } from '../types';
 import { SafeImage } from './SafeImage';
+import teachersData from '../config/teachersData.json';
 
 interface InstituteCardProps {
   institute: InstituteProfile;
@@ -10,6 +11,10 @@ interface InstituteCardProps {
 }
 
 export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
+  const affiliatedTeachers = (teachersData || []).filter(
+    (t: any) => t.institute_name && t.institute_name.toLowerCase() === institute.name.toLowerCase()
+  );
+
   return (
     <div className="bg-[#0D0D0C] border border-[#1A1A1A] w-full rounded-2xl overflow-hidden hover:border-zinc-750 hover:shadow-[0_4px_30px_rgba(0,0,0,0.85)] transition-all duration-300 flex flex-col justify-between group">
       
@@ -50,7 +55,7 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
             {/* Trust Score indicator */}
             <div className="text-right">
               <span className="block text-[8px] font-mono font-bold text-zinc-500 uppercase tracking-widest leading-none mb-1">Trust Score</span>
-              <span className="text-[10px] font-mono font-extrabold bg-zinc-905 border border-zinc-800 px-2.5 py-0.5 rounded text-white leading-none">
+              <span className="text-[10px] font-mono font-extrabold bg-zinc-905 border border-zinc-800 px-2.5 py-0.5 rounded text-trust leading-none">
                 {institute.trustScore != null ? `${institute.trustScore}/100` : 'N/A'}
               </span>
             </div>
@@ -62,7 +67,7 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
               {institute.exams?.map((ex) => (
                 <span 
                   key={ex} 
-                  className="text-[8px] font-mono font-bold bg-[#141416] text-zinc-400 px-1.5 py-0.5 rounded uppercase border border-zinc-850"
+                  className="text-[8px] font-mono font-bold bg-[#0D0D0C] text-zinc-400 px-1.5 py-0.5 rounded uppercase border border-zinc-850"
                 >
                   {ex}
                 </span>
@@ -81,11 +86,43 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
           </div>
         </div>
 
+        {/* Overlapping educator avatars list */}
+        {affiliatedTeachers.length > 0 && (
+          <div className="px-5 pb-3 pt-2.5 border-t border-zinc-900/60 text-left">
+            <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block mb-2 font-bold">Faculty Roster</span>
+            <div className="flex items-center">
+              <div className="flex -space-x-2.5 overflow-hidden">
+                {affiliatedTeachers.slice(0, 5).map((teacher: any, idx: number) => {
+                  const initials = teacher.full_name ? teacher.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'T';
+                  return (
+                    <div 
+                      key={teacher.id || idx}
+                      className="inline-block h-6 w-6 rounded-full ring-2 ring-[#0D0D0C] bg-zinc-900 text-[8px] font-mono font-bold text-zinc-350 flex items-center justify-center select-none uppercase shadow-md shrink-0 border border-zinc-800"
+                      title={teacher.full_name}
+                    >
+                      {teacher.profile_photo_url ? (
+                        <img src={teacher.profile_photo_url} alt={teacher.full_name} className="h-full w-full rounded-full object-cover" />
+                      ) : (
+                        <span>{initials}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {affiliatedTeachers.length > 5 && (
+                <span className="text-[9px] font-mono font-bold text-zinc-500 ml-2.5">
+                  +{affiliatedTeachers.length - 5} more Kota experts
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 3. Rating & CTA Actions */}
         <div className="space-y-3 pt-3 border-t border-zinc-900/60 font-mono">
           <div className="flex justify-between items-center text-[10px]">
-            <span className="text-amber-400 font-bold flex items-center gap-1">
-              {institute.rating != null && <Star className="w-3 h-3 fill-current text-amber-400" />}
+            <span className="text-ratings font-bold flex items-center gap-1">
+              {institute.rating != null && <Star className="w-3 h-3 fill-current text-ratings" />}
               <span>{institute.rating != null ? Number(institute.rating).toFixed(1) : 'Not yet rated'}</span>
             </span>
             <span className="text-zinc-500 uppercase text-[9px]">
@@ -96,7 +133,7 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
           <div className="flex gap-2">
             <button
               onClick={onViewHub}
-              className="flex-grow bg-[#141416]/90 hover:bg-[#1A1A1E] border border-zinc-800 text-white py-1.5 rounded-xl text-center cursor-pointer font-bold transition-all text-[10px] uppercase tracking-wider relative overflow-hidden"
+              className="flex-grow bg-[#0D0D0C]/90 hover:bg-[#1A1A1E] border border-zinc-800 text-white py-1.5 rounded-xl text-center cursor-pointer font-bold transition-all text-[10px] uppercase tracking-wider relative overflow-hidden"
             >
               View Hub
             </button>

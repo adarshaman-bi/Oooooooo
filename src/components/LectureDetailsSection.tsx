@@ -354,7 +354,10 @@ function useLectureUserState(currentUserId: string | null, lectureId: string) {
     const next = !liked;
     setLiked(next);
     const res = await toggleArrayColumn("liked_content", next);
-    if (!res.ok) setLiked(!next);
+    if (!res.ok) {
+      setLiked(!next);
+      alert("Failed to update liked content. Please check your connection.");
+    }
     return res;
   }, [liked, toggleArrayColumn]);
 
@@ -362,7 +365,10 @@ function useLectureUserState(currentUserId: string | null, lectureId: string) {
     const next = !saved;
     setSaved(next);
     const res = await toggleArrayColumn("saved_content", next);
-    if (!res.ok) setSaved(!next);
+    if (!res.ok) {
+      setSaved(!next);
+      alert("Failed to save content. Please check your connection.");
+    }
     return res;
   }, [saved, toggleArrayColumn]);
 
@@ -370,7 +376,10 @@ function useLectureUserState(currentUserId: string | null, lectureId: string) {
     const next = !watchLater;
     setWatchLater(next);
     const res = await toggleArrayColumn("watch_later_content", next);
-    if (!res.ok) setWatchLater(!next);
+    if (!res.ok) {
+      setWatchLater(!next);
+      alert("Failed to update watch later list. Please check your connection.");
+    }
     return res;
   }, [watchLater, toggleArrayColumn]);
 
@@ -842,7 +851,7 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
           transform: translate(-50%, -50%);
           font-size: 11px;
           font-weight: 700;
-          color: #f1f1f1;
+          color: var(--color-trust, #22D3EE);
         }
 
         .lecture-details-container .trust-label {
@@ -1240,8 +1249,8 @@ export default function LectureDetailsSection({ lecture, currentUserId, onSelect
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
           <linearGradient id="trustGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#4caf50"/>
-            <stop offset="100%" stopColor="#66bb6a"/>
+            <stop offset="0%" stopColor="#22D3EE"/>
+            <stop offset="100%" stopColor="#00acc1"/>
           </linearGradient>
         </defs>
       </svg>
@@ -1521,7 +1530,7 @@ function ReviewsSheet({
   return (
     <div className="fixed inset-0 z-[150] bg-black/75 flex items-end sm:items-center sm:justify-center p-0 sm:p-4" onClick={onClose}>
       <div
-        className="bg-[#141416] w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col border border-white/[0.05]"
+        className="bg-[#0D0D0C] w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col border border-white/[0.05]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/10">

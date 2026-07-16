@@ -78,7 +78,9 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
 
             if (!options.dryRun) {
               const { contentType, academicType } = classifyDimensions(pl.snippet?.title || '', pl.snippet?.description || '');
-              
+              const subjectResult = detectSubject(pl.snippet?.title || '', pl.snippet?.description || '');
+              const teacherResult = detectTeacher(pl.snippet?.title || '', pl.snippet?.description || '', pl.snippet?.channelTitle || '');
+
               await DbSeeder.syncStagingPlaylist(runId, {
                 id: plId,
                 title: canonicalizeText(pl.snippet?.title),
@@ -90,6 +92,34 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
                 contentType,
                 academicType
               });
+
+              // Log playlist classification decisions to change_review_log
+              await supabaseAdmin.from('change_review_log').insert([
+                {
+                  run_id: runId,
+                  entity_id: plId,
+                  entity_type: 'playlist',
+                  field_name: 'subject',
+                  old_value: null,
+                  new_value: subjectResult.subject,
+                  confidence_score: 100.0,
+                  evidence: {
+                    matched_keywords: subjectResult.matchedKeywords
+                  }
+                },
+                {
+                  run_id: runId,
+                  entity_id: plId,
+                  entity_type: 'playlist',
+                  field_name: 'teacher_id',
+                  old_value: null,
+                  new_value: teacherResult.teacherId || 'alakh_pandey',
+                  confidence_score: teacherResult.confidenceScore || 0.8,
+                  evidence: {
+                    matched_aliases: teacherResult.matchedAlias ? [teacherResult.matchedAlias] : []
+                  }
+                }
+              ]);
             }
           }
 
@@ -144,19 +174,57 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
               });
 
               // Log classification staging rules/decisions log
-              await supabaseAdmin.from('change_review_log').insert({
-                run_id: runId,
-                entity_id: vId,
-                entity_type: 'video',
-                field_name: 'subject',
-                old_value: null,
-                new_value: subjectResult.subject,
-                confidence_score: validation.confidenceScore,
-                evidence: {
-                  matched_keywords: subjectResult.matchedKeywords,
-                  validation_evidence: validation.evidenceList
+              await supabaseAdmin.from('change_review_log').insert([
+                {
+                  run_id: runId,
+                  entity_id: vId,
+                  entity_type: 'video',
+                  field_name: 'subject',
+                  old_value: null,
+                  new_value: subjectResult.subject,
+                  confidence_score: validation.confidenceScore,
+                  evidence: {
+                    matched_keywords: subjectResult.matchedKeywords,
+                    validation_evidence: validation.evidenceList
+                  }
+                },
+                {
+                  run_id: runId,
+                  entity_id: vId,
+                  entity_type: 'video',
+                  field_name: 'teacher_id',
+                  old_value: null,
+                  new_value: teacherResult.teacherId || 'alakh_pandey',
+                  confidence_score: teacherResult.confidenceScore || 0.8,
+                  evidence: {
+                    matched_aliases: teacherResult.matchedAlias ? [teacherResult.matchedAlias] : []
+                  }
+                },
+                {
+                  run_id: runId,
+                  entity_id: vId,
+                  entity_type: 'video',
+                  field_name: 'teacher_name',
+                  old_value: null,
+                  new_value: teacherResult.teacherName || 'Alakh Pandey',
+                  confidence_score: teacherResult.confidenceScore || 0.8,
+                  evidence: {
+                    matched_aliases: teacherResult.matchedAlias ? [teacherResult.matchedAlias] : []
+                  }
+                },
+                {
+                  run_id: runId,
+                  entity_id: vId,
+                  entity_type: 'video',
+                  field_name: 'chapter',
+                  old_value: null,
+                  new_value: chapterResult.chapterCodes?.[0] || '',
+                  confidence_score: chapterResult.chapterCodes?.length > 0 ? 0.9 : 0.0,
+                  evidence: {
+                    matched_aliases: chapterResult.matchedAliases || []
+                  }
                 }
-              });
+              ]);
             }
           }
         }

@@ -22,7 +22,7 @@ export default function ChannelHeader({ channel, onBack }: ChannelHeaderProps) {
   const avatarUrl = channel.avatarUrl;
 
   return (
-    <div className="w-full bg-[#08080A] rounded-2xl overflow-hidden border border-zinc-900 shadow-2xl relative">
+    <div className="w-full bg-[#0D0D0C] rounded-2xl overflow-hidden border border-zinc-900 shadow-2xl relative">
       
       {/* 1. PREMIUM COHERENT CHANNEL BANNER AREA */}
       <div className="relative w-full aspect-video object-cover overflow-hidden bg-black">
@@ -73,7 +73,7 @@ export default function ChannelHeader({ channel, onBack }: ChannelHeaderProps) {
         
         {/* Floating Absolute Avatar overlap */}
         <div className="absolute -top-12 sm:-top-16 left-6 z-10">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 aspect-square object-contain scale-100 rounded-full border-4 border-[#08080A] bg-[#0E0E10] overflow-hidden shadow-2xl relative select-none">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 aspect-square object-contain scale-100 rounded-full border-4 border-[#0D0D0C] bg-[#0E0E10] overflow-hidden shadow-2xl relative select-none">
             {avatarUrl && !avatarError ? (
               <img
                 key={avatarUrl} // Explicit identity layout key to shield concurrency

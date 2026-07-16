@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import { supabaseAdmin } from '../../utils/supabaseClient';
 import { OverrideHandler } from './overrideHandler';
+import { detectSubject } from '../classifiers/subjectDetector';
+import { detectTeacher } from '../classifiers/teacherDetector';
 
 export class DbSeeder {
   /**
@@ -158,17 +160,107 @@ export class DbSeeder {
       
       if (playlists) {
         for (const pl of playlists) {
+          // Resolve subject and teacher for the playlist
+          const { data: logs } = await supabaseAdmin
+            .from('change_review_log')
+            .select('field_name, new_value')
+            .eq('entity_id', pl.id);
+
+          let subject = logs?.find(l => l.field_name === 'subject')?.new_value;
+          let teacherId = logs?.find(l => l.field_name === 'teacher_id')?.new_value;
+
+          if (!subject) {
+            const subjectResult = detectSubject(pl.title || '', pl.description || '');
+            subject = subjectResult.subject;
+          }
+          if (!teacherId) {
+            const teacherResult = detectTeacher(pl.title || '', pl.description || '', '');
+            teacherId = teacherResult.teacherId || 'alakh_pandey';
+          }
+
+          let teacherName = 'Alakh Pandey';
+          if (teacherId) {
+            const { data: teacher } = await supabaseAdmin
+              .from('teachers')
+              .select('name')
+              .eq('id', teacherId)
+              .maybeSingle();
+            if (teacher?.name) {
+              teacherName = teacher.name;
+            }
+          }
+
+          // Detect exam type
+          const plTitleLower = pl.title.toLowerCase();
+          let examType: 'JEE' | 'NEET' | 'Both' = 'Both';
+          if (plTitleLower.includes('jee') || plTitleLower.includes('iit') || plTitleLower.includes('joint entrance')) {
+            examType = 'JEE';
+          } else if (plTitleLower.includes('neet') || plTitleLower.includes('medical') || plTitleLower.includes('national eligibility')) {
+            examType = 'NEET';
+          }
+
           // Publish to public.playlists
           await supabaseAdmin.from('playlists').upsert({
             id: pl.id,
             title: pl.title,
             description: pl.description,
             thumbnail: pl.thumbnail_url,
-            category: pl.academic_type || 'playlist',
+            category: subject,
             lectures_count: pl.video_count,
+            teacher_id: teacherId,
+            exam_type: examType,
             is_active: true,
+            cover_thumbnail_url: pl.thumbnail_url,
+            channel_id: pl.channel_id,
+            content_type: pl.content_type || 'playlist',
+            last_synced_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
+
+          // Match series/batch name from title
+          let seriesName = '';
+          if (plTitleLower.includes('raftaar')) seriesName = 'raftaar';
+          else if (plTitleLower.includes('umeed')) seriesName = 'umeed';
+          else if (plTitleLower.includes('lakshya')) seriesName = 'lakshya';
+          else if (plTitleLower.includes('yakeen')) seriesName = 'yakeen';
+          else if (plTitleLower.includes('pace')) seriesName = 'pace';
+          else if (plTitleLower.includes('shaurya')) seriesName = 'shaurya';
+          else if (plTitleLower.includes('arjuna')) seriesName = 'arjuna';
+          else if (plTitleLower.includes('parishram')) seriesName = 'parishram';
+          else if (plTitleLower.includes('neev')) seriesName = 'neev';
+          else if (plTitleLower.includes('udaan')) seriesName = 'udaan';
+          else if (plTitleLower.includes('vidya')) seriesName = 'vidya';
+
+          if (seriesName) {
+            const batchId = `batch_pw_${seriesName}`;
+            const canonicalName = `PW ${seriesName.charAt(0).toUpperCase() + seriesName.slice(1)} Batch`;
+
+            // 1. Ensure the batch exists in the `batches` table
+            await supabaseAdmin.from('batches').upsert({
+              id: batchId,
+              name: canonicalName,
+              description: `Official PW ${seriesName.charAt(0).toUpperCase() + seriesName.slice(1)} batch containing lectures for JEE/NEET.`,
+              channel_name: 'Physics Wallah',
+              exam_type: examType,
+              is_active: true,
+              institute_id: 'physics_wallah',
+              updated_at: new Date().toISOString()
+            });
+
+            // 2. Upsert the playlist mapping in batch_subjects
+            const batchSubjectId = `bs_${batchId}_${pl.id}`;
+            await supabaseAdmin.from('batch_subjects').upsert({
+              id: batchSubjectId,
+              batch_id: batchId,
+              subject: subject,
+              teacher_id: teacherId,
+              teacher_name: teacherName,
+              playlist_id: pl.id,
+              playlist_title: pl.title,
+              exam_type: examType,
+              sort_order: 10
+            });
+          }
         }
       }
 
@@ -181,12 +273,45 @@ export class DbSeeder {
       
       if (videos) {
         for (const v of videos) {
-          // Resolve playlist category
-          const { data: pl } = await supabaseAdmin
-            .from('staging_playlists')
-            .select('academic_type')
-            .eq('id', v.playlist_id)
-            .single();
+          // Resolve classification values from change_review_log
+          const { data: logs } = await supabaseAdmin
+            .from('change_review_log')
+            .select('field_name, new_value')
+            .eq('entity_id', v.id);
+
+          let subject = logs?.find(l => l.field_name === 'subject')?.new_value;
+          let teacherId = logs?.find(l => l.field_name === 'teacher_id')?.new_value;
+          let teacherName = logs?.find(l => l.field_name === 'teacher_name')?.new_value;
+          let chapter = logs?.find(l => l.field_name === 'chapter')?.new_value;
+
+          if (!subject) {
+            const subjectResult = detectSubject(v.title || '', v.description || '');
+            subject = subjectResult.subject;
+          }
+          if (!teacherId) {
+            const teacherResult = detectTeacher(v.title || '', v.description || '', '');
+            teacherId = teacherResult.teacherId || 'alakh_pandey';
+            teacherName = teacherResult.teacherName || 'Alakh Pandey';
+          }
+          if (!teacherName && teacherId) {
+            const { data: teacher } = await supabaseAdmin
+              .from('teachers')
+              .select('name')
+              .eq('id', teacherId)
+              .maybeSingle();
+            if (teacher?.name) {
+              teacherName = teacher.name;
+            }
+          }
+
+          // Detect exam type
+          const vTitleLower = v.title.toLowerCase();
+          let examType: 'JEE' | 'NEET' | 'Both' = 'Both';
+          if (vTitleLower.includes('jee') || vTitleLower.includes('iit') || vTitleLower.includes('joint entrance')) {
+            examType = 'JEE';
+          } else if (vTitleLower.includes('neet') || vTitleLower.includes('medical') || vTitleLower.includes('national eligibility')) {
+            examType = 'NEET';
+          }
 
           // Publish to public.videos
           await supabaseAdmin.from('videos').upsert({
@@ -196,8 +321,17 @@ export class DbSeeder {
             duration: `${Math.floor(v.duration_seconds / 60)}m`,
             playlist_id: v.playlist_id,
             thumbnail_url: v.thumbnail_url,
-            subject: pl?.academic_type || 'Unknown',
+            subject: subject || 'Unknown',
+            category: chapter || 'lecture',
+            teacher_id: teacherId,
+            teacher_name: teacherName || 'Alakh Pandey',
             is_active: true,
+            duration_seconds: v.duration_seconds,
+            is_playable: true,
+            embed_url: `https://www.youtube.com/embed/${v.id}`,
+            description: v.description,
+            exam_type: examType,
+            content_type: v.content_type || 'lecture',
             updated_at: new Date().toISOString()
           });
         }

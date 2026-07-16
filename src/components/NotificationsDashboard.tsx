@@ -90,7 +90,7 @@ export default function NotificationsDashboard({
             {unreadCount > 0 && onMarkAllAsRead && (
               <button
                 onClick={onMarkAllAsRead}
-                className="text-[10px] text-zinc-300 hover:text-white uppercase tracking-wider font-bold font-mono py-1.5 px-3.5 bg-[#0F0F10] hover:bg-zinc-900 rounded-full cursor-pointer transition-all"
+                className="text-[10px] text-zinc-300 hover:text-white uppercase tracking-wider font-bold font-mono py-1.5 px-3.5 bg-[#0D0D0C] hover:bg-zinc-900 rounded-full cursor-pointer transition-all"
               >
                 Mark All Read
               </button>
@@ -147,8 +147,8 @@ export default function NotificationsDashboard({
                     onClick={() => onNotificationClick(n)}
                     className={`p-4 rounded-xl transition-all text-left relative flex gap-4 cursor-pointer active:cursor-grabbing select-none ${
                       n.read
-                        ? 'bg-[#070708] text-zinc-550 hover:bg-[#0c0c0e]'
-                        : 'bg-[#0D0D10] text-white hover:bg-[#111115] shadow-[0_4px_24px_rgba(255,255,255,0.015)]'
+                        ? 'bg-[#000000] text-zinc-550 hover:bg-[#0D0D0C]/40 border border-zinc-900'
+                        : 'bg-[#0D0D0C] text-white hover:bg-[#151514] border border-zinc-800 shadow-[0_4px_24px_rgba(255,255,255,0.015)]'
                     }`}
                   >
                     {/* Left category indicator */}

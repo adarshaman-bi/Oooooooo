@@ -1,4 +1,5 @@
 import React from 'react';
+import { VirtuosoGrid } from 'react-virtuoso';
 import { ArrowLeft, X, Search, Mic, Clock, BookOpen, Play, User, Layers, ChevronRight } from 'lucide-react';
 import { Lecture, Playlist, Batch } from '../types';
 import { ViewName } from '../config/constants';
@@ -148,7 +149,7 @@ export default function SearchView({
       <div className="w-full max-w-2xl mx-auto flex flex-col items-center px-4 relative">
         {/* Autocomplete Suggestions Under Input Box (only when search has not been executed yet) */}
         {!hasExecutedSearch && searchQuery.trim() !== '' && searchSuggestions.length > 0 && (
-          <div className="w-full bg-[#0E0E0F] border border-zinc-800 rounded-2xl shadow-2xl mt-2 overflow-hidden z-50 flex flex-col divide-y divide-zinc-900">
+          <div className="w-full bg-[#0D0D0C] border border-zinc-800 rounded-2xl shadow-2xl mt-2 overflow-hidden z-50 flex flex-col divide-y divide-zinc-900">
             {searchSuggestions.map((suggestion, idx) => {
               const handleSuggestionClick = () => {
                 if (suggestion.type === 'lecture') {
@@ -294,8 +295,11 @@ export default function SearchView({
             {matchedLectures.length > 0 && (
               <div className="space-y-4">
                 <h4 className="text-[10px] font-sans font-bold tracking-widest text-zinc-500 uppercase">Video Lessons ({matchedLectures.length})</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {matchedLectures.map(lec => {
+                <VirtuosoGrid
+                  useWindowScroll
+                  data={matchedLectures}
+                  listClassName="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+                  itemContent={(index, lec) => {
                     const lectureDto = {
                       ...lec,
                       channel: {
@@ -318,8 +322,8 @@ export default function SearchView({
                         }}
                       />
                     );
-                  })}
-                </div>
+                  }}
+                />
               </div>
             )}
 
@@ -407,7 +411,7 @@ export default function SearchView({
                             recordSearchQuery(searchQuery);
                             handleSelectPlaylist(p);
                           }}
-                          className="bg-[#070708] border border-zinc-900 hover:border-zinc-800 rounded-3xl overflow-hidden cursor-pointer flex flex-col group text-left transition-all p-5 shadow-xl hover:shadow-2xl"
+                          className="bg-[#0D0D0C] border border-zinc-900 hover:border-zinc-800 rounded-3xl overflow-hidden cursor-pointer flex flex-col group text-left transition-all p-5 shadow-xl hover:shadow-2xl"
                         >
                           <div className="relative aspect-video sm:aspect-[2.2/1] w-full rounded-2xl overflow-hidden bg-zinc-950">
                             <img

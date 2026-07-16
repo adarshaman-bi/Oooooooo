@@ -159,7 +159,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="w-10 h-10 flex items-center justify-center rounded-full border border-zinc-850 hover:border-zinc-500 bg-[#0E0E0E] text-zinc-400 hover:text-white cursor-pointer transition-all"
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-zinc-850 hover:border-zinc-500 bg-[#0D0D0C] text-zinc-400 hover:text-white cursor-pointer transition-all"
             title="Back to exploration"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -179,7 +179,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: List panel */}
-        <div className="lg:col-span-5 border border-zinc-900 bg-[#0A0A0A] rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh]">
+        <div className="lg:col-span-5 border border-zinc-900 bg-[#0D0D0C] rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh]">
           <div className="flex items-center gap-3">
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Educators Directory ({teachers.length})</h3>
             <button 
@@ -199,7 +199,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
               placeholder="Filter by name, academy, or subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#111] border border-zinc-850 rounded-xl py-2 pl-9 pr-4 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-500"
+              className="w-full bg-[#0D0D0C] border border-zinc-850 rounded-xl py-2 pl-9 pr-4 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-500"
             />
           </div>
 
@@ -217,7 +217,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                   className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
                     selectedTeacherId === t.id
                       ? 'border-white bg-zinc-900/50'
-                      : 'border-zinc-850/50 bg-[#0E0E0E] hover:border-zinc-600'
+                      : 'border-zinc-850/50 bg-[#0D0D0C] hover:border-zinc-600'
                   }`}
                 >
                   <img
@@ -273,7 +273,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                   placeholder="e.g. Alakh Pandey"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full h-10 bg-[#111] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
+                  className="w-full h-10 bg-[#0D0D0C] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                   placeholder="e.g. Physics Wallah"
                   value={instituteName}
                   onChange={(e) => setInstituteName(e.target.value)}
-                  className="w-full h-10 bg-[#111] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
+                  className="w-full h-10 bg-[#0D0D0C] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
                 />
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full h-10 bg-[#111] border border-zinc-850 rounded-xl px-3 text-xs outline-none focus:border-zinc-500 transition-all text-white"
+                  className="w-full h-10 bg-[#0D0D0C] border border-zinc-850 rounded-xl px-3 text-xs outline-none focus:border-zinc-500 transition-all text-white"
                 >
                   <option value="Physics">Physics</option>
                   <option value="Chemistry">Chemistry</option>
@@ -315,7 +315,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                   placeholder="e.g. 12"
                   value={experience}
                   onChange={(e) => setExperience(e.target.value)}
-                  className="w-full h-10 bg-[#111] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
+                  className="w-full h-10 bg-[#0D0D0C] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
                 />
               </div>
             </div>
@@ -328,7 +328,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                 placeholder="e.g. https://images.unsplash.com/photo-..."
                 value={profilePhotoUrl}
                 onChange={(e) => setProfilePhotoUrl(e.target.value)}
-                className="w-full h-10 bg-[#111] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
+                className="w-full h-10 bg-[#0D0D0C] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
               />
             </div>
 
@@ -340,7 +340,7 @@ export default function AdminEducators({ onBack, userEmail }: AdminEducatorsProp
                 placeholder="e.g. UCD16eo98AXl-9T61Xd711kQ"
                 value={youtubeChannelId}
                 onChange={(e) => setYoutubeChannelId(e.target.value)}
-                className="w-full h-10 bg-[#111] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
+                className="w-full h-10 bg-[#0D0D0C] border border-zinc-850 rounded-xl px-3.5 text-xs outline-none focus:border-zinc-500 transition-all text-white placeholder-zinc-600"
               />
             </div>
 

@@ -86,7 +86,7 @@ export default function Header({
           }}
           className="relative w-full"
         >
-          <div className="relative flex items-center bg-[#09090A] border border-[#141416] rounded-full overflow-hidden focus-within:border-zinc-800 transition-all w-full px-4 h-10 shadow-inner">
+          <div className="relative flex items-center bg-[#0D0D0C] border border-[#141416] rounded-full overflow-hidden focus-within:border-zinc-800 transition-all w-full px-4 h-10 shadow-inner">
             <Search className="w-4.5 h-4.5 text-zinc-500 mr-2.5 shrink-0" />
             <input
               type="text"
@@ -140,7 +140,7 @@ export default function Header({
         {user && !isGuest ? (
           <button
             onClick={() => onViewDashboard('profile')}
-            className={`w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#111112] hover:bg-[#1C1C1E] transition-all cursor-pointer ${
+            className={`w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#0D0D0C] hover:bg-[#1A1A1A] transition-all cursor-pointer ${
               currentView === 'profile'
                 ? 'ring-1 ring-white/50'
                 : ''
@@ -156,7 +156,7 @@ export default function Header({
         ) : (
           <button
             onClick={onOpenAuth}
-            className="w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#111112] hover:bg-[#1C1C1E] text-zinc-400 hover:text-white transition-all cursor-pointer"
+            className="w-[38px] h-[38px] flex items-center justify-center rounded-full bg-[#0D0D0C] hover:bg-[#1A1A1A] text-zinc-400 hover:text-white transition-all cursor-pointer"
             title="Sign in"
           >
             <UserIcon className="w-4.5 h-4.5 text-white" strokeWidth={1.8} />

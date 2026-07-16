@@ -1219,7 +1219,7 @@ export default function BlockBuilder() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <p className="text-[9px] font-semibold text-white truncate text-left">Kota Educator {i+1}</p>
-                                  <span className="text-[8px] font-mono text-[#FFEFD5] font-bold">★ 4.9</span>
+                                  <span className="text-[8px] font-mono text-ratings font-bold">★ 4.9</span>
                                 </div>
                               </div>
                             ))}

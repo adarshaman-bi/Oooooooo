@@ -33,7 +33,7 @@ import {
   personalizeTeachers
 } from './services/recommendationEngine';
 import useSWR from 'swr';
-import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveVideos } from './utils/swrConfig';
+import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveVideos, fetchActiveChannels } from './utils/swrConfig';
 import { supabase } from './utils/supabaseClient';
 import {
   fetchTeachers,
@@ -116,7 +116,7 @@ function LectureCardSkeleton() {
 
 function TeacherCardSkeleton() {
   return (
-    <div className="bg-[#111111] rounded-2xl p-3 flex flex-col justify-between gap-3 border border-zinc-900/80 animate-pulse select-none w-full max-w-[240px] mx-auto h-[220px]">
+    <div className="bg-[#0D0D0C] rounded-2xl p-3 flex flex-col justify-between gap-3 border border-zinc-900/80 animate-pulse select-none w-full max-w-[240px] mx-auto h-[220px]">
       <div className="flex items-start gap-3 justify-between">
         <div className="flex-1 flex flex-col items-center gap-2 max-w-[50%]">
           <div className="w-14 h-14 rounded-full bg-zinc-900/70" />
@@ -138,7 +138,7 @@ function TeacherCardSkeleton() {
 
 function BatchCardSkeleton() {
   return (
-    <div className="bg-[#111111] rounded-2xl p-5 border border-zinc-900/80 animate-pulse space-y-4 select-none">
+    <div className="bg-[#0D0D0C] rounded-2xl p-5 border border-zinc-900/80 animate-pulse space-y-4 select-none">
       <div className="flex justify-between items-start">
         <div className="space-y-2 flex-grow">
           <div className="h-3.5 bg-zinc-900/70 rounded w-3/4" />
@@ -160,7 +160,7 @@ function BatchCardSkeleton() {
 
 function InstituteCardSkeleton() {
   return (
-    <div className="bg-[#111111] border border-zinc-900 rounded-2xl p-5 animate-pulse flex flex-col justify-between h-full gap-4 select-none">
+    <div className="bg-[#0D0D0C] border border-zinc-900 rounded-2xl p-5 animate-pulse flex flex-col justify-between h-full gap-4 select-none">
       <div className="flex items-start gap-4">
         <div className="w-14 h-14 bg-zinc-900/70 rounded-xl shrink-0" />
         <div className="space-y-2 flex-1 min-w-0 pt-1">
@@ -514,6 +514,7 @@ function AppContent() {
   const { data: dbTeachers } = useSWR(SWR_KEYS.TEACHERS, fetchActiveTeachers, swrOptions);
   const { data: dbPlaylists } = useSWR(SWR_KEYS.PLAYLISTS, fetchActivePlaylists, swrOptions);
   const { data: dbVideos } = useSWR(SWR_KEYS.VIDEOS, fetchActiveVideos, swrOptions);
+  const { data: dbChannels } = useSWR(SWR_KEYS.CHANNELS, fetchActiveChannels, swrOptions);
   const { data: dbTestSeries } = useSWR('test_series', async () => {
     const { data } = await supabase.from('test_series').select('*');
     return data || [];
@@ -594,6 +595,7 @@ function AppContent() {
   const [institutes, setInstitutes] = useState<InstituteProfile[]>([]);
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [channels, setChannels] = useState<any[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [batchSubjectCounts, setBatchSubjectCounts] = useState<Record<string, number>>({});
   const [batchExamFilter, setBatchExamFilter] = useState<'All' | 'JEE' | 'NEET' | 'Both'>('All');
@@ -612,6 +614,9 @@ function AppContent() {
 
       const cachedPlaylists = localStorage.getItem('biovised_cached_playlists');
       if (cachedPlaylists) setPlaylists(JSON.parse(cachedPlaylists));
+
+      const cachedChannels = localStorage.getItem('biovised_cached_channels');
+      if (cachedChannels) setChannels(JSON.parse(cachedChannels));
 
       const cachedBatches = localStorage.getItem('biovised_cached_batches');
       if (cachedBatches) setBatches(JSON.parse(cachedBatches));
@@ -1302,7 +1307,7 @@ function AppContent() {
 
   // Initial load of directories with automatic background persistence synchronization using SWR cache
   useEffect(() => {
-    if (!dbTeachers && !dbPlaylists && !dbVideos && !dbTestSeries) return;
+    if (!dbTeachers && !dbPlaylists && !dbVideos && !dbTestSeries && !dbChannels) return;
 
     const processPlatformData = async () => {
       try {
@@ -1461,6 +1466,17 @@ function AppContent() {
         const oneshots = sanitizedVideos.filter((v: any) => v.contentType === 'oneshot' || v.category === 'oneshot');
         setOneShotVideos(oneshots);
 
+        // 5b. Process & Map Channels
+        const rawChannels = dbChannels || [];
+        const sanitizedChannels = rawChannels.map((ch: any) => ({
+          channelId: ch?.id || '',
+          channelName: ch?.name || 'Verified Educator',
+          channelThumbnail: ch?.avatar || '',
+          subscriberCount: parseInt(ch?.subscribers, 10) || 120000,
+          description: ch?.description || 'Verified JEE & NEET Educator'
+        }));
+        setChannels(sanitizedChannels);
+
         // 6. Set auxiliary structures
         if (auxiliaryInstitutes && auxiliaryInstitutes.length > 0) {
           setInstitutes(auxiliaryInstitutes);
@@ -1551,6 +1567,7 @@ function AppContent() {
           localStorage.setItem('biovised_cached_teachers', JSON.stringify(sanitizedTeachers));
           localStorage.setItem('biovised_cached_playlists', JSON.stringify(sanitizedPlaylists));
           localStorage.setItem('biovised_cached_lectures', JSON.stringify(sanitizedVideos));
+          localStorage.setItem('biovised_cached_channels', JSON.stringify(sanitizedChannels));
           if (auxiliaryInstitutes && auxiliaryInstitutes.length > 0) {
             localStorage.setItem('biovised_cached_institutes', JSON.stringify(auxiliaryInstitutes));
           }
@@ -1566,7 +1583,7 @@ function AppContent() {
     };
 
     processPlatformData();
-  }, [dbTeachers, dbPlaylists, dbVideos, dbTestSeries]);
+  }, [dbTeachers, dbPlaylists, dbVideos, dbTestSeries, dbChannels]);
 
   // Sync user following list and handle view reset on sign out
   useEffect(() => {
@@ -1599,6 +1616,8 @@ function AppContent() {
       return;
     }
     const isFollowing = followedIds.includes(t.id);
+    
+    // Apply optimistic updates to UI state immediately
     if (isFollowing) {
       setFollowedIds(prev => prev.filter(id => id !== t.id));
       setTeachers(prev => prev.map(teacher => {
@@ -1607,7 +1626,6 @@ function AppContent() {
         }
         return teacher;
       }));
-      await toggleFollow(t.id, t.name, t.avatar, isFollowing);
     } else {
       setFollowedIds(prev => [...prev, t.id]);
       setTeachers(prev => prev.map(teacher => {
@@ -1616,32 +1634,58 @@ function AppContent() {
         }
         return teacher;
       }));
-      await toggleFollow(t.id, t.name, t.avatar, isFollowing);
-      
-      const newNotif: AppNotification = {
-        id: `follow_${t.id}_${Date.now()}`,
-        userId: user.uid,
-        title: "New Educator Followed",
-        message: `You have successfully subscribed to ${t.name}. Direct stream-alert triggers are active!`,
-        read: false,
-        createdAt: new Date().toISOString(),
-        type: 'follow'
-      };
-      setNotifications(prev => {
-        const updated = [newNotif, ...prev];
-        try { localStorage.setItem(`biovised_notifications_${user.uid}`, JSON.stringify(updated)); } catch {}
-        return updated;
-      });
+    }
 
-      try {
-        await addRealNotification(
-          "New Educator Followed",
-          `You have successfully subscribed to ${t.name}. Direct stream-alert triggers are active!`,
-          'follow'
-        );
-      } catch (err) {
-        console.warn("Could not save cloud notification:", err);
+    try {
+      await toggleFollow(t.id, t.name, t.avatar, isFollowing);
+
+      if (!isFollowing) {
+        const newNotif: AppNotification = {
+          id: `follow_${t.id}_${Date.now()}`,
+          userId: user.uid,
+          title: "New Educator Followed",
+          message: `You have successfully subscribed to ${t.name}. Direct stream-alert triggers are active!`,
+          read: false,
+          createdAt: new Date().toISOString(),
+          type: 'follow'
+        };
+        setNotifications(prev => {
+          const updated = [newNotif, ...prev];
+          try { localStorage.setItem(`biovised_notifications_${user.uid}`, JSON.stringify(updated)); } catch {}
+          return updated;
+        });
+
+        try {
+          await addRealNotification(
+            "New Educator Followed",
+            `You have successfully subscribed to ${t.name}. Direct stream-alert triggers are active!`,
+            'follow'
+          );
+        } catch (err) {
+          console.warn("Could not save cloud notification:", err);
+        }
       }
+    } catch (err) {
+      console.error("Failed to toggle follow status:", err);
+      // Revert the optimistic update on error
+      if (isFollowing) {
+        setFollowedIds(prev => [...prev, t.id]);
+        setTeachers(prev => prev.map(teacher => {
+          if (teacher.id === t.id) {
+            return { ...teacher, followersCount: (teacher.followersCount || 0) + 1 };
+          }
+          return teacher;
+        }));
+      } else {
+        setFollowedIds(prev => prev.filter(id => id !== t.id));
+        setTeachers(prev => prev.map(teacher => {
+          if (teacher.id === t.id) {
+            return { ...teacher, followersCount: Math.max(0, (teacher.followersCount || 0) - 1) };
+          }
+          return teacher;
+        }));
+      }
+      alert(`Failed to update follow subscription for ${t.name}. Please check your connection.`);
     }
   };
 
@@ -2372,6 +2416,11 @@ function AppContent() {
                     batchSubjectCounts={batchSubjectCounts}
                     followedIds={followedIds}
                     handleFollowToggle={handleFollowToggle}
+                    videos={lectures}
+                    playlists={playlists}
+                    teachers={teachers}
+                    channels={channels}
+                    institutes={institutes}
                   />
                 </div>
               )}
@@ -2393,7 +2442,7 @@ function AppContent() {
                         ))}
                       </div>
                     ) : filteredLectures.length === 0 ? (
-                      <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#111111] rounded-2xl">No video lessons registered matching search parameter bounds.</p>
+                      <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#0D0D0C] rounded-2xl">No video lessons registered matching search parameter bounds.</p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {filteredLectures.map((lec) => {
@@ -2479,6 +2528,8 @@ function AppContent() {
                     isActive={activeExploreTab === 'playlists'}
                     onBackToHome={() => setActiveExploreTab('home')}
                     onSelectChannel={(id, type) => setDetailModal({ id, type })}
+                    playlists={playlists}
+                    channels={channels}
                   />
                 </div>
               )}
@@ -2515,7 +2566,7 @@ function AppContent() {
                       ))}
                     </div>
                   ) : filteredBatches.length === 0 ? (
-                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#111111] rounded-2xl">No verified free batches match the selected filter.</p>
+                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#0D0D0C] rounded-2xl">No verified free batches match the selected filter.</p>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6">
                       {filteredBatches.map((b) => (
@@ -2564,7 +2615,7 @@ function AppContent() {
                       ))}
                     </div>
                   ) : filteredInstitutes.length === 0 ? (
-                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#111111] rounded-2xl">No affiliated academies match the selected criteria.</p>
+                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#0D0D0C] rounded-2xl">No affiliated academies match the selected criteria.</p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredInstitutes.map((inst) => (

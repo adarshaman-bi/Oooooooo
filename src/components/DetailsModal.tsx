@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { VirtuosoGrid } from 'react-virtuoso';
 import { useAuth } from '../context/AuthContext';
 import {
   X,
@@ -147,8 +148,7 @@ export default function DetailsModal({
             reviewCount: stats?.count ?? 0
           } as any);
 
-          const allLecs = await dbService.fetchLectures();
-          const plLecs = allLecs.filter(l => l.playlistId === targetId);
+          const plLecs = await dbService.fetchLectures({ playlistId: targetId });
           setLectures(plLecs);
         } else if (targetType === 'batch') {
           const b = await dbService.fetchBatchById(targetId);
@@ -160,11 +160,13 @@ export default function DetailsModal({
           
           // Hydrate the batch object with its subjects, lectures and ratings
           const subs = await dbService.fetchBatchSubjects(targetId);
-          const allVideos = await dbService.fetchLectures();
+          const playlistIds = subs.map(s => s.playlistId).filter(Boolean);
+          const allVideos = playlistIds.length > 0
+            ? await dbService.fetchLectures({ playlistIds })
+            : [];
           const teachersList = await dbService.fetchTeachers();
           
           // Fetch ratings & scorecards for batch and its playlists
-          const playlistIds = subs.map(s => s.playlistId).filter(Boolean);
           const allEntityIds = [targetId, ...playlistIds];
           const scorecards = await dbService.fetchReviewScorecards(allEntityIds);
 
@@ -367,21 +369,24 @@ export default function DetailsModal({
                   </h3>
 
                   {lectures.length === 0 ? (
-                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#111111] rounded-2xl">
+                    <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#0D0D0C] rounded-2xl">
                       No validated chapters registered in this curriculum yet.
                     </p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {lectures.map((lec) => (
+                    <VirtuosoGrid
+                      style={{ height: '400px' }}
+                      data={lectures}
+                      listClassName="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                      itemContent={(index, lec) => (
                         <div
                           key={lec.id}
                           onClick={() => {
                             onSelectLecture(lec);
                             onClose();
                           }}
-                          className="p-3 bg-[#0A0A0A] border border-[#1F1F1F] rounded-xl flex items-center gap-4 hover:border-zinc-500 cursor-pointer transition-colors"
+                          className="p-3 bg-[#0D0D0C] border border-[#1F1F1F] rounded-xl flex items-center gap-4 hover:border-zinc-500 cursor-pointer transition-colors h-full"
                         >
-                          <img src={getLectureThumbnail(lec)} alt={lec.title} className="aspect-video w-24 object-cover rounded border border-[#111]" />
+                          <img src={getLectureThumbnail(lec)} alt={lec.title} className="aspect-video w-24 object-cover rounded border border-[#111] shrink-0" />
                           <div className="flex-1 min-w-0">
                             <h4 className="text-xs font-bold text-white line-clamp-1 truncate uppercase">{lec.title}</h4>
                             <p className="text-[10px] font-mono text-brand-gray mt-1">Teacher: {lec.teacherName}</p>
@@ -392,8 +397,8 @@ export default function DetailsModal({
                             </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    />
                   )}
                 </div>
               </div>
@@ -463,9 +468,9 @@ export default function DetailsModal({
                         <div className="bg-brand-black border border-brand-border rounded-xl p-4 min-w-[200px] text-center md:text-right space-y-1">
                           <span className="block text-[10px] font-mono text-brand-gray uppercase">Aggregate Score</span>
                           {dynamicAverageRating ? (
-                            <span className="text-3xl font-display font-bold text-[#FFEFD5]">{dynamicAverageRating}★</span>
+                            <span className="text-3xl font-display font-bold text-ratings">{dynamicAverageRating}★</span>
                           ) : (
-                            <span className="text-sm font-mono font-medium text-[#FFEFD5] block uppercase tracking-wide">No ratings yet</span>
+                            <span className="text-sm font-mono font-medium text-ratings block uppercase tracking-wide">No ratings yet</span>
                           )}
                           <span className="block text-[10px] font-mono text-brand-gray uppercase mt-1">Review Volume</span>
                           <span className="text-sm font-mono font-medium text-brand-accent">{dynamicRatingCount} Student reviews</span>
@@ -582,21 +587,24 @@ export default function DetailsModal({
                       {lectures.length > 0 && (
                         <div>
                           <h4 className="text-xs text-brand-gray font-mono mb-2 uppercase tracking-wide">Streamable Lectures ({lectures.length})</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {lectures.map(lec => (
+                          <VirtuosoGrid
+                            style={{ height: '300px' }}
+                            data={lectures}
+                            listClassName="grid grid-cols-1 md:grid-cols-2 gap-3"
+                            itemContent={(index, lec) => (
                               <div
                                 key={lec.id}
                                 onClick={() => { onSelectLecture(lec); onClose(); }}
-                                className="p-3 bg-brand-black border border-brand-border rounded-lg flex items-center gap-3 hover:border-neutral-500 cursor-pointer transition-colors"
+                                className="p-3 bg-brand-black border border-brand-border rounded-lg flex items-center gap-3 hover:border-neutral-500 cursor-pointer transition-colors h-full"
                               >
-                                <img src={getLectureThumbnail(lec)} alt={lec.title} className="w-16 h-10 object-cover rounded border border-brand-border" />
+                                <img src={getLectureThumbnail(lec)} alt={lec.title} className="w-16 h-10 object-cover rounded border border-brand-border shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs text-brand-accent font-medium leading-tight truncate">{lec.title}</p>
                                   <span className="text-[10px] font-mono text-brand-gray uppercase mt-0.5 block">{lec.duration}</span>
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            )}
+                          />
                         </div>
                       )}
 
@@ -676,7 +684,7 @@ export default function DetailsModal({
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-0.5 text-[#FFEFD5] font-mono text-xs font-bold bg-brand-dark px-2 py-0.5 rounded">
+                            <div className="flex items-center gap-0.5 text-ratings font-mono text-xs font-bold bg-brand-dark px-2 py-0.5 rounded">
                               {r.rating}★
                             </div>
                           </div>

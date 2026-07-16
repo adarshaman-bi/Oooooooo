@@ -42,6 +42,8 @@ interface VideoLibraryProps {
   onBackToHome: () => void;
   onSelectChannel?: (id: string, type: 'teacher' | 'institute') => void;
   isActive?: boolean;
+  playlists: any[];
+  channels: any[];
 }
 
 interface WatchHistoryItem {
@@ -134,7 +136,7 @@ function VideoLibrarySkeleton() {
   );
 }
 
-export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive = true }: VideoLibraryProps) {
+export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive = true, playlists: propPlaylists, channels: propChannels }: VideoLibraryProps) {
   const { user } = useAuth();
 
   // Active view states
@@ -197,81 +199,24 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
     }
   }, [isActive, isPlaying]);
 
-  // SWR Caching Layer
-  const { data: chanData, isLoading: channelsLoading } = useSWR(SWR_KEYS.CHANNELS, fetchActiveChannels, swrOptions);
-  const { data: playData, isLoading: playlistsLoading } = useSWR(SWR_KEYS.PLAYLISTS, fetchActivePlaylists, swrOptions);
-
-  // Process channels
+  // Process channels from props
   useEffect(() => {
-    if (chanData) {
-      const items = (chanData || []).map((ch: any) => ({
-        id: ch.id,
-        channelId: ch.id,
-        channelName: ch.name || '',
-        channelHandle: ch.website || '',
-        channelThumbnail: ch.avatar || '',
-        bannerUrl: null,
-        subscriberCount: Number(ch.subscribers) || 0,
-        description: ch.name || '',
-        addedBy: 'admin',
-        addedAt: ch.added_at,
-        lastSynced: ch.added_at,
-        isActive: true,
-        tags: ch.exams || [],
-        totalVideos: ch.playlists_count || 0,
-        totalPlaylists: ch.playlists_count || 0,
-        avatarUrl: ch.avatar || '',
-        customUrl: ch.website || '',
-        exams: ch.exams || [],
-        instituteId: ch.institute_id || '',
-        teacherId: ch.teacher_id || '',
-        subscriberCountFormatted: formatSubscribers(ch.subscribers || '100K'),
-        videoCount: ch.playlists_count || 0
-      } as unknown as YouTubeChannel));
-      setChannels(items);
+    if (propChannels) {
+      setChannels(propChannels);
     }
-  }, [chanData]);
+  }, [propChannels]);
 
-  // Process playlists
+  // Process playlists from props
   useEffect(() => {
-    if (playData) {
-      const items = (playData || []).map((p: any) => {
-        const titleLower = (p.title || '').toLowerCase();
-        let resolvedContentType = p.content_type || 'playlist';
-        if (!p.content_type) {
-          if (titleLower.includes('one shot') || titleLower.includes('oneshot') || titleLower.includes('complete revision')) {
-            resolvedContentType = 'one_shot';
-          } else if (titleLower.includes('allen') || titleLower.includes('pw') || titleLower.includes('unacademy') || titleLower.includes('competishun')) {
-            resolvedContentType = 'institute';
-          }
-        }
-        const resolvedShowOnHome = p.show_on_home !== undefined ? p.show_on_home : true;
-
-        return {
-          id: p.id,
-          title: p.title || '',
-          description: p.description || '',
-          thumbnailUrl: p.cover_thumbnail_url || p.thumbnail || '',
-          lecturesCount: p.lectures_count || 0,
-          subject: p.category || '',
-          examType: p.exam_type || 'Both',
-          teacherId: p.teacher_id || '',
-          teacherName: p.channel_title || p.channel_name || '',
-          channelName: p.channel_title || p.channel_name || '',
-          channelId: p.channel_id || TEACHER_TO_CHANNEL[p.teacher_id || ''] || p.teacher_id || '',
-          createdAt: p.created_at || new Date().toISOString(),
-          contentType: resolvedContentType,
-          showOnHome: resolvedShowOnHome
-        } as Playlist;
-      });
-      setPlaylists(items);
+    if (propPlaylists) {
+      setPlaylists(propPlaylists);
     }
-  }, [playData]);
+  }, [propPlaylists]);
 
-  // Sync isLoadingFeed based on SWR status
+  // Sync isLoadingFeed based on loading status
   useEffect(() => {
-    setIsLoadingFeed(channelsLoading || playlistsLoading || isLoadingVideos);
-  }, [channelsLoading, playlistsLoading, isLoadingVideos]);
+    setIsLoadingFeed(isLoadingVideos);
+  }, [isLoadingVideos]);
 
   useEffect(() => {
     if (playlists.length > 0) {
@@ -370,7 +315,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
     }
 
     setIsLoadingPlaylistVideos(true);
-    supabase.from('videos').select('*').eq('playlist_id', selectedPlaylist.id).then(({ data, error }) => {
+    supabase.from('videos').select('id, title, video_url, duration, category, playlist_id, views, thumbnail_url, subject, exam_type, content_type, teacher_id, teacher_name, likes_count, duration_seconds, is_active, created_at, updated_at').eq('playlist_id', selectedPlaylist.id).then(({ data, error }) => {
       setIsLoadingPlaylistVideos(false);
       if (error) {
         console.error("Error retrieving playlist videos:", error);
@@ -393,7 +338,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
     setIsSearchActive(true);
 
     try {
-      let queryBuilder = supabase.from('videos').select('*').limit(50);
+      let queryBuilder = supabase.from('videos').select('id, title, video_url, duration, category, playlist_id, views, thumbnail_url, subject, exam_type, content_type, teacher_id, teacher_name, likes_count, duration_seconds, is_active, created_at, updated_at').limit(50);
       if (filterSubject !== 'All') {
         queryBuilder = queryBuilder.eq('subject', filterSubject);
       }
@@ -829,7 +774,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#070708] text-white font-sans selection:bg-white selection:text-black">
+    <div className="w-full min-h-screen bg-[#000000] text-white font-sans selection:bg-white selection:text-black">
       
       <main className="max-w-7xl mx-auto px-4 py-6 pb-28">
 
@@ -868,7 +813,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                     <select
                       value={filterSubject}
                       onChange={(e) => setFilterSubject(e.target.value)}
-                      className="w-full text-xs font-semibold h-9 rounded-lg bg-[#141416] border border-[#232326] text-white px-2 focus:outline-none focus:border-white"
+                      className="w-full text-xs font-semibold h-9 rounded-lg bg-[#0D0D0C] border border-[#232326] text-white px-2 focus:outline-none focus:border-white"
                     >
                       <option value="All">All Subjects</option>
                       <option value="Biology">Biology</option>
@@ -884,7 +829,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                     <select
                       value={filterChannel}
                       onChange={(e) => setFilterChannel(e.target.value)}
-                      className="w-full text-xs font-semibold h-9 rounded-lg bg-[#141416] border border-[#232326] text-white px-2 focus:outline-none focus:border-white"
+                      className="w-full text-xs font-semibold h-9 rounded-lg bg-[#0D0D0C] border border-[#232326] text-white px-2 focus:outline-none focus:border-white"
                     >
                       <option value="All">All Channels</option>
                       {channels.map((chan) => (
@@ -898,7 +843,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                     <select
                       value={filterDuration}
                       onChange={(e) => setFilterDuration(e.target.value)}
-                      className="w-full text-xs font-semibold h-9 rounded-lg bg-[#141416] border border-[#232326] text-white px-2 focus:outline-none focus:border-white"
+                      className="w-full text-xs font-semibold h-9 rounded-lg bg-[#0D0D0C] border border-[#232326] text-white px-2 focus:outline-none focus:border-white"
                     >
                       <option value="All">Any Duration</option>
                       <option value="Short">Short (&lt; 10m)</option>
@@ -997,7 +942,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                 <span className="text-[9px] font-mono text-zinc-500 uppercase">Interactive Hub</span>
               </div>
               {(playlists || []).filter(p => p.channelId === selectedChannel.channelId).length === 0 ? (
-                <p className="text-xs text-zinc-500 font-mono py-12 text-center bg-[#09090A] border border-neutral-900 rounded-xl">No playlists registered for this channel yet.</p>
+                <p className="text-xs text-zinc-500 font-mono py-12 text-center bg-[#0D0D0C] border border-neutral-900 rounded-xl">No playlists registered for this channel yet.</p>
               ) : (
                 <div 
                   tabIndex={0}
@@ -1282,7 +1227,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                         setSelectedChannel(chan);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="w-[180px] shrink-0 snap-start bg-[#0E0E0F]/90 border border-zinc-855 p-4 rounded-xl text-center space-y-3 flex flex-col items-center hover:bg-[#121214] hover:border-zinc-700 transition-all duration-300 cursor-pointer shadow-md"
+                      className="w-[180px] shrink-0 snap-start bg-[#0D0D0C]/90 border border-zinc-855 p-4 rounded-xl text-center space-y-3 flex flex-col items-center hover:bg-[#121214] hover:border-zinc-700 transition-all duration-300 cursor-pointer shadow-md"
                     >
                       <div className="relative">
                         <SafeImage
@@ -1319,7 +1264,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
             className="space-y-6 text-left"
           >
             {/* Playlist Header card */}
-            <div className="p-6 rounded-2xl bg-[#09090A] border border-neutral-910 flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div className="p-6 rounded-2xl bg-[#0D0D0C] border border-neutral-910 flex flex-col md:flex-row gap-6 items-start md:items-center">
               <div className="w-full md:w-56 aspect-video bg-neutral-950 rounded-xl overflow-hidden shrink-0 border border-neutral-800 shadow">
                 <SafeImage
                   src={getPlaylistThumbnail(selectedPlaylist)}
@@ -1388,7 +1333,7 @@ export default function VideoLibrary({ onBackToHome, onSelectChannel, isActive =
                             )}
                           </div>
 
-                          <div className="w-20 sm:w-28 aspect-video shrink-0 bg-[#070708] border border-neutral-800 rounded-lg overflow-hidden relative group">
+                          <div className="w-20 sm:w-28 aspect-video shrink-0 bg-[#0D0D0C] border border-neutral-800 rounded-lg overflow-hidden relative group">
                             <YoutubeThumbnailImg
                               videoId={video.videoId}
                               alt={video.title}
