@@ -210,19 +210,19 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {subjects.map((sub) => {
-              const media = getSubjectMedia(sub.subject);
-              const SubIcon = media.Icon;
+              const subjectMedia = getSubjectMedia(sub.subject);
+              const SubIcon = subjectMedia.Icon;
 
               return (
                 <button
                   key={sub.id}
                   onClick={() => handleSubjectClick(sub)}
                   style={{
-                    ['--subject-color' as any]: media.color,
+                    ['--subject-color' as any]: subjectMedia.color,
                   }}
                   className="group bg-[#0D0D0C] border border-[#1C1C1C] hover:border-[var(--subject-color)] rounded-2xl p-4 flex items-center gap-4 transition-all duration-350 hover:shadow-[0_4px_24px_rgba(0,0,0,0.6)] focus:outline-none"
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${media.gradient} shadow-lg shadow-black/40`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${subjectMedia.gradient} shadow-lg shadow-black/40`}>
                     <SubIcon className="w-5 h-5 text-white" />
                   </div>
 
@@ -232,7 +232,7 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                     </h5>
                     
                     <div className="flex items-center gap-2 mt-1.5">
-                      {sub.teacherName && <AvatarInitials name={sub.teacherName} color={media.color} />}
+                      {sub.teacherName && <AvatarInitials name={sub.teacherName} color={subjectMedia.color} />}
                       <div className="min-w-0">
                         <p className="text-[10px] text-zinc-300 font-semibold truncate leading-none mb-1">
                           {sub.teacherName || 'TBC Educator'}
@@ -316,13 +316,14 @@ export default function BatchDetail({ batch, onClose, onPlayLecture }: BatchDeta
                 {lectures.map((lec, idx) => {
                   const num = String(idx + 1).padStart(2, '0');
                   const thumb = lec.thumbnailUrl || (lec.id ? `https://i.ytimg.com/vi/${lec.id}/mqdefault.jpg` : '');
+                  const lectureMedia = getSubjectMedia(selectedSubject?.subject || '');
 
                   return (
                     <button
                       key={lec.id}
                       onClick={() => handlePlayLecture(lec)}
                       style={{
-                        ['--subject-color' as any]: media.color,
+                        ['--subject-color' as any]: lectureMedia.color,
                       }}
                       className="group w-full bg-[#0D0D0C] border border-[#1C1C1C] hover:border-[var(--subject-color)] rounded-xl p-3 flex items-center gap-3 transition-all duration-200 focus:outline-none"
                     >
