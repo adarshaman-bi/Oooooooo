@@ -32,3 +32,5 @@ htmlcov/
 
 # git recovery backup directory
 .git_corrupt/
+scratch_*
+scripts/
