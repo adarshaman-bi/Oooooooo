@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabaseClient';
+import { supabaseAdmin } from '../../utils/supabaseClient';
 
 export class OverrideHandler {
   /**
@@ -6,7 +6,7 @@ export class OverrideHandler {
    */
   static async isPlaylistLocked(playlistId: string): Promise<boolean> {
     try {
-      const { data } = await supabase
+      const { data } = await supabaseAdmin
         .from('staging_playlists')
         .select('is_locked')
         .eq('id', playlistId)
@@ -23,7 +23,7 @@ export class OverrideHandler {
    */
   static async isVideoLocked(videoId: string): Promise<boolean> {
     try {
-      const { data } = await supabase
+      const { data } = await supabaseAdmin
         .from('staging_videos')
         .select('is_locked')
         .eq('id', videoId)
@@ -48,7 +48,7 @@ export class OverrideHandler {
     modifiedBy?: string;
   }): Promise<void> {
     try {
-      await supabase.from('change_history').insert({
+      await supabaseAdmin.from('change_history').insert({
         run_id: options.runId,
         entity_id: options.entityId,
         entity_type: options.entityType,

@@ -1,8 +1,13 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env)
+  ? import.meta.env.VITE_SUPABASE_URL
+  : process.env.VITE_SUPABASE_URL;
+
+const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env)
+  ? import.meta.env.VITE_SUPABASE_ANON_KEY
+  : process.env.VITE_SUPABASE_ANON_KEY;
 
 const isConfigured = supabaseUrl && supabaseUrl.trim() !== '' && supabaseAnonKey && supabaseAnonKey.trim() !== '';
 
@@ -29,6 +34,12 @@ export const supabase = createClient(
     },
   }
 );
+
+// Secure service role client for ingestion and backend processes
+const serviceRoleKey = (typeof process !== 'undefined') ? process.env.SUPABASE_SERVICE_ROLE_KEY : null;
+export const supabaseAdmin = serviceRoleKey 
+  ? createClient(safeUrl, serviceRoleKey)
+  : supabase;
 
 export async function fetchPaginatedData<T = any>(
   table: string,

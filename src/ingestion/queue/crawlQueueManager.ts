@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabaseClient';
+import { supabaseAdmin } from '../../utils/supabaseClient';
 
 export interface QueueItem {
   id: string;
@@ -17,7 +17,7 @@ export class CrawlQueueManager {
   static async pushToQueue(runId: string, entityId: string, entityType: 'channel' | 'playlist' | 'video'): Promise<void> {
     try {
       // Check if it already exists in the queue in a non-terminal state
-      const { data } = await supabase
+      const { data } = await supabaseAdmin
         .from('crawl_queue')
         .select('id')
         .eq('run_id', runId)
@@ -27,7 +27,7 @@ export class CrawlQueueManager {
       
       if (data && data.length > 0) return; // Already queued or running
 
-      await supabase.from('crawl_queue').insert({
+      await supabaseAdmin.from('crawl_queue').insert({
         run_id: runId,
         entity_id: entityId,
         entity_type: entityType,
@@ -44,7 +44,7 @@ export class CrawlQueueManager {
    */
   static async claimNextItem(runId: string): Promise<QueueItem | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('crawl_queue')
         .select('*')
         .eq('run_id', runId)
@@ -57,7 +57,7 @@ export class CrawlQueueManager {
       if (!item) return null;
 
       // Optimistic lock check: update status to processing
-      const { data: updated, error: updateError } = await supabase
+      const { data: updated, error: updateError } = await supabaseAdmin
         .from('crawl_queue')
         .update({ status: 'processing', attempts: item.attempts + 1 })
         .eq('id', item.id)
@@ -88,14 +88,14 @@ export class CrawlQueueManager {
    * Marks a queue item as successfully processed.
    */
   static async markCompleted(id: string): Promise<void> {
-    await supabase.from('crawl_queue').update({ status: 'completed' }).eq('id', id);
+    await supabaseAdmin.from('crawl_queue').update({ status: 'completed' }).eq('id', id);
   }
 
   /**
    * Marks a queue item as failed, recording error details.
    */
   static async markFailed(id: string, error: string): Promise<void> {
-    await supabase.from('crawl_queue').update({
+    await supabaseAdmin.from('crawl_queue').update({
       status: 'failed',
       last_error: error
     }).eq('id', id);

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { supabase } from '../../utils/supabaseClient';
+import { supabaseAdmin } from '../../utils/supabaseClient';
 import { OverrideHandler } from './overrideHandler';
 
 export class DbSeeder {
@@ -19,7 +19,7 @@ export class DbSeeder {
       const hash = this.getPayloadHash(rawPayload);
       
       // Attempt insert
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('source_snapshots')
         .insert({
           run_id: runId,
@@ -32,7 +32,7 @@ export class DbSeeder {
       
       if (error) {
         // If conflict on hash, fetch the existing ID
-        const { data: existing } = await supabase
+        const { data: existing } = await supabaseAdmin
           .from('source_snapshots')
           .select('id')
           .eq('entity_id', entityId)
@@ -71,7 +71,7 @@ export class DbSeeder {
 
     try {
       // Get current title to log mutations
-      const { data: current } = await supabase
+      const { data: current } = await supabaseAdmin
         .from('staging_playlists')
         .select('title')
         .eq('id', playlist.id)
@@ -88,7 +88,7 @@ export class DbSeeder {
         });
       }
 
-      await supabase.from('staging_playlists').upsert({
+      await supabaseAdmin.from('staging_playlists').upsert({
         id: playlist.id,
         title: playlist.title,
         description: playlist.description,
@@ -126,7 +126,7 @@ export class DbSeeder {
     }
 
     try {
-      await supabase.from('staging_videos').upsert({
+      await supabaseAdmin.from('staging_videos').upsert({
         id: video.id,
         title: video.title,
         video_url: video.videoUrl,
@@ -150,7 +150,7 @@ export class DbSeeder {
   static async publishHighConfidenceItems(runId: string): Promise<void> {
     try {
       // 1. Fetch approved staging playlists
-      const { data: playlists } = await supabase
+      const { data: playlists } = await supabaseAdmin
         .from('staging_playlists')
         .select('*')
         .eq('review_status', 'pending')
@@ -159,7 +159,7 @@ export class DbSeeder {
       if (playlists) {
         for (const pl of playlists) {
           // Publish to public.playlists
-          await supabase.from('playlists').upsert({
+          await supabaseAdmin.from('playlists').upsert({
             id: pl.id,
             title: pl.title,
             description: pl.description,
@@ -173,7 +173,7 @@ export class DbSeeder {
       }
 
       // 2. Fetch approved staging videos
-      const { data: videos } = await supabase
+      const { data: videos } = await supabaseAdmin
         .from('staging_videos')
         .select('*')
         .eq('review_status', 'pending')
@@ -182,14 +182,14 @@ export class DbSeeder {
       if (videos) {
         for (const v of videos) {
           // Resolve playlist category
-          const { data: pl } = await supabase
+          const { data: pl } = await supabaseAdmin
             .from('staging_playlists')
             .select('academic_type')
             .eq('id', v.playlist_id)
             .single();
 
           // Publish to public.videos
-          await supabase.from('videos').upsert({
+          await supabaseAdmin.from('videos').upsert({
             id: v.id,
             title: v.title,
             video_url: v.video_url,

@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabaseClient';
+import { supabaseAdmin } from '../../utils/supabaseClient';
 import { ALLOWED_CHANNELS } from '../config/channels';
 import { CrawlQueueManager } from '../queue/crawlQueueManager';
 import { ChannelCollector } from '../collectors/channelCollector';
@@ -29,7 +29,7 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
   console.log(`\n🚀 [IngestionEngine] Initializing run... (Dry Run: ${options.dryRun === true})`);
 
   // 1. Create Ingestion Run record
-  const { data: run, error: runError } = await supabase
+  const { data: run, error: runError } = await supabaseAdmin
     .from('ingestion_runs')
     .insert({
       status: 'running',
@@ -144,7 +144,7 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
               });
 
               // Log classification staging rules/decisions log
-              await supabase.from('change_review_log').insert({
+              await supabaseAdmin.from('change_review_log').insert({
                 run_id: runId,
                 entity_id: vId,
                 entity_type: 'video',
@@ -174,7 +174,7 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
     }
 
     // Update run as completed
-    await supabase
+    await supabaseAdmin
       .from('ingestion_runs')
       .update({
         status: 'completed',
@@ -186,7 +186,7 @@ export async function runIngestionEngine(options: { dryRun?: boolean } = {}): Pr
 
   } catch (err: any) {
     console.error('❌ [IngestionEngine] Run failed with error:', err);
-    await supabase
+    await supabaseAdmin
       .from('ingestion_runs')
       .update({
         status: 'failed',

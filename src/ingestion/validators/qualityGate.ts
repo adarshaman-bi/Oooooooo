@@ -96,8 +96,11 @@ export function validateAcademicQuality(
 
   const finalConfidence = Math.min(totalConfidence, 100);
 
+  const isApproved = finalConfidence >= 50;
+
   return {
-    isApproved: finalConfidence >= 50,
+    isApproved,
+    rejectReason: isApproved ? undefined : `Low confidence score (${finalConfidence}/100) based on insufficient syllabus keywords.`,
     confidenceScore: finalConfidence,
     evidenceList
   };
