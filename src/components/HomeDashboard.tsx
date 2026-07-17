@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, BookOpen, Clock, Youtube, Sparkles, CheckCircle2, ChevronRight, GraduationCap, Play, CheckCircle, Building2, Users } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import useSWR from 'swr';
 import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveChannels, fetchActiveVideos } from '../utils/swrConfig';
@@ -217,32 +216,34 @@ export default function HomeDashboard({
       <div className="absolute inset-x-0 top-0 h-[600px] bg-[radial-gradient(circle_at_top,rgba(251,176,147,0.06),transparent_60%)] pointer-events-none" />
       <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 1. Curated Apple TV Style Branding Header */}
-      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-4 z-10">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0D0D0C] to-zinc-950 border border-zinc-900/80 px-6 py-6 sm:py-8 shadow-[0_15px_35px_rgba(0,0,0,0.9)]">
-          {/* Subtle warm ambient glow behind text */}
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-32 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="max-w-3xl space-y-3 relative z-10">
-            {/* Curated Flag */}
-            <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-[9px] font-mono tracking-widest text-zinc-300 uppercase">
-              <Sparkles className="w-3 h-3 text-amber-400" />
-              <span>{examText ? `TARGET: ${examText} ${targetYear ? `(${targetYear})` : ''}` : 'BIOVISED Editorial Curation'}</span>
+      {/* Hero Section */}
+      <div style={{ position:'relative', width:'100%', maxWidth:'1280px', margin:'0 auto', padding:'2rem 1rem 1rem', zIndex:10 }}>
+        <div style={{ position:'relative', overflow:'hidden', borderRadius:'16px', background:'linear-gradient(135deg,#0D0D0C,#000000,#0D0D0C)', border:'1px solid rgba(255,255,255,0.04)', boxShadow:'0 25px 80px rgba(0,0,0,0.95)', padding:'2rem' }} className="sm:p-8 md:p-10">
+          <div style={{ position:'relative', zIndex:10, display:'flex', flexDirection:'column', gap:'1.5rem' }} className="lg:flex-row lg:items-center lg:gap-12">
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'0.625rem', marginBottom:'1.25rem' }}>
+                <span style={{ width:'6px', height:'6px', borderRadius:'50%', backgroundColor:'#10B981', boxShadow:'0 0 6px rgba(16,185,129,0.5)' }} />
+                <span style={{ fontSize:'11px', fontFamily:'monospace', color:'#71717A', letterSpacing:'0.1em', textTransform:'uppercase' }}>Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}</span>
+                <span style={{ width:'1px', height:'12px', backgroundColor:'#3F3F46' }} />
+                <span style={{ fontSize:'10px', fontFamily:'monospace', color:'#52525B' }}>{examText || 'Curated Learning'}</span>
+              </div>
+              <h1 style={{ fontSize:'clamp(1.875rem,5vw,3rem)', fontWeight:900, letterSpacing:'-0.025em', color:'#FFFFFF', lineHeight:1.1, margin:0, marginBottom:'0.75rem' }}>
+                Master <span style={{ color:'#FFB800' }}>{examText || 'Your Curriculum'}</span>
+              </h1>
+              <p style={{ fontSize:'14px', color:'#A1A1AA', lineHeight:1.625, maxWidth:'32rem', margin:0, marginBottom:'1rem' }}>
+                {examText ? `${examText} playlists, top Kota educators, and targeted test series.` : 'Curated playlists, verified Kota educators, and smart test series to ace your exams.'}
+              </p>
+              <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:'0.75rem' }}>
+                <button onClick={onFocusSearch} style={{ display:'inline-flex', alignItems:'center', gap:'0.5rem', padding:'0.625rem 1.25rem', borderRadius:'0.5rem', backgroundColor:'#FFFFFF', color:'#000000', fontWeight:600, fontSize:'14px', border:'none', cursor:'pointer', transition:'all 0.3s' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <span>Start Learning</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </button>
+                <div style={{ display:'flex', alignItems:'center', gap:'0.25rem' }}>
+                  <span style={{ fontSize:'10px', color:'#52525B', fontFamily:'monospace' }}>+2K active today</span>
+                </div>
+              </div>
             </div>
-
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white uppercase font-sans leading-none flex flex-wrap items-center gap-x-3 gap-y-1 select-none">
-              <span>Discover.</span>
-              <span className="text-zinc-500">Learn.</span>
-              <span className="text-[#00D4AA]">{examText ? 'Succeed.' : 'Grow.'}</span>
-            </h1>
-
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-2xl font-sans">
-              {examText 
-                ? `Track and master your ${examText} curriculum topics with validated, high-yield playlists, structured test series, verified Kota educator classes, and strategic mock sets.`
-                : 'Track and master curriculum topics with validated, high-yield playlists, structured test series, verified Kota educator classes, and NEET/JEE strategic mock sets. Free from brand-funded bias.'
-              }
-            </p>
           </div>
         </div>
       </div>
