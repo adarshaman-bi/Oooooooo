@@ -217,30 +217,30 @@ export default function HomeDashboard({
       <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Hero Section */}
-      <div style={{ position:'relative', width:'100%', maxWidth:'1280px', margin:'0 auto', padding:'2rem 1rem 1rem', zIndex:10 }}>
-        <div style={{ position:'relative', overflow:'hidden', borderRadius:'16px', background:'linear-gradient(135deg,#0D0D0C,#000000,#0D0D0C)', border:'1px solid rgba(255,255,255,0.04)', boxShadow:'0 25px 80px rgba(0,0,0,0.95)', padding:'2rem' }} className="sm:p-8 md:p-10">
-          <div style={{ position:'relative', zIndex:10, display:'flex', flexDirection:'column', gap:'1.5rem' }} className="lg:flex-row lg:items-center lg:gap-12">
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'0.625rem', marginBottom:'1.25rem' }}>
-                <span style={{ width:'6px', height:'6px', borderRadius:'50%', backgroundColor:'#10B981', boxShadow:'0 0 6px rgba(16,185,129,0.5)' }} />
-                <span style={{ fontSize:'11px', fontFamily:'monospace', color:'#71717A', letterSpacing:'0.1em', textTransform:'uppercase' }}>Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}</span>
-                <span style={{ width:'1px', height:'12px', backgroundColor:'#3F3F46' }} />
-                <span style={{ fontSize:'10px', fontFamily:'monospace', color:'#52525B' }}>{examText || 'Curated Learning'}</span>
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-4 z-10">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-card via-main-bg to-surface-card border border-white/5 shadow-[0_25px_80px_rgba(0,0,0,0.95)] p-6 sm:p-8 md:p-10">
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-12">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2.5 mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+                <span className="text-[11px] font-mono text-zinc-500 tracking-widest uppercase">Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}</span>
+                <span className="w-px h-3 bg-zinc-800" />
+                <span className="text-[10px] font-mono text-zinc-600">{examText || 'Curated Learning'}</span>
               </div>
-              <h1 style={{ fontSize:'clamp(1.875rem,5vw,3rem)', fontWeight:900, letterSpacing:'-0.025em', color:'#FFFFFF', lineHeight:1.1, margin:0, marginBottom:'0.75rem' }}>
-                Master <span style={{ color:'#FFB800' }}>{examText || 'Your Curriculum'}</span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.1] mb-3">
+                Master <span className="text-ratings">{examText || 'Your Curriculum'}</span>
               </h1>
-              <p style={{ fontSize:'14px', color:'#A1A1AA', lineHeight:1.625, maxWidth:'32rem', margin:0, marginBottom:'1rem' }}>
+              <p className="text-sm text-zinc-400 leading-relaxed max-w-lg mb-4">
                 {examText ? `${examText} playlists, top Kota educators, and targeted test series.` : 'Curated playlists, verified Kota educators, and smart test series to ace your exams.'}
               </p>
-              <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:'0.75rem' }}>
-                <button onClick={onFocusSearch} style={{ display:'inline-flex', alignItems:'center', gap:'0.5rem', padding:'0.625rem 1.25rem', borderRadius:'0.5rem', backgroundColor:'#FFFFFF', color:'#000000', fontWeight:600, fontSize:'14px', border:'none', cursor:'pointer', transition:'all 0.3s' }}>
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={onFocusSearch} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white text-black font-semibold text-sm transition-all duration-300 hover:shadow-[0_0_24px_rgba(255,255,255,0.06)] active:scale-[0.97] cursor-pointer">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                   <span>Start Learning</span>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </button>
-                <div style={{ display:'flex', alignItems:'center', gap:'0.25rem' }}>
-                  <span style={{ fontSize:'10px', color:'#52525B', fontFamily:'monospace' }}>+2K active today</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-zinc-600 font-mono">+2K active today</span>
                 </div>
               </div>
             </div>
