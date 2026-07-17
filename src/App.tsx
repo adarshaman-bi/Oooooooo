@@ -33,8 +33,9 @@ import {
   personalizeTeachers
 } from './services/recommendationEngine';
 import useSWR from 'swr';
-import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveVideos, fetchActiveChannels } from './utils/swrConfig';
-import { supabase } from './utils/supabaseClient';
+import { VirtuosoGrid } from 'react-virtuoso';
+import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchRecentVideoPreviews, fetchActiveChannels } from './utils/swrConfig';
+import { supabase, fetchPaginatedData } from './utils/supabaseClient';
 import {
   fetchTeachers,
   fetchInstitutes,
@@ -51,7 +52,8 @@ import {
   isDurationBelow30Minutes,
   fetchTeacherStats,
   fetchReviewScorecards,
-  mergeRatingScorecards
+  mergeRatingScorecards,
+  fetchInstituteStats
 } from './services/dbService';
 import { TeacherProfile, InstituteProfile, Lecture, Playlist, Batch, AppNotification, YouTubeVideo, RatingScorecard } from './types';
 import { ViewName, ExploreTab } from './config/constants';
@@ -513,7 +515,7 @@ function AppContent() {
   // SWR Caching Layer
   const { data: dbTeachers } = useSWR(SWR_KEYS.TEACHERS, fetchActiveTeachers, swrOptions);
   const { data: dbPlaylists } = useSWR(SWR_KEYS.PLAYLISTS, fetchActivePlaylists, swrOptions);
-  const { data: dbVideos } = useSWR(SWR_KEYS.VIDEOS, fetchActiveVideos, swrOptions);
+  const { data: dbVideos } = useSWR(SWR_KEYS.RECENT_VIDEOS, fetchRecentVideoPreviews, swrOptions);
   const { data: dbChannels } = useSWR(SWR_KEYS.CHANNELS, fetchActiveChannels, swrOptions);
   const { data: dbTestSeries } = useSWR('test_series', async () => {
     const { data } = await supabase.from('test_series').select('*');
@@ -1323,6 +1325,14 @@ function AppContent() {
           console.warn('[Auxiliary Services Resolution Error]:', auxErr);
         }
 
+        // Fetch only metadata (id, playlist_id, teacher_name) of all active videos to map counts/teachers on start
+        const videoMetadata = await fetchPaginatedData(
+          'videos',
+          (q) => q.eq('is_active', true),
+          1000,
+          'id, playlist_id, teacher_name'
+        ).catch(() => []);
+
         // Fetch all review scorecards for teachers, lectures, playlists, and batches in a single batch query
         const teacherIds = (dbTeachers || []).map((t: any) => t?.id).filter(Boolean);
         const videoIds = (dbVideos || []).map((v: any) => v?.id).filter(Boolean);
@@ -1479,7 +1489,42 @@ function AppContent() {
 
         // 6. Set auxiliary structures
         if (auxiliaryInstitutes && auxiliaryInstitutes.length > 0) {
-          setInstitutes(auxiliaryInstitutes);
+          const validatedInstitutes = await Promise.all(
+            auxiliaryInstitutes.map(async (inst) => {
+              try {
+                const scorecard = await fetchInstituteStats(inst.id);
+                return {
+                  ...inst,
+                  scorecard: scorecard || {
+                    rating: null,
+                    trustScore: null,
+                    reviewCount: 0,
+                    positiveReviewCount: 0,
+                    sourceEntityIds: []
+                  },
+                  rating: scorecard?.rating ?? null,
+                  trustScore: scorecard?.trustScore ?? null,
+                  reviewCount: scorecard?.reviewCount ?? 0
+                };
+              } catch (instErr) {
+                console.warn(`Error fetching stats for institute ${inst.id}:`, instErr);
+                return {
+                  ...inst,
+                  scorecard: {
+                    rating: null,
+                    trustScore: null,
+                    reviewCount: 0,
+                    positiveReviewCount: 0,
+                    sourceEntityIds: []
+                  },
+                  rating: null,
+                  trustScore: null,
+                  reviewCount: 0
+                };
+              }
+            })
+          );
+          setInstitutes(validatedInstitutes);
         }
         if (auxiliaryBatches && auxiliaryBatches.length > 0) {
           const validatedBatches: Batch[] = [];
@@ -1496,17 +1541,16 @@ function AppContent() {
                 
                 for (const sub of subs) {
                   const subjectLecs = sub.playlistId 
-                    ? sanitizedVideos.filter(v => v.playlistId === sub.playlistId)
+                    ? videoMetadata.filter((v: any) => v.playlist_id === sub.playlistId)
                     : [];
                   
                   totalLecs += subjectLecs.length;
-                  const uniqueTeachers = Array.from(new Set(subjectLecs.map(l => l.teacherName).filter(Boolean)));
+                  const uniqueTeachers = Array.from(new Set(subjectLecs.map((l: any) => l.teacher_name).filter(Boolean)));
                   
-                  // Aggregate scorecard rating/trust for the subject's lectures & playlist
+                  // Aggregate scorecard rating/trust for the subject's playlist
                   const playlistScorecard = sub.playlistId ? scorecards[sub.playlistId] : null;
-                  const lectureScorecards = subjectLecs.map(l => l.scorecard).filter(Boolean);
                   const subjectScorecard = mergeRatingScorecards(
-                    [playlistScorecard, ...lectureScorecards].filter(Boolean),
+                    [playlistScorecard].filter(Boolean),
                     sub.playlistId ? [sub.playlistId] : []
                   );
 
@@ -1514,7 +1558,7 @@ function AppContent() {
                     ...sub,
                     name: sub.subject,
                     lectureCount: subjectLecs.length,
-                    lectures: subjectLecs,
+                    lectures: [],
                     teacherCount: uniqueTeachers.length || 1,
                     teachers: uniqueTeachers,
                     rating: subjectScorecard.rating,
@@ -2444,8 +2488,11 @@ function AppContent() {
                     ) : filteredLectures.length === 0 ? (
                       <p className="text-xs text-zinc-500 py-10 text-center font-mono bg-[#0D0D0C] rounded-2xl">No video lessons registered matching search parameter bounds.</p>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {filteredLectures.map((lec) => {
+                      <VirtuosoGrid
+                        useWindowScroll
+                        data={filteredLectures}
+                        listClassName="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                        itemContent={(index, lec) => {
                           const formattedSub = "182K";
                           const lectureDto = {
                             ...lec,
@@ -2460,18 +2507,19 @@ function AppContent() {
                           };
 
                           return (
-                            <LectureCard
-                              key={lec.id}
-                              lecture={lectureDto as any}
-                              onClick={() => {
-                                recordSearchQuery(searchQuery);
-                                setActiveLecture(lec);
-                                setCurrentView('explore');
-                              }}
-                            />
+                            <div className="pb-2">
+                              <LectureCard
+                                lecture={lectureDto as any}
+                                onClick={() => {
+                                  recordSearchQuery(searchQuery);
+                                  setActiveLecture(lec);
+                                  setCurrentView('explore');
+                                }}
+                              />
+                            </div>
                           );
-                        })}
-                      </div>
+                        }}
+                      />
                     )}
                   </section>
                 </div>
@@ -2497,26 +2545,30 @@ function AppContent() {
                     }
                     
                     return (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-4 sm:gap-4">
-                        {filteredStaticTeachers.map((t) => {
+                      <VirtuosoGrid
+                        useWindowScroll
+                        data={filteredStaticTeachers}
+                        listClassName="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-4 sm:gap-4"
+                        itemContent={(index, t) => {
                           const dbTeacher = teachersMap.get(t.id);
                           return (
-                            <TeacherCard
-                              key={t.id}
-                              t={t}
-                              dbTeacher={dbTeacher}
-                              videos={videos}
-                              followedIds={followedIds}
-                              handleFollowToggle={handleFollowToggle}
-                              setDetailModal={setDetailModal}
-                              onSelect={(id) => {
-                                setSelectedTeacherId(id);
-                                setCurrentView('teacher-detail');
-                              }}
-                            />
+                            <div className="pb-2">
+                              <TeacherCard
+                                t={t}
+                                dbTeacher={dbTeacher}
+                                videos={videos}
+                                followedIds={followedIds}
+                                handleFollowToggle={handleFollowToggle}
+                                setDetailModal={setDetailModal}
+                                onSelect={(id) => {
+                                  setSelectedTeacherId(id);
+                                  setCurrentView('teacher-detail');
+                                }}
+                              />
+                            </div>
                           );
-                        })}
-                      </div>
+                        }}
+                      />
                     );
                   })()}
                 </div>

@@ -559,7 +559,7 @@ export default function TeacherProfileDetail({
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4 text-center font-mono">
         <p className="text-sm text-zinc-400">Educator profile not found.</p>
-        <button onClick={onBack} className="text-xs text-[#00D4AA] flex items-center gap-1.5 hover:underline bg-none border-none cursor-pointer">
+        <button onClick={onBack} className="text-xs text-emerald-400 flex items-center gap-1.5 hover:underline bg-none border-none cursor-pointer">
           <ArrowLeft size={14} /> Back to Directory
         </button>
       </div>
@@ -643,13 +643,13 @@ export default function TeacherProfileDetail({
   return (
     <div style={{ background: BG, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }} className="pb-20 text-left select-none">
       {/* ── Top Custom Header Bar ── */}
-      <div className="px-6 md:px-16 py-4 flex items-center justify-between border-b border-[#1A1A1A] bg-black/40 backdrop-blur-md sticky top-0 z-30">
+      <div className="px-6 md:px-16 py-4 flex items-center justify-between border-b border-zinc-900/60 bg-black/40 backdrop-blur-md sticky top-0 z-30">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 bg-transparent border-none">
             <ArrowLeft size={16} />
             <span className="text-xs font-semibold uppercase tracking-wider font-mono hidden md:inline">Back</span>
           </button>
-          <div className="h-4 w-px bg-[#1A1A1A] hidden md:block" />
+          <div className="h-4 w-px bg-zinc-900/60 hidden md:block" />
           <span className="text-xs text-zinc-500 font-mono hidden md:inline">Teachers / {dbTeacher.name}</span>
           <span className="text-xs text-white font-mono font-bold md:hidden truncate max-w-[150px]">{dbTeacher.name}</span>
         </div>
@@ -702,13 +702,13 @@ export default function TeacherProfileDetail({
               <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                 {dbTeacher.name}
               </h1>
-              {dbTeacher.isVerified && <CheckCircle size={20} className="text-[#00D4AA] shrink-0 fill-[#00D4AA]/10" />}
+              {dbTeacher.isVerified && <CheckCircle size={20} className="text-emerald-400 shrink-0 fill-emerald-400/10" />}
             </div>
 
             <p style={{ color: TEXT_SEC }} className="text-sm font-medium">{dbTeacher.subject} Educator</p>
 
             <div className="flex items-center gap-1.5 justify-center md:justify-start">
-              <ShieldCheck size={14} className="text-[#00D4AA]" />
+              <ShieldCheck size={14} className="text-emerald-400" />
               <span style={{ color: TEXT_SEC }} className="text-xs">{dbTeacher.instituteName || "Verified Biovised Academy"}</span>
             </div>
 
@@ -834,7 +834,7 @@ export default function TeacherProfileDetail({
       </div>
 
       {/* ── Sub Navigation Tabs row ── */}
-      <div style={{ background: "#0D0D0C", borderBottom: `1px solid ${BORDER}` }} className="w-full flex px-6 md:px-16 overflow-x-auto sticky top-[53px] z-10 backdrop-blur-md bg-[#0D0D0C]/80 mt-10">
+      <div className="w-full flex px-6 md:px-16 overflow-x-auto sticky top-[53px] z-10 backdrop-blur-md bg-surface-card/80 mt-10 border-b border-zinc-900/60">
         {["Overview", "Experience", "Lectures", "Live", "Playlists", "About"].map((tab) => {
           const isActive = tab === activeTab;
           return (
@@ -863,7 +863,7 @@ export default function TeacherProfileDetail({
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <h2 style={{ color: TEXT_PRIMARY }} className="text-lg font-bold">Student Reviews</h2>
+                  <h2 className="text-lg font-bold text-white">Student Reviews</h2>
                   <div style={{ background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.2)" }} className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold text-ratings">
                     <Star size={11} className="fill-amber-500" />
                     <span>{displayRating}</span>
@@ -873,13 +873,13 @@ export default function TeacherProfileDetail({
                 <div className="flex items-center gap-3 self-end sm:self-auto">
                   <button
                     onClick={() => setDetailModal({ id: teacherId, type: 'teacher' })}
-                    className="text-[#00D4AA] text-xs bg-transparent border-none cursor-pointer flex items-center gap-1 hover:underline"
+                    className="text-emerald-400 text-xs bg-transparent border-none cursor-pointer flex items-center gap-1 hover:underline"
                   >
                     View all reviews <ArrowRight size={12} />
                   </button>
                   <button
                     onClick={() => setDetailModal({ id: teacherId, type: 'teacher' })}
-                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-[#FAFBFB] text-[#070707] hover:bg-zinc-100 transition-all cursor-pointer border-none"
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white text-black hover:bg-zinc-100 transition-all cursor-pointer border-none"
                   >
                     + Add Review
                   </button>
@@ -895,8 +895,7 @@ export default function TeacherProfileDetail({
                     return (
                       <div
                         key={r.id || i}
-                        style={{ background: "#0D0D0C", border: `1px solid #1A1A1A` }}
-                        className="rounded-2xl p-5 flex flex-col justify-between min-w-[280px] md:min-w-[340px] max-w-[340px] snap-start hover:border-zinc-800 transition-all duration-300 shadow-lg relative group"
+                        className="rounded-2xl p-5 flex flex-col justify-between min-w-[280px] md:min-w-[340px] max-w-[340px] snap-start bg-surface-card border border-zinc-900/60 hover:border-zinc-800 transition-all duration-300 shadow-lg relative group"
                       >
                         <div>
                           <div className="flex items-center gap-3 mb-4">
@@ -907,7 +906,7 @@ export default function TeacherProfileDetail({
                               {r.user_id ? getInitials(r.user_id) : 'ST'}
                             </div>
                             <div>
-                              <div style={{ color: TEXT_PRIMARY }} className="text-xs font-bold font-sans tracking-wide">
+                              <div className="text-xs font-bold font-sans tracking-wide text-white">
                                 {r.user_id ? (r.user_id.length > 25 ? r.user_id.substring(0, 25) : r.user_id) : 'Verified Learner'}
                               </div>
                               <div style={{ color: TEXT_SEC }} className="text-[10px] font-mono tracking-wider uppercase">Verified Aspirant</div>
@@ -944,7 +943,7 @@ export default function TeacherProfileDetail({
             <div className="space-y-6 pt-6 border-t border-white/5">
               <div className="flex items-center justify-between">
                 <h3 style={{ color: TEXT_PRIMARY }} className="text-lg font-bold">Popular Playlist Chapters</h3>
-                <button onClick={() => setActiveTab("Playlists")} className="text-[#00D4AA] text-xs bg-transparent border-none cursor-pointer flex items-center gap-1 hover:underline">
+                <button onClick={() => setActiveTab("Playlists")} className="text-emerald-400 text-xs bg-transparent border-none cursor-pointer flex items-center gap-1 hover:underline">
                   View all playlists <ArrowRight size={12} />
                 </button>
               </div>
@@ -965,7 +964,7 @@ export default function TeacherProfileDetail({
                           </div>
                         </div>
                       </div>
-                      <p style={{ color: TEXT_PRIMARY }} className="text-xs font-semibold mt-2 line-clamp-1 group-hover:text-[#00D4AA]">{p.title}</p>
+                      <p style={{ color: TEXT_PRIMARY }} className="text-xs font-semibold mt-2 line-clamp-1 group-hover:text-emerald-400">{p.title}</p>
                       <div className="flex items-center flex-wrap gap-1 mt-0.5 text-[9px] font-mono font-semibold uppercase tracking-wider">
                         {p.origin_channel_name && (
                           <span className="bg-zinc-800 text-zinc-400 px-1 py-0.5 rounded">
@@ -992,11 +991,11 @@ export default function TeacherProfileDetail({
                 <div key={i} className="relative group">
                   {/* Outer circle dot */}
                   <div className="absolute -left-[31px] top-1.5 w-4.5 h-4.5 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center group-hover:border-zinc-500 transition-colors">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#00D4AA]" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   </div>
                   
                   <div className="flex gap-4">
-                    <div style={{ background: "#00D4AA12", border: `1px solid #00D4AA25` }} className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base bg-emerald-500/10 border border-emerald-500/20">
                       🎓
                     </div>
                     <div>
@@ -1061,7 +1060,7 @@ export default function TeacherProfileDetail({
                     <span>LIVE STREAMING</span>
                   </div>
                 </div>
-                <h4 style={{ color: TEXT_PRIMARY }} className="text-sm font-semibold mt-3 group-hover:text-[#00D4AA]">{ytChannelInfo.liveStream.title}</h4>
+                <h4 style={{ color: TEXT_PRIMARY }} className="text-sm font-semibold mt-3 group-hover:text-emerald-400">{ytChannelInfo.liveStream.title}</h4>
                 <p style={{ color: TEXT_SEC }} className="text-xs font-mono mt-1">Click to join active live broadcast session.</p>
               </div>
             ) : (
@@ -1095,7 +1094,7 @@ export default function TeacherProfileDetail({
                         </div>
                       </div>
                     </div>
-                    <p style={{ color: TEXT_PRIMARY }} className="text-xs font-semibold mt-2 line-clamp-2 leading-snug group-hover:text-[#00D4AA]">{p.title}</p>
+                    <p style={{ color: TEXT_PRIMARY }} className="text-xs font-semibold mt-2 line-clamp-2 leading-snug group-hover:text-emerald-400">{p.title}</p>
                     <div className="flex items-center flex-wrap gap-1 mt-1 text-[9px] font-mono font-semibold uppercase tracking-wider">
                       {p.origin_channel_name && (
                         <span className="bg-zinc-800 text-zinc-400 px-1 py-0.5 rounded">

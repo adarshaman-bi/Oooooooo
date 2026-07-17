@@ -113,6 +113,10 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Viewport tracking for horizontal virtualization
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(1280);
+
   // Drag-to-scroll state
   const [isDown, setIsDown] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -121,6 +125,9 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
   const checkScrollLimits = () => {
     const el = containerRef.current;
     if (!el) return;
+    
+    setScrollLeft(el.scrollLeft);
+    setContainerWidth(el.clientWidth);
     
     // Check left scroll limit
     setShowLeftArrow(el.scrollLeft > 5);
@@ -307,14 +314,26 @@ export const HorizontalRow: React.FC<HorizontalRowProps> = ({
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {React.Children.map(children, (child) => {
+          {React.Children.map(children, (child, idx) => {
             if (!child) return null;
+            
+            // Approximate card width is ~300px
+            const itemLeft = idx * 300;
+            const isVisible = itemLeft >= scrollLeft - 600 && itemLeft <= scrollLeft + containerWidth + 600;
+            
             return (
               <div 
                 className="shrink-0 snap-start select-none relative overflow-visible"
-                style={{ scrollSnapAlign: 'start' }}
+                style={{ 
+                  scrollSnapAlign: 'start',
+                  minWidth: '256px'
+                }}
               >
-                {child}
+                {isVisible ? child : (
+                  <div className="w-64 sm:w-72 h-44 bg-zinc-950/40 border border-zinc-900/60 rounded-2xl animate-pulse flex items-center justify-center">
+                    <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-wider">Loading...</span>
+                  </div>
+                )}
               </div>
             );
           })}

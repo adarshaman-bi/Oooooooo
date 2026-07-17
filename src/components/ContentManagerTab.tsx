@@ -610,7 +610,7 @@ export default function ContentManagerTab() {
         setChannelToDelete(null);
         mutate(SWR_KEYS.CHANNELS);
         mutate(SWR_KEYS.PLAYLISTS);
-        mutate(SWR_KEYS.VIDEOS);
+        mutate(SWR_KEYS.RECENT_VIDEOS);
       } else {
         const resData = await response.json();
         alert(`Failed to delete channel resource: ${resData.error || 'Server error'}`);
@@ -661,7 +661,7 @@ export default function ContentManagerTab() {
 
       alert('Playlist and associated videos successfully removed.');
       mutate(SWR_KEYS.PLAYLISTS);
-      mutate(SWR_KEYS.VIDEOS);
+      mutate(SWR_KEYS.RECENT_VIDEOS);
     } catch (err: any) {
       alert(`Failed to delete playlist: ${err.message}`);
     }
@@ -688,7 +688,7 @@ export default function ContentManagerTab() {
     try {
       const { error } = await supabase.from('videos').update({ is_active: !currentVal }).eq('id', videoId);
       if (error) throw error;
-      mutate(SWR_KEYS.VIDEOS);
+      mutate(SWR_KEYS.RECENT_VIDEOS);
     } catch (err: any) {
       alert(`Failed to update video active status: ${err.message}`);
     }
@@ -700,7 +700,7 @@ export default function ContentManagerTab() {
     try {
       const { error } = await supabase.from('videos').delete().eq('id', videoId);
       if (error) throw error;
-      mutate(SWR_KEYS.VIDEOS);
+      mutate(SWR_KEYS.RECENT_VIDEOS);
     } catch (err: any) {
       alert(`Deletion failure: ${err.message}`);
     }
@@ -728,7 +728,7 @@ export default function ContentManagerTab() {
 
       if (error) throw error;
       setEditingVideo(null);
-      mutate(SWR_KEYS.VIDEOS);
+      mutate(SWR_KEYS.RECENT_VIDEOS);
     } catch (err: any) {
       alert(`Failed to save metadata: ${err.message}`);
     }

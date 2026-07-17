@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Search, BookOpen, Clock, Youtube, Sparkles, CheckCircle2, ChevronRight, GraduationCap, Play, CheckCircle, Building2, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import useSWR from 'swr';
-import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveChannels, fetchActiveVideos } from '../utils/swrConfig';
+import { SWR_KEYS, swrOptions, fetchActivePlaylists, fetchActiveTeachers, fetchActiveChannels } from '../utils/swrConfig';
 import { supabase } from '../utils/supabaseClient';
 import { mapVideoRow } from '../utils/youtubeUtils';
 import { TEST_SERIES_CATALOG } from '../data/testSeriesData';
@@ -289,7 +289,7 @@ export default function HomeDashboard({
               <div className="flex justify-between items-end pb-1 px-1">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Play className="w-5 h-5 text-[#00D4AA]" />
+                    <Play className="w-5 h-5 text-emerald-400" />
                     <h2 className="text-sm sm:text-base font-extrabold tracking-wider text-white uppercase font-sans">
                       Continue Learning
                     </h2>
@@ -499,7 +499,7 @@ export default function HomeDashboard({
                                       <Clock className="w-3 h-3 text-zinc-750" />
                                       <span>{formatDuration(play.totalDurationSeconds)}</span>
                                     </div>
-                                  ) || <div className="text-[9px] font-mono text-[#00D4AA] font-bold shrink-0">VERIFIED</div>}
+                                  ) || <div className="text-[9px] font-mono text-emerald-400 font-bold shrink-0">VERIFIED</div>}
                                 </div>
                               </div>
                             </div>
@@ -661,7 +661,7 @@ export default function HomeDashboard({
           {(institutes || []).length > 0 && (
             <HorizontalRow
               title="Verified Coaching Institutes"
-              icon={<Building2 className="w-5 h-5 text-[#00D4AA]" />}
+              icon={<Building2 className="w-5 h-5 text-emerald-400" />}
               onSeeAllClick={() => setActiveExploreTab('institutes')}
             >
               {(institutes || []).map((inst) => (

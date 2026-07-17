@@ -1756,4 +1756,50 @@ export async function fetchPlaylistStats(playlistId: string): Promise<{ rating: 
   }
 }
 
+export async function fetchInstituteStats(instituteId: string): Promise<RatingScorecard | null> {
+  try {
+    const { data: batches, error: batchErr } = await supabase
+      .from('batches')
+      .select('id')
+      .eq('institute_id', instituteId);
+    if (batchErr) throw batchErr;
+
+    const batchIds = (batches || []).map(b => b.id).filter(Boolean);
+    if (batchIds.length === 0) return null;
+
+    const { data: subjects, error: subErr } = await supabase
+      .from('batch_subjects')
+      .select('playlist_id')
+      .in('batch_id', batchIds);
+    if (subErr) throw subErr;
+
+    const playlistIds = (subjects || []).map(s => s.playlist_id).filter(Boolean);
+    if (playlistIds.length === 0) return null;
+
+    const { data: videos, error: vidErr } = await supabase
+      .from('videos')
+      .select('id')
+      .in('playlist_id', playlistIds)
+      .eq('is_active', true);
+    if (vidErr) throw vidErr;
+
+    const videoIds = (videos || []).map(v => v.id).filter(Boolean);
+    if (videoIds.length === 0) return null;
+
+    const { data: reviews, error: revErr } = await supabase
+      .from('reviews')
+      .select('rating')
+      .in('entity_id', videoIds);
+    if (revErr) throw revErr;
+
+    const ratings = (reviews || []).map(r => r.rating).filter(r => r != null);
+    if (ratings.length === 0) return null;
+
+    return calculateRatingScorecard(ratings, videoIds);
+  } catch (error) {
+    console.error(`Error in fetchInstituteStats for ${instituteId}:`, error);
+    return null;
+  }
+}
+
 

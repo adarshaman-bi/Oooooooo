@@ -270,7 +270,7 @@ export default function YouTubeImporterTab({
         addTerminalLog(`Successfully ingested ${payload.count} videos as official platform lectures!`, 'success');
         await loadPlaylists();
         mutate(SWR_KEYS.PLAYLISTS);
-        mutate(SWR_KEYS.VIDEOS);
+        mutate(SWR_KEYS.RECENT_VIDEOS);
       } else {
         const payload = await res.json();
         addTerminalLog(`Batch video ingestion failed: ${payload.error}`, 'error');
@@ -291,7 +291,7 @@ export default function YouTubeImporterTab({
         const pay = await res.json();
         addTerminalLog(`Scheduled sync completed. Synthesized ${pay.playlistsSynced} playlists. Units: ${pay.apiUnitsConsumed}`, 'success');
         mutate(SWR_KEYS.PLAYLISTS);
-        mutate(SWR_KEYS.VIDEOS);
+        mutate(SWR_KEYS.RECENT_VIDEOS);
       }
     } catch (err: any) {
       addTerminalLog(`Scheduled sync errored out: ${err.message}`, 'error');

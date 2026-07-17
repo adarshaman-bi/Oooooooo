@@ -90,9 +90,10 @@ export interface InstituteProfile {
   logo: string;
   bannerUrl?: string;
   description: string;
-  rating: number;
+  rating: number | null;
   reviewCount: number;
-  trustScore: number;
+  trustScore: number | null;
+  scorecard?: RatingScorecard;
   followersCount: number;
   officialLinks: string[];
   exams: string[];

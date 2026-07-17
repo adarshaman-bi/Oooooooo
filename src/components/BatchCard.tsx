@@ -66,7 +66,7 @@ export function BatchCard({ batch, subjectCount, onClick }: BatchCardProps) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
-      className="group relative bg-[#0D0D0C] border border-[#1A1A1A] hover:border-zinc-700/70 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_4px_32px_rgba(0,0,0,0.7)] focus:outline-none focus:ring-1 focus:ring-zinc-600"
+      className="group relative bg-surface-card border border-zinc-900/60 hover:border-zinc-700/70 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_4px_32px_rgba(0,0,0,0.7)] focus:outline-none focus:ring-1 focus:ring-zinc-600"
     >
       {/* Banner gradient strip */}
       <div className={`h-1.5 w-full bg-gradient-to-r ${bannerGradient} opacity-80`} />

@@ -3,6 +3,7 @@ import { ShieldCheck, Star, ExternalLink, Building2 } from 'lucide-react';
 import { InstituteProfile } from '../types';
 import { SafeImage } from './SafeImage';
 import teachersData from '../config/teachersData.json';
+import { ScorecardSummary } from './ScorecardSummary';
 
 interface InstituteCardProps {
   institute: InstituteProfile;
@@ -121,13 +122,7 @@ export function InstituteCard({ institute, onViewHub }: InstituteCardProps) {
         {/* 3. Rating & CTA Actions */}
         <div className="space-y-3 pt-3 border-t border-zinc-900/60 font-mono">
           <div className="flex justify-between items-center text-[10px]">
-            <span className="text-ratings font-bold flex items-center gap-1">
-              {institute.rating != null && <Star className="w-3 h-3 fill-current text-ratings" />}
-              <span>{institute.rating != null ? Number(institute.rating).toFixed(1) : 'Not yet rated'}</span>
-            </span>
-            <span className="text-zinc-500 uppercase text-[9px]">
-              {institute.reviewCount || 0} reviews
-            </span>
+            <ScorecardSummary scorecard={institute.scorecard} variant="inline" trustScale="ten" />
           </div>
 
           <div className="flex gap-2">

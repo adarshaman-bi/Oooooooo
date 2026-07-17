@@ -423,21 +423,21 @@ export default function SearchView({
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                             
                             <div className="absolute right-0 inset-y-0 w-[28%] min-w-[80px] max-w-[128px] bg-black/85 backdrop-blur-md flex flex-col items-center justify-center text-center p-2 border-l border-zinc-900/40">
-                              <BookOpen className="w-5 h-5 sm:w-8 sm:h-8 text-[#00D4AA]" />
+                              <BookOpen className="w-5 h-5 sm:w-8 sm:h-8 text-emerald-400" />
                               <div className="space-y-0.5">
                                 <span className="text-sm sm:text-xl font-mono font-black text-white block">{p.lecturesCount}</span>
                                 <span className="text-[8px] sm:text-[9px] font-mono text-zinc-400 uppercase tracking-widest block">Lectures</span>
                               </div>
                             </div>
 
-                            <div className="absolute top-4 left-4 bg-brand-accent/90 backdrop-blur-md text-[#000000] font-sans font-black px-3 py-1 rounded-full text-[9px] uppercase tracking-wider">
+                            <div className="absolute top-4 left-4 bg-brand-accent/90 backdrop-blur-md text-black font-sans font-black px-3 py-1 rounded-full text-[9px] uppercase tracking-wider">
                               {p.subject}
                             </div>
                           </div>
 
                           <div className="pt-6 px-2 space-y-2 flex-grow flex flex-col justify-between">
                             <div className="space-y-2">
-                              <h3 className="text-base sm:text-xl font-extrabold text-[#FFFFFF] line-clamp-2 leading-snug group-hover:text-brand-accent transition-colors uppercase tracking-tight">
+                              <h3 className="text-base sm:text-xl font-extrabold text-white line-clamp-2 leading-snug group-hover:text-brand-accent transition-colors uppercase tracking-tight">
                                 {p.title}
                               </h3>
                               <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
@@ -446,7 +446,7 @@ export default function SearchView({
                                 </p>
                                 {durText && (
                                   <div className="flex items-center gap-1.5 text-xs font-mono text-zinc-450">
-                                    <Clock className="w-4 h-4 text-[#00D4AA]" />
+                                    <Clock className="w-4 h-4 text-emerald-400" />
                                     <span>{durText}</span>
                                   </div>
                                 )}
